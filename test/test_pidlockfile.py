@@ -33,8 +33,7 @@ class FakeFileDescriptorStringIO(StringIO, object):
 
     def __init__(self, *args, **kwargs):
         self._fileno = self._fileno_generator.next()
-        super_instance = super(FakeFileDescriptorStringIO, self)
-        super_instance.__init__(*args, **kwargs)
+        StringIO.__init__(self, *args, **kwargs)
 
     def fileno(self):
         return self._fileno
