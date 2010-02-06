@@ -53,8 +53,8 @@ def get_test_module_names(module_list, module_prefix='test_'):
     return module_names
 
 
-def make_suite(path=test_dir):
-    """ Create the test suite for the given path. """
+def make_unittest_suite(path=test_dir):
+    """ Create the unit test suite for the given path. """
     loader = unittest.TestLoader()
     python_module_names = get_python_module_names(os.listdir(path))
     test_module_names = get_test_module_names(python_module_names)

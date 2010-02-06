@@ -16,4 +16,4 @@
 import scaffold
 
 
-suite = scaffold.make_suite()
+suite = scaffold.make_unittest_suite()
