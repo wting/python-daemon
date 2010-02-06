@@ -13,10 +13,17 @@
     """
 
 import unittest
+from unittest import (
+    TestSuite,
+    TestLoader,
+    )
 import doctest
 import logging
 import os
 import sys
+import fnmatch
+import pkgutil
+import imp
 import operator
 import textwrap
 
@@ -39,26 +46,37 @@ if not parent_dir in sys.path:
 logging.disable(logging.CRITICAL)
 
 
-def get_python_module_names(file_list, file_suffix='.py'):
-    """ Return a list of module names from a filename list. """
-    module_names = [m[:m.rfind(file_suffix)] for m in file_list
-        if m.endswith(file_suffix)]
-    return module_names
+PYTHON_SOURCE_SUFFIX = [
+    suffix for (suffix, dummy, mod_type) in imp.get_suffixes()
+        if mod_type is imp.PY_SOURCE
+    ][0]
 
+UNITTEST_MODULE_GLOB = "test_*" + PYTHON_SOURCE_SUFFIX
 
-def get_test_module_names(module_list, module_prefix='test_'):
-    """ Return the list of module names that qualify as test modules. """
-    module_names = [m for m in module_list
-        if m.startswith(module_prefix)]
-    return module_names
+
+def get_modules(dir_paths, filename_glob):
+    """ Return a list of modules under `dir_paths` matching `filename_glob`. """
+    modules = []
+
+    for (importer, name, is_package) in pkgutil.walk_packages(dir_paths):
+        loader = importer.find_module(name)
+        file_path = loader.get_filename(name)
+        if fnmatch.fnmatch(os.path.basename(file_path), filename_glob):
+            modules.append(loader.load_module(name))
+
+    return modules
 
 
 def make_unittest_suite(path=test_dir):
-    """ Create the unit test suite for the given path. """
-    loader = unittest.TestLoader()
-    python_module_names = get_python_module_names(os.listdir(path))
-    test_module_names = get_test_module_names(python_module_names)
-    suite = loader.loadTestsFromNames(test_module_names)
+    """ Return a unit test suite of test cases from modules in `path`. """
+    suite = TestSuite()
+
+    dir_paths = [path]
+    test_modules = get_modules(dir_paths, UNITTEST_MODULE_GLOB)
+
+    loader = TestLoader()
+    for module in test_modules:
+        suite.addTests(loader.loadTestsFromModule(module))
 
     return suite
 
