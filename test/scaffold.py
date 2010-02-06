@@ -33,6 +33,7 @@ from minimock import (
     mock,
     restore as mock_restore,
     )
+import testscenarios
 
 
 test_dir = os.path.dirname(os.path.abspath(__file__))
@@ -136,7 +137,7 @@ def format_function_signature(func):
     return signature_text
 
 
-class TestCase(unittest.TestCase):
+class TestCase(testscenarios.TestWithScenarios):
     """ Test case behaviour. """
 
     def failUnlessRaises(self, exc_class, func, *args, **kwargs):
