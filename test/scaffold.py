@@ -4,9 +4,10 @@
 # Part of python-daemon, an implementation of PEP 3143.
 #
 # Copyright © 2007–2010 Ben Finney <ben+python@benfinney.id.au>
+#
 # This is free software; you may copy, modify and/or distribute this work
 # under the terms of the GNU General Public License, version 2 or later.
-# No warranty expressed or implied. See the file LICENSE.GPL-2 for details.
+# No warranty expressed or implied. See the file ‘LICENSE.GPL-2’ for details.
 
 """ Scaffolding for unit test modules.
     """
@@ -18,6 +19,7 @@ import os
 import sys
 import operator
 import textwrap
+
 from minimock import (
     Mock,
     TraceTracker as MockTracker,
@@ -25,6 +27,7 @@ from minimock import (
     restore as mock_restore,
     )
 
+
 test_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(test_dir)
 if not test_dir in sys.path:
@@ -32,7 +35,7 @@ if not test_dir in sys.path:
 if not parent_dir in sys.path:
     sys.path.insert(1, parent_dir)
 
-# Disable all but the most critical logging messages
+# Disable all but the most critical logging messages.
 logging.disable(logging.CRITICAL)
 
 
