@@ -422,3 +422,30 @@ class Exception_TestCase(TestCase):
                 self.failUnless(
                     isinstance(instance, match_type),
                     msg=fail_msg)
+
+
+# This monkey-patch is needed only until ‘testscenarios’ incorporates
+# this behaviour for scenario short descriptions.
+
+def apply_scenario((name, parameters), test):
+    """Apply scenario to test.
+
+    :param scenario: A tuple (name, parameters) to apply to the test. The test
+        is cloned, its id adjusted to have (name) after it, and the parameters
+        dict is used to update the new test.
+    :param test: The test to apply the scenario to. This test is unaltered.
+    :return: A new test cloned from test, with the scenario applied.
+    """
+    scenario_suffix = '(' + name + ')'
+    newtest = testscenarios.scenarios.clone_test_with_new_id(test,
+        test.id() + scenario_suffix)
+    test_desc = test.shortDescription()
+    if test_desc is not None:
+        newtest_desc = "%(test_desc)s %(scenario_suffix)s" % vars()
+        newtest.shortDescription = (lambda: newtest_desc)
+    for key, value in parameters.iteritems():
+        setattr(newtest, key, value)
+    return newtest
+
+testscenarios.scenarios.apply_scenario = apply_scenario
+testscenarios.apply_scenario = apply_scenario
