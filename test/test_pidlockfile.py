@@ -39,23 +39,21 @@ class FakeFileDescriptorStringIO(StringIO, object):
         return self._fileno
 
 
-class Exception_TestCase(scaffold.Exception_TestCase):
+class ModuleExceptions_TestCase(scaffold.Exception_TestCase):
     """ Test cases for module exception classes. """
 
-    def __init__(self, *args, **kwargs):
-        """ Set up a new instance. """
-        super(Exception_TestCase, self).__init__(*args, **kwargs)
-
-        self.valid_exceptions = {
-            pidlockfile.PIDFileError: dict(
-                min_args = 1,
-                types = (Exception,),
-                ),
-            pidlockfile.PIDFileParseError: dict(
-                min_args = 2,
-                types = (pidlockfile.PIDFileError, ValueError),
-                ),
-            }
+    scenarios = scaffold.make_exception_scenarios([
+        ('pidlockfile.PIDFileError', dict(
+            exc_type = pidlockfile.PIDFileError,
+            min_args = 1,
+            types = [Exception],
+            )),
+        ('pidlockfile.PIDFileParseError', dict(
+            exc_type = pidlockfile.PIDFileParseError,
+            min_args = 2,
+            types = [pidlockfile.PIDFileError, ValueError],
+            )),
+        ])
 
 
 def make_pidlockfile_scenarios():

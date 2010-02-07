@@ -34,27 +34,26 @@ from daemon import pidlockfile
 import daemon
 
 
-class Exception_TestCase(scaffold.Exception_TestCase):
+class ModuleExceptions_TestCase(scaffold.Exception_TestCase):
     """ Test cases for module exception classes. """
 
-    def __init__(self, *args, **kwargs):
-        """ Set up a new instance. """
-        super(Exception_TestCase, self).__init__(*args, **kwargs)
-
-        self.valid_exceptions = {
-            daemon.daemon.DaemonError: dict(
-                min_args = 1,
-                types = (Exception,),
-            ),
-            daemon.daemon.DaemonOSEnvironmentError: dict(
-                min_args = 1,
-                types = (daemon.daemon.DaemonError, OSError),
-            ),
-            daemon.daemon.DaemonProcessDetachError: dict(
-                min_args = 1,
-                types = (daemon.daemon.DaemonError, OSError),
-            ),
-        }
+    scenarios = scaffold.make_exception_scenarios([
+        ('daemon.daemon.DaemonError', dict(
+            exc_type = daemon.daemon.DaemonError,
+            min_args = 1,
+            types = [Exception],
+            )),
+        ('daemon.daemon.DaemonOSEnvironmentError', dict(
+            exc_type = daemon.daemon.DaemonOSEnvironmentError,
+            min_args = 1,
+            types = [daemon.daemon.DaemonError, OSError],
+            )),
+        ('daemon.daemon.DaemonProcessDetachError', dict(
+            exc_type = daemon.daemon.DaemonProcessDetachError,
+            min_args = 1,
+            types = [daemon.daemon.DaemonError, OSError],
+            )),
+        ])
 
 
 def setup_daemon_context_fixtures(testcase):

@@ -36,31 +36,31 @@ from daemon import pidlockfile
 from daemon import runner
 
 
-class Exception_TestCase(scaffold.Exception_TestCase):
+class ModuleExceptions_TestCase(scaffold.Exception_TestCase):
     """ Test cases for module exception classes. """
 
-    def __init__(self, *args, **kwargs):
-        """ Set up a new instance. """
-        super(Exception_TestCase, self).__init__(*args, **kwargs)
-
-        self.valid_exceptions = {
-            runner.DaemonRunnerError: dict(
-                min_args = 1,
-                types = (Exception,),
-                ),
-            runner.DaemonRunnerInvalidActionError: dict(
-                min_args = 1,
-                types = (runner.DaemonRunnerError, ValueError),
-                ),
-            runner.DaemonRunnerStartFailureError: dict(
-                min_args = 1,
-                types = (runner.DaemonRunnerError, RuntimeError),
-                ),
-            runner.DaemonRunnerStopFailureError: dict(
-                min_args = 1,
-                types = (runner.DaemonRunnerError, RuntimeError),
-                ),
-            }
+    scenarios = scaffold.make_exception_scenarios([
+        ('runner.DaemonRunnerError', dict(
+            exc_type = runner.DaemonRunnerError,
+            min_args = 1,
+            types = [Exception],
+            )),
+        ('runner.DaemonRunnerInvalidActionError', dict(
+            exc_type = runner.DaemonRunnerInvalidActionError,
+            min_args = 1,
+            types = [runner.DaemonRunnerError, ValueError],
+            )),
+        ('runner.DaemonRunnerStartFailureError', dict(
+            exc_type = runner.DaemonRunnerStartFailureError,
+            min_args = 1,
+            types = [runner.DaemonRunnerError, RuntimeError],
+            )),
+        ('runner.DaemonRunnerStopFailureError', dict(
+            exc_type = runner.DaemonRunnerStopFailureError,
+            min_args = 1,
+            types = [runner.DaemonRunnerError, RuntimeError],
+            )),
+        ])
 
 
 def make_runner_scenarios():

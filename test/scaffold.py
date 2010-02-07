@@ -26,6 +26,7 @@ import pkgutil
 import imp
 import operator
 import textwrap
+from copy import deepcopy
 
 from minimock import (
     Mock,
@@ -388,40 +389,48 @@ class TestCase(testscenarios.TestWithScenarios):
 class Exception_TestCase(TestCase):
     """ Test cases for exception classes. """
 
-    def __init__(self, *args, **kwargs):
-        """ Set up a new instance """
-        self.valid_exceptions = NotImplemented
-        super(Exception_TestCase, self).__init__(*args, **kwargs)
-
-    def setUp(self):
-        """ Set up test fixtures. """
-        for exc_type, params in self.valid_exceptions.items():
-            args = (None, ) * params['min_args']
-            params['args'] = args
-            instance = exc_type(*args)
-            params['instance'] = instance
-
-        super(Exception_TestCase, self).setUp()
-
     def test_exception_instance(self):
         """ Exception instance should be created. """
-        for params in self.valid_exceptions.values():
-            instance = params['instance']
-            self.failIfIs(None, instance)
+        self.failIfIs(None, self.instance)
 
     def test_exception_types(self):
-        """ Exception instances should match expected types. """
-        for params in self.valid_exceptions.values():
-            instance = params['instance']
-            for match_type in params['types']:
-                match_type_name = match_type.__name__
-                fail_msg = (
-                    "%(instance)r is not an instance of"
-                    " %(match_type_name)s"
-                    ) % vars()
-                self.failUnless(
-                    isinstance(instance, match_type),
-                    msg=fail_msg)
+        """ Exception instance should match expected types. """
+        for match_type in self.types:
+            self.failUnlessIsInstance(self.instance, match_type)
+
+
+def make_exception_scenarios(scenarios):
+    """ Make test scenarios for exception classes.
+
+        Use this with `testscenarios` to adapt `Exception_TestCase`_
+        for any exceptions that need testing.
+
+        :param scenarios:
+            List of scenarios Each scenario is a tuple (`name`, `map`)
+            where `map` is a mapping of attributes to be applied to
+            each test case. Attributes map must contain items for:
+
+            :key exc_type:
+                The exception type to be tested.
+            :key min_args:
+                The minimum argument count for the exception instance
+                initialiser.
+            :key types:
+                Sequence of types that should be superclasses of each
+                instance of the exception type.
+
+        :return:
+            List of scenarios with additional mapping entries.
+
+        """
+    updated_scenarios = deepcopy(scenarios)
+    for (name, scenario) in updated_scenarios:
+        args = (None,) * scenario['min_args']
+        scenario['args'] = args
+        instance = scenario['exc_type'](*args)
+        scenario['instance'] = instance
+
+    return updated_scenarios
 
 
 # This monkey-patch is needed only until ‘testscenarios’ incorporates
