@@ -82,7 +82,7 @@ def make_runner_scenarios():
             pidlockfile_scenario = pidlockfile_scenarios.pop(
                 scenario['pidlockfile_scenario_name'])
         scenario['pid'] = pidlockfile_scenario['pid']
-        scenario['pidfile_path'] = pidlockfile_scenario['path']
+        scenario['pidfile_path'] = pidlockfile_scenario['pidfile_path']
         scenario['pidfile_timeout'] = 23
         scenario['pidlockfile_scenario'] = pidlockfile_scenario
 
