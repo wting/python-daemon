@@ -37,11 +37,5 @@
 
     """
 
-import version
-from daemon import DaemonContext
-
-
-_version = version.version
-_copyright = version.copyright
-_license = version.license
-_url = "http://pypi.python.org/pypi/python-daemon/"
+from ._metadata import version
+from .daemon import DaemonContext

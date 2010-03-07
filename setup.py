@@ -19,8 +19,8 @@ from setuptools import setup, find_packages
 
 distribution_name = "python-daemon"
 main_module_name = 'daemon'
-main_module = __import__(main_module_name, fromlist=['version'])
-version = main_module.version
+main_module = __import__(main_module_name, fromlist=['_metadata'])
+metadata = main_module._metadata
 
 short_description, long_description = (
     textwrap.dedent(d).strip()
@@ -30,7 +30,7 @@ short_description, long_description = (
 
 setup(
     name=distribution_name,
-    version=version.version,
+    version=metadata.version,
     packages=find_packages(exclude=["test"]),
 
     # setuptools metadata
@@ -45,12 +45,12 @@ setup(
         ],
 
     # PyPI metadata
-    author=version.author_name,
-    author_email=version.author_email,
+    author=metadata.author_name,
+    author_email=metadata.author_email,
     description=short_description,
-    license=version.license,
+    license=metadata.license,
     keywords=u"daemon fork unix".split(),
-    url=main_module._url,
+    url=metadata.url,
     long_description=long_description,
     classifiers=[
         # Reference: http://pypi.python.org/pypi?%3Aaction=list_classifiers

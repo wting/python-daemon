@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# daemon/version/__init__.py
+# daemon/_metadata.py
 # Part of python-daemon, an implementation of PEP 3143.
 #
 # Copyright © 2008–2010 Ben Finney <ben+python@benfinney.id.au>
@@ -9,9 +9,9 @@
 # later as published by the Python Software Foundation.
 # No warranty expressed or implied. See the file LICENSE.PSF-2 for details.
 
-""" Version information for the python-daemon distribution. """
+""" Package metadata for the ‘python-daemon’ distribution. """
 
-from version_info import version_info
+from ._version_info import version_info
 
 version_info['version_string'] = u"1.5.6"
 
@@ -34,3 +34,4 @@ copyright = (
     u"Copyright © %(copyright_year_range)s %(author)s and others"
     ) % vars()
 license = u"PSF-2+"
+url = "http://pypi.python.org/pypi/python-daemon/"

@@ -80,15 +80,15 @@ def update_version_info_module_if_needed(module_path):
 
 package_name = "daemon"
 version_info_module_relpath = os.path.join(
-    package_name, "version", "version_info.py")
+    package_name, "_version_info.py")
 version_info_module_path = os.path.join(
     workingtree.basedir, version_info_module_relpath)
 
 update_version_info_module_if_needed(version_info_module_path)
 
-package_module = __import__(package_name, fromlist=['version'])
-version_module = package_module.version
-version = version_module.version
+package_module = __import__(package_name, fromlist=['_metadata'])
+metadata = package_module._metadata
+version = metadata.version
 
 
 export_dir_name = "%(dist_name)s-%(version)s" % vars()
