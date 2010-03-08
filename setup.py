@@ -30,7 +30,7 @@ short_description, long_description = (
 
 setup(
     name=distribution_name,
-    version=metadata.version,
+    version=str(metadata.version),
     packages=find_packages(exclude=["test"]),
 
     # setuptools metadata
@@ -45,13 +45,13 @@ setup(
         ],
 
     # PyPI metadata
-    author=metadata.author_name,
-    author_email=metadata.author_email,
-    description=short_description,
-    license=metadata.license,
-    keywords=u"daemon fork unix".split(),
-    url=metadata.url,
-    long_description=long_description,
+    author=str(metadata.author_name),
+    author_email=str(metadata.author_email),
+    description=str(short_description),
+    license=str(metadata.license),
+    keywords="daemon fork unix".split(),
+    url=str(metadata.url),
+    long_description=str(long_description),
     classifiers=[
         # Reference: http://pypi.python.org/pypi?%3Aaction=list_classifiers
         "Development Status :: 4 - Beta",
