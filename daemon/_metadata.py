@@ -13,6 +13,7 @@
 
 from ._version_info import version_info
 
+
 version_info['version_string'] = u"1.5.6"
 
 version_short = u"%(version_string)s" % version_info
@@ -34,4 +35,4 @@ copyright = (
     u"Copyright © %(copyright_year_range)s %(author)s and others"
     ) % vars()
 license = u"PSF-2+"
-url = "http://pypi.python.org/pypi/python-daemon/"
+url = u"http://pypi.python.org/pypi/python-daemon/"
