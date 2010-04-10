@@ -62,6 +62,51 @@ in a `message from 2009-01-30`_ to the ``python-ideas`` forum.
 
 ..  _`message from 2009-01-30`: http://mail.python.org/pipermail/python-ideas/2009-January/002606.html
 
+How can I preserve a ‘logging’ handler's file descriptor?
+---------------------------------------------------------
+
+The ‘DaemonContext.open’ method conforms to `PEP 3143`_ by closing all
+open file descriptors, but excluding those files specified in the
+‘files_preserve’ option. This option is a list of files or file
+descriptors.
+
+The Python standard library ‘logging’ module provides log handlers
+that write to streams, including to files via the ‘StreamHandler’
+class and its sub-classes. The documentation (both the online `logging
+module documentation`_ and the docstrings for the code) makes no
+mention of a way to get at the stream associated with a handler
+object.
+
+However, looking at the source code for ‘StreamHandler’, in Python 2.5
+as ``/usr/lib/python2.5/logging/__init__.py``, shows a ‘stream’
+attribute that is bound to the stream object. The attribute is not
+marked private (i.e. it is not named with a leading underscore), so we
+can presume it is part of the public API.
+
+That attribute can then be used to specify that a logging handler's
+file descriptor should, when the ‘DaemonContext’ opens, be excluded
+from closure::
+
+    import logging
+    import daemon
+
+    # any subclass of StreamHandler should provide the ‘stream’ attribute.
+    lh = logging.handlers.TimedRotatingFileHandler(
+        "/var/log/foo.log",
+        # …
+        )
+
+    # … do some logging and other activity …
+
+    daemon_context = daemon.DaemonContext()
+    daemon_context.files_preserve = [lh.stream]
+
+    daemon_context.open()
+
+    # … continue as a daemon process …
+
+..  _`logging module documentation`: http://docs.python.org/library/logging
+
 
 ..
     Local variables:
