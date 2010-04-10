@@ -5,17 +5,13 @@ python-daemon Frequently Asked Questions
 :Updated: 2010-04-10
 
 ..  contents::
-
 ..
-    Table of Contents: 
-    python-daemon Frequently Asked Questions
-      General
-        What is the purpose of the ‘python-daemon’ library?
-        How can I run a service communicating with a separate daemon process?
-      File descriptors
-        Why does the output stop after opening the daemon context?
-        How can I preserve a ‘logging’ handler's file descriptor?
-
+    1  General
+      1.1  What is the purpose of the ‘python-daemon’ library?
+      1.2  How can I run a service communicating with a separate daemon process?
+    2  File descriptors
+      2.1  Why does the output stop after opening the daemon context?
+      2.2  How can I preserve a ‘logging’ handler's file descriptor?
 
 General
 =======
