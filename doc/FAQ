@@ -2,13 +2,23 @@ python-daemon Frequently Asked Questions
 ########################################
 
 :Author: Ben Finney <ben+python@benfinney.id.au>
-:Updated: 2009-09-28
+:Updated: 2010-04-10
 
 ..  contents::
 
-1  What is the purpose of the ‘python-daemon’ library?
-2  Why does the output stop after opening the daemon context?
-3  How can I run a service communicating with a separate daemon process?
+..
+    Table of Contents: 
+    python-daemon Frequently Asked Questions
+      General
+        What is the purpose of the ‘python-daemon’ library?
+        How can I run a service communicating with a separate daemon process?
+      File descriptors
+        Why does the output stop after opening the daemon context?
+        How can I preserve a ‘logging’ handler's file descriptor?
+
+
+General
+=======
 
 What is the purpose of the ‘python-daemon’ library?
 ---------------------------------------------------
@@ -18,21 +28,6 @@ being a reference implementation for `PEP 3143`_, “Standard daemon
 process library”.
 
 ..  _`PEP 3143`: http://www.python.org/dev/peps/pep-3143
-
-Why does the output stop after opening the daemon context?
-----------------------------------------------------------
-
-The specified behaviour in `PEP 3143`_ includes the requirement to
-detach the process from the controlling terminal (to allow the process
-to continue to run as a daemon), and to close all file descriptors not
-known to be safe once detached (to ansure any files that continue to
-be used are under the control of the daemon process).
-
-If you want the process to generate output via the system streams
-‘sys.stdout’ and ‘sys.stderr’, set the ‘DaemonContext’'s ‘stdout’
-and/or ‘stderr’ options to a file-like object (e.g. the ‘stream’
-attribute of a ‘logging.Handler’ instance). If these objects have file
-descriptors, they will be preserved when the daemon context opens.
 
 How can I run a service communicating with a separate daemon process?
 ---------------------------------------------------------------------
@@ -61,6 +56,25 @@ A possible starting point for such a “service” model of execution is
 in a `message from 2009-01-30`_ to the ``python-ideas`` forum.
 
 ..  _`message from 2009-01-30`: http://mail.python.org/pipermail/python-ideas/2009-January/002606.html
+
+
+File descriptors
+================
+
+Why does the output stop after opening the daemon context?
+----------------------------------------------------------
+
+The specified behaviour in `PEP 3143`_ includes the requirement to
+detach the process from the controlling terminal (to allow the process
+to continue to run as a daemon), and to close all file descriptors not
+known to be safe once detached (to ansure any files that continue to
+be used are under the control of the daemon process).
+
+If you want the process to generate output via the system streams
+‘sys.stdout’ and ‘sys.stderr’, set the ‘DaemonContext’'s ‘stdout’
+and/or ‘stderr’ options to a file-like object (e.g. the ‘stream’
+attribute of a ‘logging.Handler’ instance). If these objects have file
+descriptors, they will be preserved when the daemon context opens.
 
 How can I preserve a ‘logging’ handler's file descriptor?
 ---------------------------------------------------------
