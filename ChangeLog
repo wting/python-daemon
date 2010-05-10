@@ -1,5 +1,7 @@
 2010-05-10  Ben Finney  <ben+python@benfinney.id.au>
 
+    Version 1.6 released.
+
     * Use absolute imports to disambiguate provenance of names.
     * setup.py: Require ‘lockfile >=0.9’.
     * daemon/pidfile.py: Renamed from ‘daemon/pidlockfile.py’. Change
