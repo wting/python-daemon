@@ -25,12 +25,12 @@ import atexit
 from StringIO import StringIO
 
 import scaffold
-from test_pidlockfile import (
+from test_pidfile import (
     FakeFileDescriptorStringIO,
     setup_pidfile_fixtures,
     )
 
-from daemon import pidlockfile
+from lockfile import pidlockfile
 import daemon
 
 

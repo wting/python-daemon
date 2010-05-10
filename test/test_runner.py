@@ -20,8 +20,10 @@ import tempfile
 import errno
 import signal
 
+import lockfile
+
 import scaffold
-from test_pidlockfile import (
+from test_pidfile import (
     FakeFileDescriptorStringIO,
     setup_pidfile_fixtures,
     make_pidlockfile_scenarios,
@@ -32,7 +34,7 @@ from test_daemon import (
     )
 import daemon.daemon
 
-from daemon import pidlockfile
+from daemon import pidfile
 from daemon import runner
 
 
@@ -125,7 +127,7 @@ def setup_runner_fixtures(testcase):
 
     simple_scenario = testcase.runner_scenarios['simple']
 
-    testcase.lockfile_class_name = u"pidlockfile.TimeoutPIDLockFile"
+    testcase.lockfile_class_name = u"pidfile.TimeoutPIDLockFile"
 
     testcase.mock_runner_lock = scaffold.Mock(
         testcase.lockfile_class_name,
@@ -474,7 +476,7 @@ class DaemonRunner_do_action_start_TestCase(scaffold.TestCase):
         set_pidlockfile_scenario(self, 'exist-other-pid-locked')
         instance = self.test_instance
         instance.daemon_context.open.mock_raises = (
-            pidlockfile.AlreadyLocked)
+            lockfile.AlreadyLocked)
         pidfile_path = self.scenario['pidfile_path']
         expect_error = runner.DaemonRunnerStartFailureError
         expect_message_content = pidfile_path
