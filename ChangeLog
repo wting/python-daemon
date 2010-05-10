@@ -1,3 +1,7 @@
+2010-05-10  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Use absolute imports to disambiguate provenance of names.
+
 2010-03-09  Ben Finney  <ben+python@benfinney.id.au>
 
     * Use ‘unicode’ data type for all text values.

@@ -37,8 +37,10 @@
 
     """
 
-import version
-from daemon import DaemonContext
+from __future__ import absolute_import
+
+from . import version
+from .daemon import DaemonContext
 
 
 _version = version.version

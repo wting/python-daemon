@@ -11,7 +11,9 @@
 
 """ Version information for the python-daemon distribution. """
 
-from version_info import version_info
+from __future__ import absolute_import
+
+from .version_info import version_info
 
 version_info['version_string'] = u"1.5.6"
 

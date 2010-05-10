@@ -17,14 +17,16 @@
 """ Daemon runner library.
     """
 
+from __future__ import absolute_import
+
 import sys
 import os
 import signal
 import errno
 
-import pidlockfile
+from . import pidlockfile
 
-from daemon import DaemonContext
+from .daemon import DaemonContext
 
 
 class DaemonRunnerError(Exception):
