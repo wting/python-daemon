@@ -24,8 +24,9 @@ import os
 import signal
 import errno
 
-from . import pidlockfile
+import lockfile
 
+from . import pidfile
 from .daemon import DaemonContext
 
 
@@ -121,7 +122,7 @@ class DaemonRunner(object):
 
         try:
             self.daemon_context.open()
-        except pidlockfile.AlreadyLocked:
+        except lockfile.AlreadyLocked:
             pidfile_path = self.pidfile.path
             raise DaemonRunnerStartFailureError(
                 u"PID file %(pidfile_path)r already locked" % vars())
@@ -204,7 +205,7 @@ def make_pidlockfile(path, acquire_timeout):
     if not os.path.isabs(path):
         error = ValueError(u"Not an absolute path: %(path)r" % vars())
         raise error
-    lockfile = pidlockfile.TimeoutPIDLockFile(path, acquire_timeout)
+    lockfile = pidfile.TimeoutPIDLockFile(path, acquire_timeout)
 
     return lockfile
 

@@ -1,6 +1,13 @@
 2010-05-10  Ben Finney  <ben+python@benfinney.id.au>
 
     * Use absolute imports to disambiguate provenance of names.
+    * setup.py: Require ‘lockfile >=0.9’.
+    * daemon/pidfile.py: Renamed from ‘daemon/pidlockfile.py’. Change
+      references elsewhere to use this new name.
+    * test/test_pidfile.py: Renamed from ‘test/test_pidlockfile.py’.
+      Change references elsewhere to use this new name.
+    * daemon/pidfile.py: Remove functionality now migrated to ‘lockfile’
+      library.
 
 2010-03-09  Ben Finney  <ben+python@benfinney.id.au>
 
