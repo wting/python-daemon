@@ -11,6 +11,11 @@ Tests
 * Write full unit tests for every new or changed behaviour at time of
   commit.
 
+Libraries
+=========
+
+* Work correctly with current ‘lockfile’ library (0.9 or later).
+
 Features
 ========
 
