@@ -10,7 +10,7 @@
 # Apache Software Foundation.
 # No warranty expressed or implied. See the file LICENSE.ASF-2 for details.
 
-""" Scaffolding for unit test modules.
+u""" Scaffolding for unit test modules.
     """
 
 import unittest
@@ -46,21 +46,21 @@ logging.disable(logging.CRITICAL)
 
 
 def get_python_module_names(file_list, file_suffix=u'.py'):
-    """ Return a list of module names from a filename list. """
+    u""" Return a list of module names from a filename list. """
     module_names = [m[:m.rfind(file_suffix)] for m in file_list
         if m.endswith(file_suffix)]
     return module_names
 
 
 def get_test_module_names(module_list, module_prefix='test_'):
-    """ Return the list of module names that qualify as test modules. """
+    u""" Return the list of module names that qualify as test modules. """
     module_names = [m for m in module_list
         if m.startswith(module_prefix)]
     return module_names
 
 
 def make_suite(path=test_dir):
-    """ Create the test suite for the given path. """
+    u""" Create the test suite for the given path. """
     loader = unittest.TestLoader()
     python_module_names = get_python_module_names(os.listdir(path))
     test_module_names = get_test_module_names(python_module_names)
@@ -70,7 +70,7 @@ def make_suite(path=test_dir):
 
 
 def get_function_signature(func):
-    """ Get the function signature as a mapping of attributes. """
+    u""" Get the function signature as a mapping of attributes. """
     arg_count = func.func_code.co_argcount
     arg_names = func.func_code.co_varnames[:arg_count]
 
@@ -100,7 +100,7 @@ def get_function_signature(func):
 
 
 def format_function_signature(func):
-    """ Format the function signature as printable text. """
+    u""" Format the function signature as printable text. """
     signature = get_function_signature(func)
 
     args_text = []
@@ -125,10 +125,10 @@ def format_function_signature(func):
 
 
 class TestCase(unittest.TestCase):
-    """ Test case behaviour. """
+    u""" Test case behaviour. """
 
     def failUnlessRaises(self, exc_class, func, *args, **kwargs):
-        """ Fail unless the function call raises the expected exception.
+        u""" Fail unless the function call raises the expected exception.
 
             Fail the test if an instance of the exception class
             ``exc_class`` is not raised when calling ``func`` with the
@@ -148,7 +148,7 @@ class TestCase(unittest.TestCase):
             raise self.failureException(msg)
 
     def failIfIs(self, first, second, msg=None):
-        """ Fail if the two objects are identical.
+        u""" Fail if the two objects are identical.
 
             Fail the test if ``first`` and ``second`` are identical,
             as determined by the ``is`` operator.
@@ -160,7 +160,7 @@ class TestCase(unittest.TestCase):
             raise self.failureException(msg)
 
     def failUnlessIs(self, first, second, msg=None):
-        """ Fail unless the two objects are identical.
+        u""" Fail unless the two objects are identical.
 
             Fail the test unless ``first`` and ``second`` are
             identical, as determined by the ``is`` operator.
@@ -175,7 +175,7 @@ class TestCase(unittest.TestCase):
     assertNotIs = failIfIs
 
     def failIfIn(self, first, second, msg=None):
-        """ Fail if the second object is in the first.
+        u""" Fail if the second object is in the first.
 
             Fail the test if ``first`` contains ``second``, as
             determined by the ``in`` operator.
@@ -187,7 +187,7 @@ class TestCase(unittest.TestCase):
             raise self.failureException(msg)
 
     def failUnlessIn(self, first, second, msg=None):
-        """ Fail unless the second object is in the first.
+        u""" Fail unless the second object is in the first.
 
             Fail the test unless ``first`` contains ``second``, as
             determined by the ``in`` operator.
@@ -202,7 +202,7 @@ class TestCase(unittest.TestCase):
     assertNotIn = failIfIn
 
     def failUnlessOutputCheckerMatch(self, want, got, msg=None):
-        """ Fail unless the specified string matches the expected.
+        u""" Fail unless the specified string matches the expected.
 
             Fail the test unless ``want`` matches ``got``, as
             determined by a ``doctest.OutputChecker`` instance. This
@@ -231,7 +231,7 @@ class TestCase(unittest.TestCase):
     assertOutputCheckerMatch = failUnlessOutputCheckerMatch
 
     def failUnlessMockCheckerMatch(self, want, tracker=None, msg=None):
-        """ Fail unless the mock tracker matches the wanted output.
+        u""" Fail unless the mock tracker matches the wanted output.
 
             Fail the test unless `want` matches the output tracked by
             `tracker` (defaults to ``self.mock_tracker``. This is not
@@ -251,7 +251,7 @@ class TestCase(unittest.TestCase):
             raise self.failureException(msg)
 
     def failIfMockCheckerMatch(self, want, tracker=None, msg=None):
-        """ Fail if the mock tracker matches the specified output.
+        u""" Fail if the mock tracker matches the specified output.
 
             Fail the test if `want` matches the output tracked by
             `tracker` (defaults to ``self.mock_tracker``. This is not
@@ -274,7 +274,7 @@ class TestCase(unittest.TestCase):
     assertNotMockCheckerMatch = failIfMockCheckerMatch
 
     def failIfIsInstance(self, obj, classes, msg=None):
-        """ Fail if the object is an instance of the specified classes.
+        u""" Fail if the object is an instance of the specified classes.
 
             Fail the test if the object ``obj`` is an instance of any
             of ``classes``.
@@ -288,7 +288,7 @@ class TestCase(unittest.TestCase):
             raise self.failureException(msg)
 
     def failUnlessIsInstance(self, obj, classes, msg=None):
-        """ Fail unless the object is an instance of the specified classes.
+        u""" Fail unless the object is an instance of the specified classes.
 
             Fail the test unless the object ``obj`` is an instance of
             any of ``classes``.
@@ -305,7 +305,7 @@ class TestCase(unittest.TestCase):
     assertNotIsInstance = failIfIsInstance
 
     def failUnlessFunctionInTraceback(self, traceback, function, msg=None):
-        """ Fail if the function is not in the traceback.
+        u""" Fail if the function is not in the traceback.
 
             Fail the test if the function ``function`` is not at any
             of the levels in the traceback object ``traceback``.
@@ -331,7 +331,7 @@ class TestCase(unittest.TestCase):
     assertFunctionInTraceback = failUnlessFunctionInTraceback
 
     def failUnlessFunctionSignatureMatch(self, first, second, msg=None):
-        """ Fail if the function signatures do not match.
+        u""" Fail if the function signatures do not match.
 
             Fail the test if the function signature does not match
             between the ``first`` function and the ``second``
@@ -373,15 +373,15 @@ class TestCase(unittest.TestCase):
 
 
 class Exception_TestCase(TestCase):
-    """ Test cases for exception classes. """
+    u""" Test cases for exception classes. """
 
     def __init__(self, *args, **kwargs):
-        """ Set up a new instance """
+        u""" Set up a new instance. """
         self.valid_exceptions = NotImplemented
         super(Exception_TestCase, self).__init__(*args, **kwargs)
 
     def setUp(self):
-        """ Set up test fixtures. """
+        u""" Set up test fixtures. """
         for exc_type, params in self.valid_exceptions.items():
             args = (None, ) * params['min_args']
             params['args'] = args
@@ -391,13 +391,13 @@ class Exception_TestCase(TestCase):
         super(Exception_TestCase, self).setUp()
 
     def test_exception_instance(self):
-        """ Exception instance should be created. """
+        u""" Exception instance should be created. """
         for params in self.valid_exceptions.values():
             instance = params['instance']
             self.failIfIs(None, instance)
 
     def test_exception_types(self):
-        """ Exception instances should match expected types. """
+        u""" Exception instances should match expected types. """
         for params in self.valid_exceptions.values():
             instance = params['instance']
             for match_type in params['types']:

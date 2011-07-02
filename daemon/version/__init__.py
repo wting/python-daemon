@@ -10,7 +10,7 @@
 # Apache Software Foundation.
 # No warranty expressed or implied. See the file LICENSE.ASF-2 for details.
 
-""" Version information for the ‘python-daemon’ distribution. """
+u""" Version information for the ‘python-daemon’ distribution. """
 
 from __future__ import absolute_import
 

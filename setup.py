@@ -11,7 +11,7 @@
 # Free Software Foundation; version 3 of that license or any later version.
 # No warranty expressed or implied. See the file LICENSE.GPL-2 for details.
 
-""" Distribution setup for ‘python-daemon’ library.
+u""" Distribution setup for ‘python-daemon’ library.
     """
 
 import textwrap

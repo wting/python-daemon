@@ -14,7 +14,7 @@
 # Apache Software Foundation.
 # No warranty expressed or implied. See the file LICENSE.ASF-2 for details.
 
-""" Daemon runner library.
+u""" Daemon runner library.
     """
 
 from __future__ import absolute_import
@@ -31,20 +31,20 @@ from .daemon import DaemonContext
 
 
 class DaemonRunnerError(Exception):
-    """ Abstract base class for errors from DaemonRunner. """
+    u""" Abstract base class for errors from DaemonRunner. """
 
 class DaemonRunnerInvalidActionError(ValueError, DaemonRunnerError):
-    """ Raised when specified action for DaemonRunner is invalid. """
+    u""" Raised when specified action for DaemonRunner is invalid. """
 
 class DaemonRunnerStartFailureError(RuntimeError, DaemonRunnerError):
-    """ Raised when failure starting DaemonRunner. """
+    u""" Raised when failure starting DaemonRunner. """
 
 class DaemonRunnerStopFailureError(RuntimeError, DaemonRunnerError):
-    """ Raised when failure stopping DaemonRunner. """
+    u""" Raised when failure stopping DaemonRunner. """
 
 
 class DaemonRunner(object):
-    """ Controller for a callable running in a separate background process.
+    u""" Controller for a callable running in a separate background process.
 
         The first command-line argument is the action to take:
 
@@ -57,7 +57,7 @@ class DaemonRunner(object):
     start_message = u"started with pid %(pid)d"
 
     def __init__(self, app):
-        """ Set up the parameters of a new runner.
+        u""" Set up the parameters of a new runner.
 
             The `app` argument must have the following attributes:
 
@@ -91,7 +91,7 @@ class DaemonRunner(object):
         self.daemon_context.pidfile = self.pidfile
 
     def _usage_exit(self, argv):
-        """ Emit a usage message, then exit.
+        u""" Emit a usage message, then exit.
             """
         progname = os.path.basename(argv[0])
         usage_exit_code = 2
@@ -101,7 +101,7 @@ class DaemonRunner(object):
         sys.exit(usage_exit_code)
 
     def parse_args(self, argv=None):
-        """ Parse command-line arguments.
+        u""" Parse command-line arguments.
             """
         if argv is None:
             argv = sys.argv
@@ -115,7 +115,7 @@ class DaemonRunner(object):
             self._usage_exit(argv)
 
     def _start(self):
-        """ Open the daemon context and run the application.
+        u""" Open the daemon context and run the application.
             """
         if is_pidfile_stale(self.pidfile):
             self.pidfile.break_lock()
@@ -134,7 +134,7 @@ class DaemonRunner(object):
         self.app.run()
 
     def _terminate_daemon_process(self):
-        """ Terminate the daemon process specified in the current PID file.
+        u""" Terminate the daemon process specified in the current PID file.
             """
         pid = self.pidfile.read_pid()
         try:
@@ -144,7 +144,7 @@ class DaemonRunner(object):
                 u"Failed to terminate %(pid)d: %(exc)s" % vars())
 
     def _stop(self):
-        """ Exit the daemon process specified in the current PID file.
+        u""" Exit the daemon process specified in the current PID file.
             """
         if not self.pidfile.is_locked():
             pidfile_path = self.pidfile.path
@@ -157,7 +157,7 @@ class DaemonRunner(object):
             self._terminate_daemon_process()
 
     def _restart(self):
-        """ Stop, then start.
+        u""" Stop, then start.
             """
         self._stop()
         self._start()
@@ -169,7 +169,7 @@ class DaemonRunner(object):
         }
 
     def _get_action_func(self):
-        """ Return the function for the specified action.
+        u""" Return the function for the specified action.
 
             Raises ``DaemonRunnerInvalidActionError`` if the action is
             unknown.
@@ -183,14 +183,14 @@ class DaemonRunner(object):
         return func
 
     def do_action(self):
-        """ Perform the requested action.
+        u""" Perform the requested action.
             """
         func = self._get_action_func()
         func(self)
 
 
 def emit_message(message, stream=None):
-    """ Emit a message to the specified stream (default `sys.stderr`). """
+    u""" Emit a message to the specified stream (default `sys.stderr`). """
     if stream is None:
         stream = sys.stderr
     stream.write(u"%(message)s\n" % vars())
@@ -198,7 +198,7 @@ def emit_message(message, stream=None):
 
 
 def make_pidlockfile(path, acquire_timeout):
-    """ Make a PIDLockFile instance with the given filesystem path. """
+    u""" Make a PIDLockFile instance with the given filesystem path. """
     if not isinstance(path, basestring):
         error = ValueError(u"Not a filesystem path: %(path)r" % vars())
         raise error
@@ -211,7 +211,7 @@ def make_pidlockfile(path, acquire_timeout):
 
 
 def is_pidfile_stale(pidfile):
-    """ Determine whether a PID file is stale.
+    u""" Determine whether a PID file is stale.
 
         Return ``True`` (“stale”) if the contents of the PID file are
         valid but do not match the PID of a currently-running process;

@@ -11,10 +11,10 @@
 # Apache Software Foundation.
 # No warranty expressed or implied. See the file LICENSE.ASF-2 for details.
 
-""" Library to implement a well-behaved Unix daemon process.
+u""" Library to implement a well-behaved Unix daemon process.
 
     This library implements the well-behaved daemon specification of
-    :pep:`3143`, "Standard daemon process library".
+    :pep:`3143`, “Standard daemon process library”.
 
     A well-behaved Unix daemon process is tricky to get right, but the
     required steps are much the same for every daemon program. A

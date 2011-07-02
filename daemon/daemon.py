@@ -15,7 +15,7 @@
 # Apache Software Foundation.
 # No warranty expressed or implied. See the file LICENSE.ASF-2 for details.
 
-""" Daemon process behaviour.
+u""" Daemon process behaviour.
     """
 
 from __future__ import absolute_import
@@ -30,19 +30,19 @@ import atexit
 
 
 class DaemonError(Exception):
-    """ Base exception class for errors from this module. """
+    u""" Base exception class for errors from this module. """
 
 
 class DaemonOSEnvironmentError(DaemonError, OSError):
-    """ Exception raised when daemon OS environment setup receives error. """
+    u""" Exception raised when daemon OS environment setup receives error. """
 
 
 class DaemonProcessDetachError(DaemonError, OSError):
-    """ Exception raised when process detach fails. """
+    u""" Exception raised when process detach fails. """
 
 
 class DaemonContext(object):
-    """ Context for turning the current program into a daemon process.
+    u""" Context for turning the current program into a daemon process.
 
         A `DaemonContext` instance represents the behaviour settings and
         process context for the program when it becomes a daemon. The
@@ -221,7 +221,7 @@ class DaemonContext(object):
         stderr=None,
         signal_map=None,
         ):
-        """ Set up a new instance. """
+        u""" Set up a new instance. """
         self.chroot_directory = chroot_directory
         self.working_directory = working_directory
         self.umask = umask
@@ -251,11 +251,11 @@ class DaemonContext(object):
 
     @property
     def is_open(self):
-        """ ``True`` if the instance is currently open. """
+        u""" ``True`` if the instance is currently open. """
         return self._is_open
 
     def open(self):
-        """ Become a daemon process.
+        u""" Become a daemon process.
             :Return: ``None``
 
             Open the daemon context, turning the current program into a daemon
@@ -350,12 +350,12 @@ class DaemonContext(object):
         register_atexit_function(self.close)
 
     def __enter__(self):
-        """ Context manager entry point. """
+        u""" Context manager entry point. """
         self.open()
         return self
 
     def close(self):
-        """ Exit the daemon process context.
+        u""" Exit the daemon process context.
             :Return: ``None``
 
             Close the daemon context. This performs the following steps:
@@ -382,11 +382,11 @@ class DaemonContext(object):
         self._is_open = False
 
     def __exit__(self, exc_type, exc_value, traceback):
-        """ Context manager exit point. """
+        u""" Context manager exit point. """
         self.close()
 
     def terminate(self, signal_number, stack_frame):
-        """ Signal handler for end-process signals.
+        u""" Signal handler for end-process signals.
             :Return: ``None``
 
             Signal handler for the ``signal.SIGTERM`` signal. Performs the
@@ -401,7 +401,7 @@ class DaemonContext(object):
         raise exception
 
     def _get_exclude_file_descriptors(self):
-        """ Return the set of file descriptors to exclude closing.
+        u""" Return the set of file descriptors to exclude closing.
 
             Returns a set containing the file descriptors for the
             items in `files_preserve`, and also each of `stdin`,
@@ -433,7 +433,7 @@ class DaemonContext(object):
         return exclude_descriptors
 
     def _make_signal_handler(self, target):
-        """ Make the signal handler for a specified target object.
+        u""" Make the signal handler for a specified target object.
 
             If `target` is ``None``, returns ``signal.SIG_IGN``. If
             `target` is a string, returns the attribute of this
@@ -452,7 +452,7 @@ class DaemonContext(object):
         return result
 
     def _make_signal_handler_map(self):
-        """ Make the map from signals to handlers for this instance.
+        u""" Make the map from signals to handlers for this instance.
 
             Constructs a map from signal numbers to handlers for this
             context instance, suitable for passing to
@@ -466,7 +466,7 @@ class DaemonContext(object):
 
 
 def change_working_directory(directory):
-    """ Change the working directory of this process.
+    u""" Change the working directory of this process.
         """
     try:
         os.chdir(directory)
@@ -478,7 +478,7 @@ def change_working_directory(directory):
 
 
 def change_root_directory(directory):
-    """ Change the root directory of this process.
+    u""" Change the root directory of this process.
 
         Sets the current working directory, then the process root
         directory, to the specified `directory`. Requires appropriate
@@ -496,7 +496,7 @@ def change_root_directory(directory):
 
 
 def change_file_creation_mask(mask):
-    """ Change the file creation mask for this process.
+    u""" Change the file creation mask for this process.
         """
     try:
         os.umask(mask)
@@ -508,7 +508,7 @@ def change_file_creation_mask(mask):
 
 
 def change_process_owner(uid, gid):
-    """ Change the owning UID and GID of this process.
+    u""" Change the owning UID and GID of this process.
 
         Sets the GID then the UID of the process (in that order, to
         avoid permission errors) to the specified `gid` and `uid`
@@ -526,7 +526,7 @@ def change_process_owner(uid, gid):
 
 
 def prevent_core_dump():
-    """ Prevent this process from generating a core dump.
+    u""" Prevent this process from generating a core dump.
 
         Sets the soft and hard limits for core dump size to zero. On
         Unix, this prevents the process from creating core dump
@@ -551,7 +551,7 @@ def prevent_core_dump():
 
 
 def detach_process_context():
-    """ Detach the process context from parent and session.
+    u""" Detach the process context from parent and session.
 
         Detach from the parent process and session group, allowing the
         parent to exit while this process continues running.
@@ -563,7 +563,7 @@ def detach_process_context():
         """
 
     def fork_then_exit_parent(error_message):
-        """ Fork a child process, then exit the parent process.
+        u""" Fork a child process, then exit the parent process.
 
             If the fork fails, raise a ``DaemonProcessDetachError``
             with ``error_message``.
@@ -586,7 +586,7 @@ def detach_process_context():
 
 
 def is_process_started_by_init():
-    """ Determine if the current process is started by `init`.
+    u""" Determine if the current process is started by `init`.
 
         The `init` process has the process ID of 1; if that is our
         parent process ID, return ``True``, otherwise ``False``.
@@ -602,7 +602,7 @@ def is_process_started_by_init():
 
 
 def is_socket(fd):
-    """ Determine if the file descriptor is a socket.
+    u""" Determine if the file descriptor is a socket.
 
         Return ``False`` if querying the socket type of `fd` raises an
         error; otherwise return ``True``.
@@ -631,7 +631,7 @@ def is_socket(fd):
 
 
 def is_process_started_by_superserver():
-    """ Determine if the current process is started by the superserver.
+    u""" Determine if the current process is started by the superserver.
 
         The internet superserver creates a network socket, and
         attaches it to the standard streams of the child process. If
@@ -649,7 +649,7 @@ def is_process_started_by_superserver():
 
 
 def is_detach_process_context_required():
-    """ Determine whether detaching process context is required.
+    u""" Determine whether detaching process context is required.
 
         Return ``True`` if the process environment indicates the
         process is already detached:
@@ -667,7 +667,7 @@ def is_detach_process_context_required():
 
 
 def close_file_descriptor_if_open(fd):
-    """ Close a file descriptor if already open.
+    u""" Close a file descriptor if already open.
 
         Close the file descriptor `fd`, suppressing an error in the
         case the file was not open.
@@ -690,7 +690,7 @@ def close_file_descriptor_if_open(fd):
 MAXFD = 2048
 
 def get_maximum_file_descriptors():
-    """ Return the maximum number of open file descriptors for this process.
+    u""" Return the maximum number of open file descriptors for this process.
 
         Return the process hard resource limit of maximum number of
         open file descriptors. If the limit is “infinity”, a default
@@ -705,7 +705,7 @@ def get_maximum_file_descriptors():
 
 
 def close_all_open_files(exclude=set()):
-    """ Close all open file descriptors.
+    u""" Close all open file descriptors.
 
         Closes every file descriptor (if open) of this process. If
         specified, `exclude` is a set of file descriptors to *not*
@@ -719,7 +719,7 @@ def close_all_open_files(exclude=set()):
 
 
 def redirect_stream(system_stream, target_stream):
-    """ Redirect a system stream to a specified file.
+    u""" Redirect a system stream to a specified file.
 
         `system_stream` is a standard system stream such as
         ``sys.stdout``. `target_stream` is an open file object that
@@ -737,7 +737,7 @@ def redirect_stream(system_stream, target_stream):
 
 
 def make_default_signal_map():
-    """ Make the default signal map for this system.
+    u""" Make the default signal map for this system.
 
         The signals available differ by system. The map will not
         contain any signals not defined on the running system.
@@ -758,7 +758,7 @@ def make_default_signal_map():
 
 
 def set_signal_handlers(signal_handler_map):
-    """ Set the signal handlers as specified.
+    u""" Set the signal handlers as specified.
 
         The `signal_handler_map` argument is a map from signal number
         to signal handler. See the `signal` module for details.
@@ -769,7 +769,7 @@ def set_signal_handlers(signal_handler_map):
 
 
 def register_atexit_function(func):
-    """ Register a function for processing at program exit.
+    u""" Register a function for processing at program exit.
 
         The function `func` is registered for a call with no arguments
         at program exit.
