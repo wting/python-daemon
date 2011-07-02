@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 # test/scaffold.py
-# Part of python-daemon, an implementation of PEP 3143.
+# Part of ‘python-daemon’, an implementation of PEP 3143.
 #
-# Copyright © 2007–2010 Ben Finney <ben+python@benfinney.id.au>
-# This is free software; you may copy, modify and/or distribute this work
-# under the terms of the GNU General Public License, version 2 or later.
-# No warranty expressed or implied. See the file LICENSE.GPL-2 for details.
+# Copyright © 2007–2011 Ben Finney <ben+python@benfinney.id.au>
+#
+# This is free software: you may copy, modify, and/or distribute this work
+# under the terms of the Apache License, version 2.0 as published by the
+# Apache Software Foundation.
+# No warranty expressed or implied. See the file LICENSE.ASF-2 for details.
 
 """ Scaffolding for unit test modules.
     """
