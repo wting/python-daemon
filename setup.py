@@ -24,7 +24,7 @@ version = main_module.version
 
 
 def get_descriptions_from_docstring(docstring):
-    u"""Get package description text from a docstring.
+    u""" Get package description text from a docstring.
 
         :param docstring: A docstring formatted conformant with PEP 257.
         :return: A two-item tuple of (`synopsis`, `long_description`). If
