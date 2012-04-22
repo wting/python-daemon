@@ -520,7 +520,7 @@ def change_process_owner(uid, gid):
         os.setuid(uid)
     except Exception, exc:
         error = DaemonOSEnvironmentError(
-            u"Unable to change file creation mask (%(exc)s)"
+            u"Unable to change process owner (%(exc)s)"
             % vars())
         raise error
 
