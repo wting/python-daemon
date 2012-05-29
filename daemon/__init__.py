@@ -11,7 +11,7 @@
 # Apache Software Foundation.
 # No warranty expressed or implied. See the file LICENSE.ASF-2 for details.
 
-u""" Library to implement a well-behaved Unix daemon process.
+""" Library to implement a well-behaved Unix daemon process.
 
     This library implements the well-behaved daemon specification of
     :pep:`3143`, “Standard daemon process library”.
@@ -37,7 +37,7 @@ u""" Library to implement a well-behaved Unix daemon process.
 
     """
 
-from __future__ import absolute_import
+from __future__ import (absolute_import, unicode_literals)
 
 from . import version
 from .daemon import DaemonContext
@@ -46,4 +46,4 @@ from .daemon import DaemonContext
 _version = version.version
 _copyright = version.copyright
 _license = version.license
-_url = u"http://pypi.python.org/pypi/python-daemon/"
+_url = "http://pypi.python.org/pypi/python-daemon/"

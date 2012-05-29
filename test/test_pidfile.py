@@ -13,6 +13,8 @@
 """ Unit test for ‘pidfile’ module.
     """
 
+from __future__ import unicode_literals
+
 import __builtin__ as builtins
 import os
 from StringIO import StringIO
@@ -51,11 +53,11 @@ def make_pidlockfile_scenarios():
 
     mock_pidfile_empty = FakeFileDescriptorStringIO()
     mock_pidfile_current_pid = FakeFileDescriptorStringIO(
-        u"%(mock_current_pid)d\n" % vars())
+        "%(mock_current_pid)d\n" % vars())
     mock_pidfile_other_pid = FakeFileDescriptorStringIO(
-        u"%(mock_other_pid)d\n" % vars())
+        "%(mock_other_pid)d\n" % vars())
     mock_pidfile_bogus = FakeFileDescriptorStringIO(
-        u"b0gUs")
+        "b0gUs")
 
     scenarios = {
         'simple': {},
@@ -137,7 +139,7 @@ def setup_pidfile_fixtures(testcase):
         return value
 
     scaffold.mock(
-        u"os.getpid",
+        "os.getpid",
         returns=scenarios['simple']['pid'],
         tracker=testcase.mock_tracker)
 
@@ -146,7 +148,7 @@ def setup_pidfile_fixtures(testcase):
         def mock_open_nonexist(filename, mode, buffering):
             if 'r' in mode:
                 raise IOError(
-                    errno.ENOENT, u"No such file %(filename)r" % vars())
+                    errno.ENOENT, "No such file %(filename)r" % vars())
             else:
                 result = testcase.scenario['pidfile']
             return result
@@ -154,7 +156,7 @@ def setup_pidfile_fixtures(testcase):
         def mock_open_read_denied(filename, mode, buffering):
             if 'r' in mode:
                 raise IOError(
-                    errno.EPERM, u"Read denied on %(filename)r" % vars())
+                    errno.EPERM, "Read denied on %(filename)r" % vars())
             else:
                 result = testcase.scenario['pidfile']
             return result
@@ -168,7 +170,7 @@ def setup_pidfile_fixtures(testcase):
                 result = testcase.scenario['pidfile'].fileno()
             else:
                 raise OSError(
-                    errno.ENOENT, u"No such file %(filename)r" % vars())
+                    errno.ENOENT, "No such file %(filename)r" % vars())
             return result
 
         def mock_os_open_read_denied(filename, flags, mode):
@@ -176,7 +178,7 @@ def setup_pidfile_fixtures(testcase):
                 result = testcase.scenario['pidfile'].fileno()
             else:
                 raise OSError(
-                    errno.EPERM, u"Read denied on %(filename)r" % vars())
+                    errno.EPERM, "Read denied on %(filename)r" % vars())
             return result
 
         def mock_os_open_okay(filename, flags, mode):
@@ -202,7 +204,7 @@ def setup_pidfile_fixtures(testcase):
         return result
 
     scaffold.mock(
-        u"builtins.open",
+        "builtins.open",
         returns_func=mock_open,
         tracker=testcase.mock_tracker)
 
@@ -217,7 +219,7 @@ def setup_pidfile_fixtures(testcase):
         return result
 
     scaffold.mock(
-        u"os.open",
+        "os.open",
         returns_func=mock_os_open,
         tracker=testcase.mock_tracker)
 
@@ -227,11 +229,11 @@ def setup_pidfile_fixtures(testcase):
         if fd == testcase.scenario['pidfile'].fileno():
             result = testcase.scenario['pidfile']
         else:
-            raise OSError(errno.EBADF, u"Bad file descriptor")
+            raise OSError(errno.EBADF, "Bad file descriptor")
         return result
 
     scaffold.mock(
-        u"os.fdopen",
+        "os.fdopen",
         returns_func=mock_os_fdopen,
         tracker=testcase.mock_tracker)
 
@@ -267,7 +269,7 @@ def setup_lockfile_method_mocks(testcase, scenario, class_name):
         'acquire', 'release', 'break_lock',
         ]:
         mock_func = vars()["mock_%(func_name)s" % vars()]
-        lockfile_func_name = u"%(class_name)s.%(func_name)s" % vars()
+        lockfile_func_name = "%(class_name)s.%(func_name)s" % vars()
         mock_lockfile_func = scaffold.Mock(
             lockfile_func_name,
             returns_func=mock_func,
@@ -287,10 +289,10 @@ def setup_pidlockfile_fixtures(testcase, scenario_name=None):
     setup_pidfile_fixtures(testcase)
 
     scaffold.mock(
-        u"pidlockfile.write_pid_to_pidfile",
+        "pidlockfile.write_pid_to_pidfile",
         tracker=testcase.mock_tracker)
     scaffold.mock(
-        u"pidlockfile.remove_existing_pidfile",
+        "pidlockfile.remove_existing_pidfile",
         tracker=testcase.mock_tracker)
 
     if scenario_name is not None:
@@ -301,7 +303,7 @@ def set_pidlockfile_scenario(testcase, scenario_name, clear_tracker=True):
     """ Set up the test case to the specified scenario. """
     testcase.scenario = testcase.pidlockfile_scenarios[scenario_name]
     setup_lockfile_method_mocks(
-        testcase, testcase.scenario, u"lockfile.LinkLockFile")
+        testcase, testcase.scenario, "lockfile.LinkLockFile")
     testcase.pidlockfile_args = dict(
         path=testcase.scenario['path'],
         )
@@ -323,10 +325,10 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
         pidfile_path = self.pidlockfile_scenario['path']
 
         scaffold.mock(
-            u"pidlockfile.PIDLockFile.__init__",
+            "pidlockfile.PIDLockFile.__init__",
             tracker=self.mock_tracker)
         scaffold.mock(
-            u"pidlockfile.PIDLockFile.acquire",
+            "pidlockfile.PIDLockFile.acquire",
             tracker=self.mock_tracker)
 
         self.scenario = {
@@ -353,7 +355,7 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
     def test_init_has_expected_signature(self):
         """ Should have expected signature for ‘__init__’. """
         def test_func(self, path, acquire_timeout=None, *args, **kwargs): pass
-        test_func.__name__ = '__init__'
+        test_func.__name__ = b'__init__'
         self.failUnlessFunctionSignatureMatch(
             test_func, 
             daemon.pidfile.TimeoutPIDLockFile.__init__)
@@ -367,7 +369,7 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
     def test_calls_superclass_init(self):
         """ Should call the superclass ‘__init__’. """
         expect_path = self.test_kwargs['path']
-        expect_mock_output = u"""\
+        expect_mock_output = """\
             Called pidlockfile.PIDLockFile.__init__(
                 %(expect_path)r)
             """ % vars()
@@ -379,7 +381,7 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
         test_timeout = object()
         expect_timeout = test_timeout
         self.mock_tracker.clear()
-        expect_mock_output = u"""\
+        expect_mock_output = """\
             Called pidlockfile.PIDLockFile.acquire(%(expect_timeout)r)
             """ % vars()
         instance.acquire(test_timeout)
@@ -391,7 +393,7 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
         test_timeout = self.test_kwargs['acquire_timeout']
         expect_timeout = test_timeout
         self.mock_tracker.clear()
-        expect_mock_output = u"""\
+        expect_mock_output = """\
             Called pidlockfile.PIDLockFile.acquire(%(expect_timeout)r)
             """ % vars()
         instance.acquire()

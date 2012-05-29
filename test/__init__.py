@@ -10,8 +10,10 @@
 # Apache Software Foundation.
 # No warranty expressed or implied. See the file LICENSE.ASF-2 for details.
 
-u""" Unit test suite for ‘daemon’ package.
+""" Unit test suite for ‘daemon’ package.
     """
+
+from __future__ import unicode_literals
 
 import scaffold
 

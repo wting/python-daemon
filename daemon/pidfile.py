@@ -10,16 +10,16 @@
 # Apache Software Foundation.
 # No warranty expressed or implied. See the file LICENSE.ASF-2 for details.
 
-u""" Lockfile behaviour implemented via Unix PID files.
+""" Lockfile behaviour implemented via Unix PID files.
     """
 
-from __future__ import absolute_import
+from __future__ import (absolute_import, unicode_literals)
 
 from lockfile.pidlockfile import PIDLockFile
 
 
 class TimeoutPIDLockFile(PIDLockFile, object):
-    u""" Lockfile with default timeout, implemented as a Unix PID file.
+    """ Lockfile with default timeout, implemented as a Unix PID file.
 
         This uses the ``PIDLockFile`` implementation, with the
         following changes:
@@ -31,12 +31,12 @@ class TimeoutPIDLockFile(PIDLockFile, object):
         """
 
     def __init__(self, path, acquire_timeout=None, *args, **kwargs):
-        u""" Set up the parameters of a TimeoutPIDLockFile. """
+        """ Set up the parameters of a TimeoutPIDLockFile. """
         self.acquire_timeout = acquire_timeout
         super(TimeoutPIDLockFile, self).__init__(path, *args, **kwargs)
 
     def acquire(self, timeout=None, *args, **kwargs):
-        u""" Acquire the lock. """
+        """ Acquire the lock. """
         if timeout is None:
             timeout = self.acquire_timeout
         super(TimeoutPIDLockFile, self).acquire(timeout, *args, **kwargs)
