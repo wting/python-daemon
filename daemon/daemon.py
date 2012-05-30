@@ -3,7 +3,7 @@
 # daemon/daemon.py
 # Part of ‘python-daemon’, an implementation of PEP 3143.
 #
-# Copyright © 2008–2011 Ben Finney <ben+python@benfinney.id.au>
+# Copyright © 2008–2012 Ben Finney <ben+python@benfinney.id.au>
 # Copyright © 2007–2008 Robert Niederreiter, Jens Klein
 # Copyright © 2004–2005 Chad J. Schroeder
 # Copyright © 2003 Clark Evans

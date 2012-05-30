@@ -3,6 +3,7 @@
     * Use unicode literals by default, specifying bytes where necessary.
       This is to ease the port to Python 3, where the string type is
       unicode.
+    * Update copyright notices.
 
 2011-07-02  Ben Finney  <ben+python@benfinney.id.au>
 

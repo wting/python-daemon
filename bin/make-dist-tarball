@@ -4,7 +4,7 @@
 # bin/make-dist-tarball
 # Part of ‘python-daemon’, an implementation of PEP 3143.
 #
-# Copyright © 2007–2011 Ben Finney <ben+python@benfinney.id.au>
+# Copyright © 2007–2012 Ben Finney <ben+python@benfinney.id.au>
 #
 # This is free software: you may copy, modify, and/or distribute this work
 # under the terms of the GNU General Public License as published by the
