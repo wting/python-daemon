@@ -3,7 +3,7 @@
 # setup.py
 # Part of ‘python-daemon’, an implementation of PEP 3143.
 #
-# Copyright © 2008–2012 Ben Finney <ben+python@benfinney.id.au>
+# Copyright © 2008–2014 Ben Finney <ben+python@benfinney.id.au>
 # Copyright © 2008 Robert Niederreiter, Jens Klein
 #
 # This is free software: you may copy, modify, and/or distribute this work
@@ -119,3 +119,10 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
         ],
     )
+
+
+# Local variables:
+# coding: utf-8
+# mode: python
+# End:
+# vim: fileencoding=utf-8 filetype=python :
