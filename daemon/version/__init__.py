@@ -34,8 +34,8 @@ if copyright_year > copyright_year_begin:
     copyright_year_range += "–%(copyright_year)s" % vars()
 
 copyright = (
-    "Copyright © %(copyright_year_range)s %(author)s and others"
-    ) % vars()
+        "Copyright © %(copyright_year_range)s %(author)s and others"
+        ) % vars()
 license = "Apache-2"
 
 

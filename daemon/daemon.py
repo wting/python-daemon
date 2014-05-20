@@ -206,21 +206,21 @@ class DaemonContext(object):
         """
 
     def __init__(
-        self,
-        chroot_directory=None,
-        working_directory='/',
-        umask=0,
-        uid=None,
-        gid=None,
-        prevent_core=True,
-        detach_process=None,
-        files_preserve=None,
-        pidfile=None,
-        stdin=None,
-        stdout=None,
-        stderr=None,
-        signal_map=None,
-        ):
+            self,
+            chroot_directory=None,
+            working_directory='/',
+            umask=0,
+            uid=None,
+            gid=None,
+            prevent_core=True,
+            detach_process=None,
+            files_preserve=None,
+            pidfile=None,
+            stdin=None,
+            stdout=None,
+            stderr=None,
+            signal_map=None,
+            ):
         """ Set up a new instance. """
         self.chroot_directory = chroot_directory
         self.working_directory = working_directory
@@ -396,8 +396,8 @@ class DaemonContext(object):
 
             """
         exception = SystemExit(
-            "Terminating on signal %(signal_number)r"
-                % vars())
+                "Terminating on signal %(signal_number)r"
+                    % vars())
         raise exception
 
     def _get_exclude_file_descriptors(self):
@@ -420,8 +420,8 @@ class DaemonContext(object):
         if files_preserve is None:
             files_preserve = []
         files_preserve.extend(
-            item for item in [self.stdin, self.stdout, self.stderr]
-            if hasattr(item, 'fileno'))
+                item for item in [self.stdin, self.stdout, self.stderr]
+                if hasattr(item, 'fileno'))
         exclude_descriptors = set()
         for item in files_preserve:
             if item is None:
@@ -460,8 +460,8 @@ class DaemonContext(object):
 
             """
         signal_handler_map = dict(
-            (signal_number, self._make_signal_handler(target))
-            for (signal_number, target) in self.signal_map.items())
+                (signal_number, self._make_signal_handler(target))
+                for (signal_number, target) in self.signal_map.items())
         return signal_handler_map
 
 
@@ -472,8 +472,8 @@ def change_working_directory(directory):
         os.chdir(directory)
     except Exception, exc:
         error = DaemonOSEnvironmentError(
-            "Unable to change working directory (%(exc)s)"
-            % vars())
+                "Unable to change working directory (%(exc)s)"
+                    % vars())
         raise error
 
 
@@ -490,8 +490,8 @@ def change_root_directory(directory):
         os.chroot(directory)
     except Exception, exc:
         error = DaemonOSEnvironmentError(
-            "Unable to change root directory (%(exc)s)"
-            % vars())
+                "Unable to change root directory (%(exc)s)"
+                    % vars())
         raise error
 
 
@@ -502,8 +502,8 @@ def change_file_creation_mask(mask):
         os.umask(mask)
     except Exception, exc:
         error = DaemonOSEnvironmentError(
-            "Unable to change file creation mask (%(exc)s)"
-            % vars())
+                "Unable to change file creation mask (%(exc)s)"
+                    % vars())
         raise error
 
 
@@ -520,8 +520,8 @@ def change_process_owner(uid, gid):
         os.setuid(uid)
     except Exception, exc:
         error = DaemonOSEnvironmentError(
-            "Unable to change process owner (%(exc)s)"
-            % vars())
+                "Unable to change process owner (%(exc)s)"
+                    % vars())
         raise error
 
 
@@ -537,15 +537,15 @@ def prevent_core_dump():
 
     try:
         # Ensure the resource limit exists on this platform, by requesting
-        # its current value
+        # its current value.
         core_limit_prev = resource.getrlimit(core_resource)
     except ValueError, exc:
         error = DaemonOSEnvironmentError(
-            "System does not support RLIMIT_CORE resource limit (%(exc)s)"
-            % vars())
+                "System does not support RLIMIT_CORE resource limit (%(exc)s)"
+                    % vars())
         raise error
 
-    # Set hard and soft limits to zero, i.e. no core dump at all
+    # Set hard and soft limits to zero, i.e. no core dump at all.
     core_limit = (0, 0)
     resource.setrlimit(core_resource, core_limit)
 
@@ -577,7 +577,8 @@ def detach_process_context():
             exc_errno = exc.errno
             exc_strerror = exc.strerror
             error = DaemonProcessDetachError(
-                "%(error_message)s: [%(exc_errno)d] %(exc_strerror)s" % vars())
+                    "%(error_message)s: [%(exc_errno)d] %(exc_strerror)s"
+                        % vars())
             raise error
 
     fork_then_exit_parent(error_message="Failed first fork")
@@ -614,17 +615,17 @@ def is_socket(fd):
 
     try:
         socket_type = file_socket.getsockopt(
-            socket.SOL_SOCKET, socket.SO_TYPE)
+                socket.SOL_SOCKET, socket.SO_TYPE)
     except socket.error, exc:
         exc_errno = exc.args[0]
         if exc_errno == errno.ENOTSOCK:
-            # Socket operation on non-socket
+            # Socket operation on non-socket.
             pass
         else:
-            # Some other socket error
+            # Some other socket error.
             result = True
     else:
-        # No error getting socket type
+        # No error getting socket type.
         result = True
 
     return result
@@ -677,13 +678,13 @@ def close_file_descriptor_if_open(fd):
         os.close(fd)
     except OSError, exc:
         if exc.errno == errno.EBADF:
-            # File descriptor was not open
+            # File descriptor was not open.
             pass
         else:
             error = DaemonOSEnvironmentError(
-                "Failed to close file descriptor %(fd)d"
-                " (%(exc)s)"
-                % vars())
+                    "Failed to close file descriptor %(fd)d"
+                    " (%(exc)s)"
+                        % vars())
             raise error
 
 
@@ -744,15 +745,15 @@ def make_default_signal_map():
 
         """
     name_map = {
-        'SIGTSTP': None,
-        'SIGTTIN': None,
-        'SIGTTOU': None,
-        'SIGTERM': 'terminate',
-        }
+            'SIGTSTP': None,
+            'SIGTTIN': None,
+            'SIGTTOU': None,
+            'SIGTERM': 'terminate',
+            }
     signal_map = dict(
-        (getattr(signal, name), target)
-        for (name, target) in name_map.items()
-        if hasattr(signal, name))
+            (getattr(signal, name), target)
+            for (name, target) in name_map.items()
+            if hasattr(signal, name))
 
     return signal_map
 

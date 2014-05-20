@@ -2,6 +2,7 @@
 
     * Update copyright notices.
     * Add editor hints for most files.
+    * Distinguish continuation-line indentation versus block indentation.
 
 2012-05-30  Ben Finney  <ben+python@benfinney.id.au>
 

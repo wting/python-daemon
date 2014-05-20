@@ -53,58 +53,58 @@ def make_pidlockfile_scenarios():
 
     mock_pidfile_empty = FakeFileDescriptorStringIO()
     mock_pidfile_current_pid = FakeFileDescriptorStringIO(
-        "%(mock_current_pid)d\n" % vars())
+            "%(mock_current_pid)d\n" % vars())
     mock_pidfile_other_pid = FakeFileDescriptorStringIO(
-        "%(mock_other_pid)d\n" % vars())
+            "%(mock_other_pid)d\n" % vars())
     mock_pidfile_bogus = FakeFileDescriptorStringIO(
-        "b0gUs")
+            "b0gUs")
 
     scenarios = {
-        'simple': {},
-        'not-exist': {
-            'open_func_name': 'mock_open_nonexist',
-            'os_open_func_name': 'mock_os_open_nonexist',
-            },
-        'not-exist-write-denied': {
-            'open_func_name': 'mock_open_nonexist',
-            'os_open_func_name': 'mock_os_open_nonexist',
-            },
-        'not-exist-write-busy': {
-            'open_func_name': 'mock_open_nonexist',
-            'os_open_func_name': 'mock_os_open_nonexist',
-            },
-        'exist-read-denied': {
-            'open_func_name': 'mock_open_read_denied',
-            'os_open_func_name': 'mock_os_open_read_denied',
-            },
-        'exist-locked-read-denied': {
-            'locking_pid': mock_other_pid,
-            'open_func_name': 'mock_open_read_denied',
-            'os_open_func_name': 'mock_os_open_read_denied',
-            },
-        'exist-empty': {},
-        'exist-invalid': {
-            'pidfile': mock_pidfile_bogus,
-            },
-        'exist-current-pid': {
-            'pidfile': mock_pidfile_current_pid,
-            'pidfile_pid': mock_current_pid,
-            },
-        'exist-current-pid-locked': {
-            'pidfile': mock_pidfile_current_pid,
-            'pidfile_pid': mock_current_pid,
-            'locking_pid': mock_current_pid,
-            },
-        'exist-other-pid': {
-            'pidfile': mock_pidfile_other_pid,
-            'pidfile_pid': mock_other_pid,
-            },
-        'exist-other-pid-locked': {
-            'pidfile': mock_pidfile_other_pid,
-            'pidfile_pid': mock_other_pid,
-            'locking_pid': mock_other_pid,
-            },
-        }
+            'simple': {},
+            'not-exist': {
+                'open_func_name': 'mock_open_nonexist',
+                'os_open_func_name': 'mock_os_open_nonexist',
+                },
+            'not-exist-write-denied': {
+                'open_func_name': 'mock_open_nonexist',
+                'os_open_func_name': 'mock_os_open_nonexist',
+                },
+            'not-exist-write-busy': {
+                'open_func_name': 'mock_open_nonexist',
+                'os_open_func_name': 'mock_os_open_nonexist',
+                },
+            'exist-read-denied': {
+                'open_func_name': 'mock_open_read_denied',
+                'os_open_func_name': 'mock_os_open_read_denied',
+                },
+            'exist-locked-read-denied': {
+                'locking_pid': mock_other_pid,
+                'open_func_name': 'mock_open_read_denied',
+                'os_open_func_name': 'mock_os_open_read_denied',
+                },
+            'exist-empty': {},
+            'exist-invalid': {
+                'pidfile': mock_pidfile_bogus,
+                },
+            'exist-current-pid': {
+                'pidfile': mock_pidfile_current_pid,
+                'pidfile_pid': mock_current_pid,
+                },
+            'exist-current-pid-locked': {
+                'pidfile': mock_pidfile_current_pid,
+                'pidfile_pid': mock_current_pid,
+                'locking_pid': mock_current_pid,
+                },
+            'exist-other-pid': {
+                'pidfile': mock_pidfile_other_pid,
+                'pidfile_pid': mock_other_pid,
+                },
+            'exist-other-pid-locked': {
+                'pidfile': mock_pidfile_other_pid,
+                'pidfile_pid': mock_other_pid,
+                'locking_pid': mock_other_pid,
+                },
+            }
 
     for scenario in scenarios.values():
         scenario['pid'] = mock_current_pid
@@ -139,16 +139,16 @@ def setup_pidfile_fixtures(testcase):
         return value
 
     scaffold.mock(
-        "os.getpid",
-        returns=scenarios['simple']['pid'],
-        tracker=testcase.mock_tracker)
+            "os.getpid",
+            returns=scenarios['simple']['pid'],
+            tracker=testcase.mock_tracker)
 
     def make_mock_open_funcs(testcase):
 
         def mock_open_nonexist(filename, mode, buffering):
             if 'r' in mode:
                 raise IOError(
-                    errno.ENOENT, "No such file %(filename)r" % vars())
+                        errno.ENOENT, "No such file %(filename)r" % vars())
             else:
                 result = testcase.scenario['pidfile']
             return result
@@ -156,7 +156,7 @@ def setup_pidfile_fixtures(testcase):
         def mock_open_read_denied(filename, mode, buffering):
             if 'r' in mode:
                 raise IOError(
-                    errno.EPERM, "Read denied on %(filename)r" % vars())
+                        errno.EPERM, "Read denied on %(filename)r" % vars())
             else:
                 result = testcase.scenario['pidfile']
             return result
@@ -170,7 +170,7 @@ def setup_pidfile_fixtures(testcase):
                 result = testcase.scenario['pidfile'].fileno()
             else:
                 raise OSError(
-                    errno.ENOENT, "No such file %(filename)r" % vars())
+                        errno.ENOENT, "No such file %(filename)r" % vars())
             return result
 
         def mock_os_open_read_denied(filename, flags, mode):
@@ -178,7 +178,7 @@ def setup_pidfile_fixtures(testcase):
                 result = testcase.scenario['pidfile'].fileno()
             else:
                 raise OSError(
-                    errno.EPERM, "Read denied on %(filename)r" % vars())
+                        errno.EPERM, "Read denied on %(filename)r" % vars())
             return result
 
         def mock_os_open_okay(filename, flags, mode):
@@ -186,8 +186,8 @@ def setup_pidfile_fixtures(testcase):
             return result
 
         funcs = dict(
-            (name, obj) for (name, obj) in vars().items()
-            if hasattr(obj, '__call__'))
+                (name, obj) for (name, obj) in vars().items()
+                if hasattr(obj, '__call__'))
 
         return funcs
 
@@ -204,9 +204,9 @@ def setup_pidfile_fixtures(testcase):
         return result
 
     scaffold.mock(
-        "builtins.open",
-        returns_func=mock_open,
-        tracker=testcase.mock_tracker)
+            "builtins.open",
+            returns_func=mock_open,
+            tracker=testcase.mock_tracker)
 
     def mock_os_open(filename, flags, mode=None):
         scenario_path = get_scenario_option(testcase, 'path')
@@ -219,13 +219,13 @@ def setup_pidfile_fixtures(testcase):
         return result
 
     scaffold.mock(
-        "os.open",
-        returns_func=mock_os_open,
-        tracker=testcase.mock_tracker)
+            "os.open",
+            returns_func=mock_os_open,
+            tracker=testcase.mock_tracker)
 
     def mock_os_fdopen(fd, mode='r', buffering=None):
         scenario_pidfile = get_scenario_option(
-            testcase, 'pidfile', FakeFileDescriptorStringIO())
+                testcase, 'pidfile', FakeFileDescriptorStringIO())
         if fd == testcase.scenario['pidfile'].fileno():
             result = testcase.scenario['pidfile']
         else:
@@ -233,9 +233,9 @@ def setup_pidfile_fixtures(testcase):
         return result
 
     scaffold.mock(
-        "os.fdopen",
-        returns_func=mock_os_fdopen,
-        tracker=testcase.mock_tracker)
+            "os.fdopen",
+            returns_func=mock_os_fdopen,
+            tracker=testcase.mock_tracker)
 
     testcase.scenario = NotImplemented
 
@@ -249,7 +249,7 @@ def setup_lockfile_method_mocks(testcase, scenario, class_name):
         return (scenario['locking_pid'] is not None)
     def mock_i_am_locking():
         return (
-            scenario['locking_pid'] == scenario['pid'])
+                scenario['locking_pid'] == scenario['pid'])
     def mock_acquire(timeout=None):
         if scenario['locking_pid'] is not None:
             raise lockfile.AlreadyLocked()
@@ -264,21 +264,21 @@ def setup_lockfile_method_mocks(testcase, scenario, class_name):
         scenario['locking_pid'] = None
 
     for func_name in [
-        'read_pid',
-        'is_locked', 'i_am_locking',
-        'acquire', 'release', 'break_lock',
-        ]:
+            'read_pid',
+            'is_locked', 'i_am_locking',
+            'acquire', 'release', 'break_lock',
+            ]:
         mock_func = vars()["mock_%(func_name)s" % vars()]
         lockfile_func_name = "%(class_name)s.%(func_name)s" % vars()
         mock_lockfile_func = scaffold.Mock(
-            lockfile_func_name,
-            returns_func=mock_func,
-            tracker=testcase.mock_tracker)
+                lockfile_func_name,
+                returns_func=mock_func,
+                tracker=testcase.mock_tracker)
         try:
             scaffold.mock(
-                lockfile_func_name,
-                mock_obj=mock_lockfile_func,
-                tracker=testcase.mock_tracker)
+                    lockfile_func_name,
+                    mock_obj=mock_lockfile_func,
+                    tracker=testcase.mock_tracker)
         except NameError:
             pass
 
@@ -289,11 +289,11 @@ def setup_pidlockfile_fixtures(testcase, scenario_name=None):
     setup_pidfile_fixtures(testcase)
 
     scaffold.mock(
-        "pidlockfile.write_pid_to_pidfile",
-        tracker=testcase.mock_tracker)
+            "pidlockfile.write_pid_to_pidfile",
+            tracker=testcase.mock_tracker)
     scaffold.mock(
-        "pidlockfile.remove_existing_pidfile",
-        tracker=testcase.mock_tracker)
+            "pidlockfile.remove_existing_pidfile",
+            tracker=testcase.mock_tracker)
 
     if scenario_name is not None:
         set_pidlockfile_scenario(testcase, scenario_name, clear_tracker=False)
@@ -303,12 +303,12 @@ def set_pidlockfile_scenario(testcase, scenario_name, clear_tracker=True):
     """ Set up the test case to the specified scenario. """
     testcase.scenario = testcase.pidlockfile_scenarios[scenario_name]
     setup_lockfile_method_mocks(
-        testcase, testcase.scenario, "lockfile.LinkLockFile")
+            testcase, testcase.scenario, "lockfile.LinkLockFile")
     testcase.pidlockfile_args = dict(
-        path=testcase.scenario['path'],
-        )
+            path=testcase.scenario['path'],
+            )
     testcase.test_instance = pidlockfile.PIDLockFile(
-        **testcase.pidlockfile_args)
+            **testcase.pidlockfile_args)
     if clear_tracker:
         testcase.mock_tracker.clear()
 
@@ -325,23 +325,23 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
         pidfile_path = self.pidlockfile_scenario['path']
 
         scaffold.mock(
-            "pidlockfile.PIDLockFile.__init__",
-            tracker=self.mock_tracker)
+                "pidlockfile.PIDLockFile.__init__",
+                tracker=self.mock_tracker)
         scaffold.mock(
-            "pidlockfile.PIDLockFile.acquire",
-            tracker=self.mock_tracker)
+                "pidlockfile.PIDLockFile.acquire",
+                tracker=self.mock_tracker)
 
         self.scenario = {
-            'pidfile_path': self.pidlockfile_scenario['path'],
-            'acquire_timeout': object(),
-            }
+                'pidfile_path': self.pidlockfile_scenario['path'],
+                'acquire_timeout': object(),
+                }
 
         self.test_kwargs = dict(
-            path=self.scenario['pidfile_path'],
-            acquire_timeout=self.scenario['acquire_timeout'],
-            )
+                path=self.scenario['pidfile_path'],
+                acquire_timeout=self.scenario['acquire_timeout'],
+                )
         self.test_instance = daemon.pidfile.TimeoutPIDLockFile(
-            **self.test_kwargs)
+                **self.test_kwargs)
 
     def tearDown(self):
         """ Tear down test fixtures. """
@@ -357,8 +357,8 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
         def test_func(self, path, acquire_timeout=None, *args, **kwargs): pass
         test_func.__name__ = b'__init__'
         self.failUnlessFunctionSignatureMatch(
-            test_func, 
-            daemon.pidfile.TimeoutPIDLockFile.__init__)
+                test_func, 
+                daemon.pidfile.TimeoutPIDLockFile.__init__)
 
     def test_has_specified_acquire_timeout(self):
         """ Should have specified ‘acquire_timeout’ value. """
@@ -370,9 +370,9 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
         """ Should call the superclass ‘__init__’. """
         expect_path = self.test_kwargs['path']
         expect_mock_output = """\
-            Called pidlockfile.PIDLockFile.__init__(
-                %(expect_path)r)
-            """ % vars()
+                Called pidlockfile.PIDLockFile.__init__(
+                    %(expect_path)r)
+                """ % vars()
         self.failUnlessMockCheckerMatch(expect_mock_output)
 
     def test_acquire_uses_specified_timeout(self):
@@ -382,8 +382,8 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
         expect_timeout = test_timeout
         self.mock_tracker.clear()
         expect_mock_output = """\
-            Called pidlockfile.PIDLockFile.acquire(%(expect_timeout)r)
-            """ % vars()
+                Called pidlockfile.PIDLockFile.acquire(%(expect_timeout)r)
+                """ % vars()
         instance.acquire(test_timeout)
         self.failUnlessMockCheckerMatch(expect_mock_output)
 
@@ -394,8 +394,8 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
         expect_timeout = test_timeout
         self.mock_tracker.clear()
         expect_mock_output = """\
-            Called pidlockfile.PIDLockFile.acquire(%(expect_timeout)r)
-            """ % vars()
+                Called pidlockfile.PIDLockFile.acquire(%(expect_timeout)r)
+                """ % vars()
         instance.acquire()
         self.failUnlessMockCheckerMatch(expect_mock_output)
 

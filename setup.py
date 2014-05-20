@@ -66,7 +66,7 @@ def get_descriptions_from_docstring(docstring):
     else:
         if lines[1].strip():
             raise ValueError(
-                "PEP 257 multi-line docstrings must have second line blank")
+                    "PEP 257 multi-line docstrings must have second line blank")
         synopsis = lines[0].strip()
         long_description = textwrap.dedent("\n".join(lines[2:]))
 
@@ -80,45 +80,45 @@ description_translate_map = {
 
 synopsis, long_description = get_descriptions_from_docstring(
         main_module.__doc__)
-short_description, long_description = (
-    (synopsis.translate(description_translate_map),
-     long_description.translate(description_translate_map)))
+short_description, long_description = ((
+        synopsis.translate(description_translate_map),
+        long_description.translate(description_translate_map)))
 
 
 setup(
-    name=distribution_name,
-    version=version.version,
-    packages=find_packages(exclude=["test"]),
+        name=distribution_name,
+        version=version.version,
+        packages=find_packages(exclude=["test"]),
 
-    # setuptools metadata
-    zip_safe=False,
-    test_suite="test.suite",
-    tests_require=[
-        "MiniMock >=1.2.2",
-        ],
-    install_requires=[
-        "setuptools",
-        "lockfile >=0.9",
-        ],
+        # Setuptools metadata.
+        zip_safe=False,
+        test_suite="test.suite",
+        tests_require=[
+            "MiniMock >=1.2.2",
+            ],
+        install_requires=[
+            "setuptools",
+            "lockfile >=0.9",
+            ],
 
-    # PyPI metadata
-    author=version.author_name,
-    author_email=version.author_email,
-    description=short_description,
-    license=version.license,
-    keywords="daemon fork unix".split(),
-    url=main_module._url,
-    long_description=long_description,
-    classifiers=[
-        # Reference: http://pypi.python.org/pypi?%3Aaction=list_classifiers
-        "Development Status :: 4 - Beta",
-        "License :: OSI Approved :: Python Software Foundation License",
-        "Operating System :: POSIX",
-        "Programming Language :: Python",
-        "Intended Audience :: Developers",
-        "Topic :: Software Development :: Libraries :: Python Modules",
-        ],
-    )
+        # PyPI metadata.
+        author=version.author_name,
+        author_email=version.author_email,
+        description=short_description,
+        license=version.license,
+        keywords="daemon fork unix".split(),
+        url=main_module._url,
+        long_description=long_description,
+        classifiers=[
+            # Reference: http://pypi.python.org/pypi?%3Aaction=list_classifiers
+            "Development Status :: 4 - Beta",
+            "License :: OSI Approved :: Python Software Foundation License",
+            "Operating System :: POSIX",
+            "Programming Language :: Python",
+            "Intended Audience :: Developers",
+            "Topic :: Software Development :: Libraries :: Python Modules",
+            ],
+        )
 
 
 # Local variables:
