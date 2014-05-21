@@ -2,7 +2,7 @@
 ##########################################
 
 :Author: Ben Finney <ben+python@benfinney.id.au>
-:Updated: 2014-05-20
+:Updated: 2014-05-21
 
 ..
     This is free software: you may copy, modify, and/or distribute this work
@@ -108,9 +108,9 @@ from closure::
 
     # any subclass of StreamHandler should provide the ‘stream’ attribute.
     lh = logging.handlers.TimedRotatingFileHandler(
-        "/var/log/foo.log",
-        # …
-        )
+            "/var/log/foo.log",
+            # …
+            )
 
     # … do some logging and other activity …
 
