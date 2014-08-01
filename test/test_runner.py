@@ -484,7 +484,7 @@ class DaemonRunner_do_action_start_TestCase(scaffold.TestCase):
         expect_message_content = pidfile_path
         try:
             instance.do_action()
-        except expect_error, exc:
+        except expect_error as exc:
             pass
         else:
             raise self.failureException(
@@ -578,7 +578,7 @@ class DaemonRunner_do_action_stop_TestCase(scaffold.TestCase):
         expect_message_content = pidfile_path
         try:
             instance.do_action()
-        except expect_error, exc:
+        except expect_error as exc:
             pass
         else:
             raise self.failureException(
@@ -627,7 +627,7 @@ class DaemonRunner_do_action_stop_TestCase(scaffold.TestCase):
         expect_message_content = str(test_pid)
         try:
             instance.do_action()
-        except expect_error, exc:
+        except expect_error as exc:
             pass
         else:
             raise self.failureException(

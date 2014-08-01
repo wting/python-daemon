@@ -737,7 +737,7 @@ class DaemonContext_terminate_TestCase(scaffold.TestCase):
         expect_exception = SystemExit
         try:
             instance.terminate(*args)
-        except expect_exception, exc:
+        except expect_exception as exc:
             pass
         self.failUnlessIn(str(exc), str(signal_number))
 
@@ -947,7 +947,7 @@ class change_working_directory_TestCase(scaffold.TestCase):
         expect_error = daemon.daemon.DaemonOSEnvironmentError
         try:
             daemon.daemon.change_working_directory(**args)
-        except expect_error, exc:
+        except expect_error as exc:
             pass
         self.failUnlessIn(str(exc), str(test_error))
 
@@ -1025,7 +1025,7 @@ class change_root_directory_TestCase(scaffold.TestCase):
         expect_error = daemon.daemon.DaemonOSEnvironmentError
         try:
             daemon.daemon.change_root_directory(**args)
-        except expect_error, exc:
+        except expect_error as exc:
             pass
         self.failUnlessIn(str(exc), str(test_error))
 
@@ -1078,7 +1078,7 @@ class change_file_creation_mask_TestCase(scaffold.TestCase):
         expect_error = daemon.daemon.DaemonOSEnvironmentError
         try:
             daemon.daemon.change_file_creation_mask(**args)
-        except expect_error, exc:
+        except expect_error as exc:
             pass
         self.failUnlessIn(str(exc), str(test_error))
 
@@ -1174,7 +1174,7 @@ class change_process_owner_TestCase(scaffold.TestCase):
         expect_error = daemon.daemon.DaemonOSEnvironmentError
         try:
             daemon.daemon.change_process_owner(**args)
-        except expect_error, exc:
+        except expect_error as exc:
             pass
         self.failUnlessIn(str(exc), str(test_error))
 

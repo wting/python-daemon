@@ -1,3 +1,9 @@
+2014-08-01  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Use unambiguous “except FooType as foo” syntax.
+      This is to ease the port to Python 3, where the ambiguous comma
+      usage is an error.
+
 2014-05-20  Ben Finney  <ben+python@benfinney.id.au>
 
     * Update copyright notices.
