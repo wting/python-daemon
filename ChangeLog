@@ -3,6 +3,8 @@
     * Use unambiguous “except FooType as foo” syntax.
       This is to ease the port to Python 3, where the ambiguous comma
       usage is an error.
+    * Ensure a ‘basestring’ name bound to the base type for strings.
+      This is to allow checks to work on Python 2 and 3.
 
 2014-05-20  Ben Finney  <ben+python@benfinney.id.au>
 
