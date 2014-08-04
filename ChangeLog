@@ -1,3 +1,7 @@
+2014-08-04  Ben Finney  <ben+python@benfinney.id.au>
+
+    Version 1.6.1 released.
+
 2014-08-01  Ben Finney  <ben+python@benfinney.id.au>
 
     * Use unambiguous “except FooType as foo” syntax.
