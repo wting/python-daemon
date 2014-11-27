@@ -16,6 +16,8 @@
 
 from __future__ import unicode_literals
 
+import os
+import os.path
 import pydoc
 
 from setuptools import setup, find_packages
@@ -29,10 +31,16 @@ metadata = main_module._metadata
 synopsis, long_description = pydoc.splitdoc(
         pydoc.getdoc(main_module))
 
+setup_dir = os.path.dirname(__file__)
+version_string_filename = "VERSION"
+version_string_file = open(
+        os.path.join(setup_dir, version_string_filename), 'r')
+version_string = version_string_file.read().strip()
+
 
 setup(
         name=distribution_name,
-        version=metadata.version,
+        version=version_string,
         packages=find_packages(exclude=["test"]),
 
         # Setuptools metadata.
