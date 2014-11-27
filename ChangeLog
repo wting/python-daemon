@@ -1,3 +1,58 @@
+2014-08-05  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Update package homepage to Alioth hosted project page.
+
+2014-08-04  Ben Finney  <ben+python@benfinney.id.au>
+
+    Version 1.6.1 released.
+
+2014-08-01  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Use unambiguous “except FooType as foo” syntax.
+      This is to ease the port to Python 3, where the ambiguous comma
+      usage is an error.
+    * Ensure a ‘basestring’ name bound to the base type for strings.
+      This is to allow checks to work on Python 2 and 3.
+    * Specify versions of Python supported, as trove classifiers.
+
+2014-05-20  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Update copyright notices.
+    * Add editor hints for most files.
+    * Distinguish continuation-line indentation versus block indentation.
+
+2012-05-30  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Use unicode literals by default, specifying bytes where necessary.
+      This is to ease the port to Python 3, where the string type is
+      unicode.
+    * Update copyright notices.
+    * Update the GPL license file to version 3, as declared in our
+      copyright notices.
+
+2011-07-02  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Change license of library code to Apache License 2.0. Rationale at
+      <URL:http://wiki.python.org/moin/PythonSoftwareFoundationLicenseFaq#Contributing_Code_to_Python>.
+
+2010-05-10  Ben Finney  <ben+python@benfinney.id.au>
+
+    Version 1.6 released.
+
+    * Use absolute imports to disambiguate provenance of names.
+    * setup.py: Require ‘lockfile >=0.9’.
+    * daemon/pidfile.py: Renamed from ‘daemon/pidlockfile.py’. Change
+      references elsewhere to use this new name.
+    * test/test_pidfile.py: Renamed from ‘test/test_pidlockfile.py’.
+      Change references elsewhere to use this new name.
+    * daemon/pidfile.py: Remove functionality now migrated to ‘lockfile’
+      library.
+
+2010-03-09  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Use ‘unicode’ data type for all text values.
+    * Prepare for Python 3 upgrade by tweaking some names and imports.
+
 2010-03-03  Ben Finney  <ben+python@benfinney.id.au>
 
     * MANIFEST.in: Include the documentation in the distribution.
@@ -183,9 +238,15 @@
     * Begin unit test suite.
 
 
+This is free software: you may copy, modify, and/or distribute this work
+under the terms of the Apache License version 2.0 as published by the
+Apache Software Foundation.
+No warranty expressed or implied. See the file LICENSE.ASF-2 for details.
+
 Local variables:
 mode: change-log
 coding: utf-8
 left-margin: 4
 indent-tabs-mode: nil
 End:
+vim: fileencoding=utf-8 filetype=changelog :
