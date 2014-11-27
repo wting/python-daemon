@@ -89,10 +89,14 @@ update_version_info_module_if_needed(version_info_module_path)
 
 package_module = __import__(package_name, fromlist=[b'_metadata'])
 metadata = package_module._metadata
-version = metadata.version
 
 
-export_dir_name = "%(dist_name)s-%(version)s" % vars()
+version_string_filename = "VERSION"
+version_string_file = open(
+        os.path.join(workingtree.basedir, version_string_filename), 'r')
+version_string = version_string_file.read().strip()
+
+export_dir_name = "%(dist_name)s-%(version_string)s" % vars()
 export_root_dir = tempfile.mkdtemp()
 export_dir_path = os.path.join(export_root_dir, export_dir_name)
 bzrlib.export.export(revision_tree, export_dir_path, format="dir")
