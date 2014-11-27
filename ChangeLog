@@ -5,6 +5,7 @@
       docstring is a proper Unicode text value.
     * Move package metadata to ‘daemon/_metadata.py’.
     * Move version string to a plain-text data file, ‘VERSION’.
+    * Get version string at run-time from installed distribution.
 
 2014-08-05  Ben Finney  <ben+python@benfinney.id.au>
 
