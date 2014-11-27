@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# daemon/version/__init__.py
+# daemon/_metadata.py
 # Part of ‘python-daemon’, an implementation of PEP 3143.
 #
 # Copyright © 2008–2014 Ben Finney <ben+python@benfinney.id.au>
@@ -10,17 +10,24 @@
 # Apache Software Foundation.
 # No warranty expressed or implied. See the file LICENSE.ASF-2 for details.
 
-""" Version information for the ‘python-daemon’ distribution. """
+""" Package metadata for the ‘python-daemon’ distribution. """
 
 from __future__ import (absolute_import, unicode_literals)
 
-from .version_info import version_info
+import pkg_resources
 
-version_info['version_string'] = "1.6.2"
+from ._version_info import version_info
 
-version_short = "%(version_string)s" % version_info
-version_full = "%(version_string)s.r%(revno)s" % version_info
-version = version_short
+
+distribution_name = "python-daemon"
+try:
+    distribution = pkg_resources.get_distribution(distribution_name)
+except pkg_resources.DistributionNotFound:
+    distribution = None
+
+version_installed = None
+if distribution is not None:
+    version_installed = distribution.version
 
 author_name = "Ben Finney"
 author_email = "ben+python@benfinney.id.au"
@@ -37,6 +44,7 @@ copyright = (
         "Copyright © %(copyright_year_range)s %(author)s and others"
         ) % vars()
 license = "Apache-2"
+url = "https://alioth.debian.org/projects/python-daemon/"
 
 
 # Local variables:
