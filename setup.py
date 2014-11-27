@@ -16,73 +16,18 @@
 
 from __future__ import unicode_literals
 
-import textwrap
+import pydoc
+
 from setuptools import setup, find_packages
 
+
 distribution_name = "python-daemon"
 main_module_name = 'daemon'
 main_module = __import__(main_module_name, fromlist=[b'_metadata'])
 metadata = main_module._metadata
 
-
-def get_descriptions_from_docstring(docstring):
-    """ Get package description text from a docstring.
-
-        :param docstring: A docstring formatted conformant with PEP 257.
-        :return: A two-item tuple of (`synopsis`, `long_description`). If
-            the docstring contains only a single line, `long_description`
-            will be ``None``.
-
-        Important implications of PEP 257 convention:
-
-        * The docstring either has only a synopsis (a single line of text),
-          or a synopsis and a long description.
-
-        * The synopsis is the first line (only) of the docstring. It may be
-          preceded by a blank line if the docstring has a synopsis and long
-          description.
-
-        * Leading and trailing whitespace is not part of the synopsis nor
-          long description.
-
-        * If the docstring has a long description:
-
-          * The second line of the docstring is blank, separating the
-            synopsis from the long description.
-
-          * The long description starts after the blank separator line, and
-            extends to the end of the docstring.
-
-          * Common leading whitespace on all the long description lines is
-            removed.
-
-        """
-    synopsis = None
-    long_description = None
-
-    lines = docstring.expandtabs().strip().splitlines()
-    if len(lines) < 2:
-        synopsis = lines[0].strip()
-    else:
-        if lines[1].strip():
-            raise ValueError(
-                    "PEP 257 multi-line docstrings must have second line blank")
-        synopsis = lines[0].strip()
-        long_description = textwrap.dedent("\n".join(lines[2:]))
-
-    return (synopsis, long_description)
-
-
-description_translate_map = {
-    "‘": "'", "’": "'",
-    "“": '"', "”": '"',
-    }
-
-synopsis, long_description = get_descriptions_from_docstring(
-        main_module.__doc__)
-short_description, long_description = ((
-        synopsis.translate(description_translate_map),
-        long_description.translate(description_translate_map)))
+synopsis, long_description = pydoc.splitdoc(
+        pydoc.getdoc(main_module))
 
 
 setup(
@@ -104,7 +49,7 @@ setup(
         # PyPI metadata.
         author=metadata.author_name,
         author_email=metadata.author_email,
-        description=short_description,
+        description=synopsis,
         license=metadata.license,
         keywords="daemon fork unix".split(),
         url=metadata.url,

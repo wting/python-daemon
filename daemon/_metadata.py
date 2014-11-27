@@ -16,7 +16,7 @@ from __future__ import (absolute_import, unicode_literals)
 
 from ._version_info import version_info
 
-version_info['version_string'] = "1.6.1"
+version_info['version_string'] = "1.6.2"
 
 version_short = "%(version_string)s" % version_info
 version_full = "%(version_string)s.r%(revno)s" % version_info

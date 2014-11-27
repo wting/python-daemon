@@ -1,5 +1,8 @@
 2014-11-27  Ben Finney  <ben+python@benfinney.id.au>
 
+    * Use ‘pydoc.splitdoc’ to get package description text.
+    * Remove ASCII translation of package description, not needed now the
+      docstring is a proper Unicode text value.
     * Move package metadata to ‘daemon/_metadata.py’.
 
 2014-08-05  Ben Finney  <ben+python@benfinney.id.au>
