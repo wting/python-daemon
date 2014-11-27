@@ -73,16 +73,8 @@ def get_descriptions_from_docstring(docstring):
     return (synopsis, long_description)
 
 
-description_translate_map = {
-    "‘": "'", "’": "'",
-    "“": '"', "”": '"',
-    }
-
 synopsis, long_description = get_descriptions_from_docstring(
         main_module.__doc__)
-short_description, long_description = ((
-        synopsis.translate(description_translate_map),
-        long_description.translate(description_translate_map)))
 
 
 setup(
@@ -104,7 +96,7 @@ setup(
         # PyPI metadata.
         author=version.author_name,
         author_email=version.author_email,
-        description=short_description,
+        description=synopsis,
         license=version.license,
         keywords="daemon fork unix".split(),
         url=main_module._url,
