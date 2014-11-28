@@ -43,6 +43,12 @@ class FakeFileDescriptorStringIO(StringIO, object):
     def fileno(self):
         return self._fileno
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
 
 def make_pidlockfile_scenarios():
     """ Make a collection of scenarios for testing PIDLockFile instances. """
