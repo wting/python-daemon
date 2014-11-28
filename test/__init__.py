@@ -1,19 +1,28 @@
 # -*- coding: utf-8 -*-
 #
 # test/__init__.py
-# Part of python-daemon, an implementation of PEP 3143.
+# Part of ‘python-daemon’, an implementation of PEP 3143.
 #
-# Copyright © 2008–2010 Ben Finney <ben+python@benfinney.id.au>
+# Copyright © 2008–2014 Ben Finney <ben+python@benfinney.id.au>
 #
 # This is free software: you may copy, modify, and/or distribute this work
-# under the terms of the Python Software Foundation License, version 2 or
-# later as published by the Python Software Foundation.
-# No warranty expressed or implied. See the file ‘LICENSE.PSF-2’ for details.
+# under the terms of the Apache License, version 2.0 as published by the
+# Apache Software Foundation.
+# No warranty expressed or implied. See the file ‘LICENSE.ASF-2’ for details.
 
-""" Unit test suite for daemon package.
+""" Unit test suite for ‘daemon’ package.
     """
+
+from __future__ import unicode_literals
 
 import scaffold
 
 
-suite = scaffold.make_unittest_suite()
+suite = scaffold.make_suite()
+
+
+# Local variables:
+# coding: utf-8
+# mode: python
+# End:
+# vim: fileencoding=utf-8 filetype=python :

@@ -1,30 +1,33 @@
 # -*- coding: utf-8 -*-
 
 # daemon/runner.py
-# Part of python-daemon, an implementation of PEP 3143.
+# Part of ‘python-daemon’, an implementation of PEP 3143.
 #
-# Copyright © 2009–2010 Ben Finney <ben+python@benfinney.id.au>
+# Copyright © 2009–2014 Ben Finney <ben+python@benfinney.id.au>
 # Copyright © 2007–2008 Robert Niederreiter, Jens Klein
 # Copyright © 2003 Clark Evans
 # Copyright © 2002 Noah Spurrier
 # Copyright © 2001 Jürgen Hermann
 #
 # This is free software: you may copy, modify, and/or distribute this work
-# under the terms of the Python Software Foundation License, version 2 or
-# later as published by the Python Software Foundation.
-# No warranty expressed or implied. See the file ‘LICENSE.PSF-2’ for details.
+# under the terms of the Apache License, version 2.0 as published by the
+# Apache Software Foundation.
+# No warranty expressed or implied. See the file ‘LICENSE.ASF-2’ for details.
 
 """ Daemon runner library.
     """
+
+from __future__ import (absolute_import, unicode_literals)
 
 import sys
 import os
 import signal
 import errno
 
-import pidlockfile
+import lockfile
 
-from daemon import DaemonContext
+from . import pidfile
+from .daemon import DaemonContext
 
 
 class DaemonRunnerError(Exception):
@@ -79,12 +82,12 @@ class DaemonRunner(object):
         self.daemon_context.stdin = open(app.stdin_path, 'r')
         self.daemon_context.stdout = open(app.stdout_path, 'w+')
         self.daemon_context.stderr = open(
-            app.stderr_path, 'w+', buffering=0)
+                app.stderr_path, 'w+', buffering=0)
 
         self.pidfile = None
         if app.pidfile_path is not None:
             self.pidfile = make_pidlockfile(
-                app.pidfile_path, app.pidfile_timeout)
+                    app.pidfile_path, app.pidfile_timeout)
         self.daemon_context.pidfile = self.pidfile
 
     def _usage_exit(self, argv):
@@ -107,7 +110,7 @@ class DaemonRunner(object):
         if len(argv) < min_args:
             self._usage_exit(argv)
 
-        self.action = argv[1]
+        self.action = unicode(argv[1])
         if self.action not in self.action_funcs:
             self._usage_exit(argv)
 
@@ -119,10 +122,10 @@ class DaemonRunner(object):
 
         try:
             self.daemon_context.open()
-        except pidlockfile.AlreadyLocked:
+        except lockfile.AlreadyLocked:
             pidfile_path = self.pidfile.path
             raise DaemonRunnerStartFailureError(
-                "PID file %(pidfile_path)r already locked" % vars())
+                    "PID file %(pidfile_path)r already locked" % vars())
 
         pid = os.getpid()
         message = self.start_message % vars()
@@ -136,9 +139,9 @@ class DaemonRunner(object):
         pid = self.pidfile.read_pid()
         try:
             os.kill(pid, signal.SIGTERM)
-        except OSError, exc:
+        except OSError as exc:
             raise DaemonRunnerStopFailureError(
-                "Failed to terminate %(pid)d: %(exc)s" % vars())
+                    "Failed to terminate %(pid)d: %(exc)s" % vars())
 
     def _stop(self):
         """ Exit the daemon process specified in the current PID file.
@@ -146,7 +149,7 @@ class DaemonRunner(object):
         if not self.pidfile.is_locked():
             pidfile_path = self.pidfile.path
             raise DaemonRunnerStopFailureError(
-                "PID file %(pidfile_path)r not locked" % vars())
+                    "PID file %(pidfile_path)r not locked" % vars())
 
         if is_pidfile_stale(self.pidfile):
             self.pidfile.break_lock()
@@ -160,10 +163,10 @@ class DaemonRunner(object):
         self._start()
 
     action_funcs = {
-        'start': _start,
-        'stop': _stop,
-        'restart': _restart,
-        }
+            'start': _start,
+            'stop': _stop,
+            'restart': _restart,
+            }
 
     def _get_action_func(self):
         """ Return the function for the specified action.
@@ -176,7 +179,7 @@ class DaemonRunner(object):
             func = self.action_funcs[self.action]
         except KeyError:
             raise DaemonRunnerInvalidActionError(
-                "Unknown action: %(action)r" % vars(self))
+                    "Unknown action: %(action)r" % vars(self))
         return func
 
     def do_action(self):
@@ -202,7 +205,7 @@ def make_pidlockfile(path, acquire_timeout):
     if not os.path.isabs(path):
         error = ValueError("Not an absolute path: %(path)r" % vars())
         raise error
-    lockfile = pidlockfile.TimeoutPIDLockFile(path, acquire_timeout)
+    lockfile = pidfile.TimeoutPIDLockFile(path, acquire_timeout)
 
     return lockfile
 
@@ -221,9 +224,16 @@ def is_pidfile_stale(pidfile):
     if pidfile_pid is not None:
         try:
             os.kill(pidfile_pid, signal.SIG_DFL)
-        except OSError, exc:
+        except OSError as exc:
             if exc.errno == errno.ESRCH:
                 # The specified PID does not exist
                 result = True
 
     return result
+
+
+# Local variables:
+# coding: utf-8
+# mode: python
+# End:
+# vim: fileencoding=utf-8 filetype=python :

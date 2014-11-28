@@ -1,3 +1,99 @@
+2014-11-27  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Use ‘pydoc.splitdoc’ to get package description text.
+    * Remove ASCII translation of package description, not needed now the
+      docstring is a proper Unicode text value.
+    * Move package metadata to ‘daemon/_metadata.py’.
+    * Move version string to a plain-text data file, ‘VERSION’.
+    * Get version string at run-time from installed distribution.
+    * Add unit tests for metadata.
+
+2014-08-05  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Update package homepage to Alioth hosted project page.
+
+2014-08-04  Ben Finney  <ben+python@benfinney.id.au>
+
+    Version 1.6.1 released.
+
+2014-08-01  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Use unambiguous “except FooType as foo” syntax.
+      This is to ease the port to Python 3, where the ambiguous comma
+      usage is an error.
+    * Ensure a ‘basestring’ name bound to the base type for strings.
+      This is to allow checks to work on Python 2 and 3.
+    * Specify versions of Python supported, as trove classifiers.
+
+2014-05-20  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Update copyright notices.
+    * Add editor hints for most files.
+    * Distinguish continuation-line indentation versus block indentation.
+
+2012-05-30  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Use unicode literals by default, specifying bytes where necessary.
+      This is to ease the port to Python 3, where the string type is
+      unicode.
+    * Update copyright notices.
+    * Update the GPL license file to version 3, as declared in our
+      copyright notices.
+
+2011-07-02  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Change license of library code to Apache License 2.0. Rationale at
+      <URL:http://wiki.python.org/moin/PythonSoftwareFoundationLicenseFaq#Contributing_Code_to_Python>.
+
+2010-05-10  Ben Finney  <ben+python@benfinney.id.au>
+
+    Version 1.6 released.
+
+    * Use absolute imports to disambiguate provenance of names.
+    * setup.py: Require ‘lockfile >=0.9’.
+    * daemon/pidfile.py: Renamed from ‘daemon/pidlockfile.py’. Change
+      references elsewhere to use this new name.
+    * test/test_pidfile.py: Renamed from ‘test/test_pidlockfile.py’.
+      Change references elsewhere to use this new name.
+    * daemon/pidfile.py: Remove functionality now migrated to ‘lockfile’
+      library.
+
+2010-03-09  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Use ‘unicode’ data type for all text values.
+    * Prepare for Python 3 upgrade by tweaking some names and imports.
+
+2010-03-03  Ben Finney  <ben+python@benfinney.id.au>
+
+    * MANIFEST.in: Include the documentation in the distribution.
+
+2010-03-02  Ben Finney  <ben+python@benfinney.id.au>
+
+    Version 1.5.5 released.
+
+    * Stop using ‘pkg_resources’ and revert to pre-1.5.3 version-string
+      handling, until a better way that doesn't break everyone else's
+      installation can be found.
+
+2010-02-27  Ben Finney  <ben+python@benfinney.id.au>
+
+    Version 1.5.4 released.
+
+    * MANIFEST.in: Explicitly include version data file, otherwise
+      everything breaks for users of the sdist.
+
+2010-02-26  Ben Finney  <ben+python@benfinney.id.au>
+
+    Version 1.5.3 released.
+
+    * daemon/daemon.py: Invoke the pidfile context manager's ‘__exit__’
+      method with the correct arguments (as per
+      <URL:http://docs.python.org/library/stdtypes.html#typecontextmanager>).
+      Thanks to Ludvig Ericson for the bug report.
+    * version: New plain-text data file to store project version string.
+    * setup.py: Read version string from data file.
+    * daemon/version/__init__.py: Query version string with ‘pkg_resources’.
+
 2010-01-20  Ben Finney  <ben+python@benfinney.id.au>
 
     * Add ‘pylint’ configuration for this project.
@@ -152,9 +248,15 @@
     * Begin unit test suite.
 
 
+This is free software: you may copy, modify, and/or distribute this work
+under the terms of the Apache License version 2.0 as published by the
+Apache Software Foundation.
+No warranty expressed or implied. See the file ‘LICENSE.ASF-2’ for details.
+
 Local variables:
 mode: change-log
 coding: utf-8
 left-margin: 4
 indent-tabs-mode: nil
 End:
+vim: fileencoding=utf-8 filetype=changelog :

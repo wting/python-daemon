@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 
 # test/scaffold.py
-# Part of python-daemon, an implementation of PEP 3143.
+# Part of ‘python-daemon’, an implementation of PEP 3143.
 #
-# Copyright © 2007–2010 Ben Finney <ben+python@benfinney.id.au>
+# Copyright © 2007–2014 Ben Finney <ben+python@benfinney.id.au>
 #
-# This is free software; you may copy, modify and/or distribute this work
-# under the terms of the GNU General Public License, version 2 or later.
-# No warranty expressed or implied. See the file ‘LICENSE.GPL-2’ for details.
+# This is free software: you may copy, modify, and/or distribute this work
+# under the terms of the Apache License, version 2.0 as published by the
+# Apache Software Foundation.
+# No warranty expressed or implied. See the file ‘LICENSE.ASF-2’ for details.
 
 """ Scaffolding for unit test modules.
     """
+
+from __future__ import unicode_literals
 
 import unittest
 from unittest import (
@@ -27,14 +30,21 @@ import imp
 import operator
 import textwrap
 from copy import deepcopy
+try:
+    # Python 2.6 or greater?
+    from functools import reduce
+except ImportError:
+    # Not available, so try the builtin function.
+    assert reduce
 
-from minimock import (
-    Mock,
-    TraceTracker as MockTracker,
-    mock,
-    restore as mock_restore,
-    )
 import testscenarios
+import testtools.testcase
+from minimock import (
+        Mock,
+        TraceTracker as MockTracker,
+        mock,
+        restore as mock_restore,
+        )
 
 
 test_dir = os.path.dirname(os.path.abspath(__file__))
@@ -48,37 +58,28 @@ if not parent_dir in sys.path:
 logging.disable(logging.CRITICAL)
 
 
-PYTHON_SOURCE_SUFFIX = [
-    suffix for (suffix, dummy, mod_type) in imp.get_suffixes()
-        if mod_type is imp.PY_SOURCE
-    ][0]
-
-UNITTEST_MODULE_GLOB = "test_*" + PYTHON_SOURCE_SUFFIX
-
-
-def get_modules(dir_paths, filename_glob):
-    """ Return a list of modules under `dir_paths` matching `filename_glob`. """
-    modules = []
-
-    for (importer, name, is_package) in pkgutil.walk_packages(dir_paths):
-        loader = importer.find_module(name)
-        file_path = loader.get_filename(name)
-        if fnmatch.fnmatch(os.path.basename(file_path), filename_glob):
-            modules.append(loader.load_module(name))
-
-    return modules
+def get_python_module_names(file_list, file_suffix='.py'):
+    """ Return a list of module names from a filename list. """
+    module_names = [
+            m[:m.rfind(file_suffix)] for m in file_list
+            if m.endswith(file_suffix)]
+    return module_names
 
 
-def make_unittest_suite(path=test_dir):
-    """ Return a unit test suite of test cases from modules in `path`. """
-    suite = TestSuite()
+def get_test_module_names(module_list, module_prefix='test_'):
+    """ Return the list of module names that qualify as test modules. """
+    module_names = [
+            m for m in module_list
+            if m.startswith(module_prefix)]
+    return module_names
 
-    dir_paths = [path]
-    test_modules = get_modules(dir_paths, UNITTEST_MODULE_GLOB)
 
-    loader = TestLoader()
-    for module in test_modules:
-        suite.addTests(loader.loadTestsFromModule(module))
+def make_suite(path=test_dir):
+    """ Create the test suite for the given path. """
+    loader = unittest.TestLoader()
+    python_module_names = get_python_module_names(os.listdir(path))
+    test_module_names = get_test_module_names(python_module_names)
+    suite = loader.loadTestsFromNames(test_module_names)
 
     return suite
 
@@ -96,11 +97,11 @@ def get_function_signature(func):
         arg_defaults[name] = value
 
     signature = {
-        'name': func.__name__,
-        'arg_count': arg_count,
-        'arg_names': arg_names,
-        'arg_defaults': arg_defaults,
-        }
+            'name': func.__name__,
+            'arg_count': arg_count,
+            'arg_names': arg_names,
+            'arg_defaults': arg_defaults,
+            }
 
     non_pos_names = list(func.func_code.co_varnames[arg_count:])
     COLLECTS_ARBITRARY_POSITIONAL_ARGS = 0x04
@@ -133,12 +134,12 @@ def format_function_signature(func):
 
     func_name = signature['name']
     signature_text = (
-        "%(func_name)s(%(signature_args_text)s)" % vars())
+            "%(func_name)s(%(signature_args_text)s)" % vars())
 
     return signature_text
 
 
-class TestCase(testscenarios.TestWithScenarios):
+class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
     """ Test case behaviour. """
 
     def failUnlessRaises(self, exc_class, func, *args, **kwargs):
@@ -151,14 +152,14 @@ class TestCase(testscenarios.TestWithScenarios):
             """
         try:
             super(TestCase, self).failUnlessRaises(
-                exc_class, func, *args, **kwargs)
+                    exc_class, func, *args, **kwargs)
         except self.failureException:
             exc_class_name = exc_class.__name__
             msg = (
-                "Exception %(exc_class_name)s not raised"
-                " for function call:"
-                " func=%(func)r args=%(args)r kwargs=%(kwargs)r"
-                ) % vars()
+                    "Exception %(exc_class_name)s not raised"
+                    " for function call:"
+                    " func=%(func)r args=%(args)r kwargs=%(kwargs)r"
+                    ) % vars()
             raise self.failureException(msg)
 
     def failIfIs(self, first, second, msg=None):
@@ -230,16 +231,16 @@ class TestCase(testscenarios.TestWithScenarios):
         example = doctest.Example(source, want)
         got = textwrap.dedent(got)
         checker_optionflags = reduce(operator.or_, [
-            doctest.ELLIPSIS,
-            ])
+                doctest.ELLIPSIS,
+                ])
         if not checker.check_output(want, got, checker_optionflags):
             if msg is None:
                 diff = checker.output_difference(
-                    example, got, checker_optionflags)
+                        example, got, checker_optionflags)
                 msg = "\n".join([
-                    "Output received did not match expected output",
-                    "%(diff)s",
-                    ]) % vars()
+                        "Output received did not match expected output",
+                        "%(diff)s",
+                        ]) % vars()
             raise self.failureException(msg)
 
     assertOutputCheckerMatch = failUnlessOutputCheckerMatch
@@ -259,9 +260,9 @@ class TestCase(testscenarios.TestWithScenarios):
             if msg is None:
                 diff = tracker.diff(want)
                 msg = "\n".join([
-                    "Output received did not match expected output",
-                    "%(diff)s",
-                    ]) % vars()
+                        "Output received did not match expected output",
+                        "%(diff)s",
+                        ]) % vars()
             raise self.failureException(msg)
 
     def failIfMockCheckerMatch(self, want, tracker=None, msg=None):
@@ -279,9 +280,9 @@ class TestCase(testscenarios.TestWithScenarios):
             if msg is None:
                 diff = tracker.diff(want)
                 msg = "\n".join([
-                    "Output received matched specified undesired output",
-                    "%(diff)s",
-                    ]) % vars()
+                        "Output received matched specified undesired output",
+                        "%(diff)s",
+                        ]) % vars()
             raise self.failureException(msg)
 
     assertMockCheckerMatch = failUnlessMockCheckerMatch
@@ -297,8 +298,8 @@ class TestCase(testscenarios.TestWithScenarios):
         if isinstance(obj, classes):
             if msg is None:
                 msg = (
-                    "%(obj)r is an instance of one of %(classes)r"
-                    ) % vars()
+                        "%(obj)r is an instance of one of %(classes)r"
+                        ) % vars()
             raise self.failureException(msg)
 
     def failUnlessIsInstance(self, obj, classes, msg=None):
@@ -311,8 +312,8 @@ class TestCase(testscenarios.TestWithScenarios):
         if not isinstance(obj, classes):
             if msg is None:
                 msg = (
-                    "%(obj)r is not an instance of any of %(classes)r"
-                    ) % vars()
+                        "%(obj)r is not an instance of any of %(classes)r"
+                        ) % vars()
             raise self.failureException(msg)
 
     assertIsInstance = failUnlessIsInstance
@@ -337,9 +338,9 @@ class TestCase(testscenarios.TestWithScenarios):
         if not func_in_traceback:
             if msg is None:
                 msg = (
-                    "Traceback did not lead to original function"
-                    " %(function)s"
-                    ) % vars()
+                        "Traceback did not lead to original function"
+                        " %(function)s"
+                        ) % vars()
             raise self.failureException(msg)
 
     assertFunctionInTraceback = failUnlessFunctionInTraceback
@@ -374,13 +375,13 @@ class TestCase(testscenarios.TestWithScenarios):
                 first_signature_text = format_function_signature(first)
                 second_signature_text = format_function_signature(second)
                 msg = (textwrap.dedent("""\
-                    Function signatures do not match:
-                        %(first_signature)r != %(second_signature)r
-                    Expected:
-                        %(first_signature_text)s
-                    Got:
-                        %(second_signature_text)s""")
-                    ) % vars()
+                        Function signatures do not match:
+                            %(first_signature)r != %(second_signature)r
+                        Expected:
+                            %(first_signature_text)s
+                        Got:
+                            %(second_signature_text)s""")
+                        ) % vars()
             raise self.failureException(msg)
 
     assertFunctionSignatureMatch = failUnlessFunctionSignatureMatch
@@ -458,3 +459,10 @@ def apply_scenario((name, parameters), test):
 
 testscenarios.scenarios.apply_scenario = apply_scenario
 testscenarios.apply_scenario = apply_scenario
+
+
+# Local variables:
+# coding: utf-8
+# mode: python
+# End:
+# vim: fileencoding=utf-8 filetype=python :

@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 
 # daemon/__init__.py
-# Part of python-daemon, an implementation of PEP 3143.
+# Part of ‘python-daemon’, an implementation of PEP 3143.
 #
-# Copyright © 2009–2010 Ben Finney <ben+python@benfinney.id.au>
+# Copyright © 2009–2014 Ben Finney <ben+python@benfinney.id.au>
 # Copyright © 2006 Robert Niederreiter
 #
 # This is free software: you may copy, modify, and/or distribute this work
-# under the terms of the Python Software Foundation License, version 2 or
-# later as published by the Python Software Foundation.
-# No warranty expressed or implied. See the file ‘LICENSE.PSF-2’ for details.
+# under the terms of the Apache License, version 2.0 as published by the
+# Apache Software Foundation.
+# No warranty expressed or implied. See the file ‘LICENSE.ASF-2’ for details.
 
 """ Library to implement a well-behaved Unix daemon process.
 
     This library implements the well-behaved daemon specification of
-    :pep:`3143`, "Standard daemon process library".
+    :pep:`3143`, “Standard daemon process library”.
 
     A well-behaved Unix daemon process is tricky to get right, but the
     required steps are much the same for every daemon program. A
@@ -37,11 +37,13 @@
 
     """
 
-import version
-from daemon import DaemonContext
+from __future__ import (absolute_import, unicode_literals)
+
+from .daemon import DaemonContext
 
 
-_version = version.version
-_copyright = version.copyright
-_license = version.license
-_url = "http://pypi.python.org/pypi/python-daemon/"
+# Local variables:
+# coding: utf-8
+# mode: python
+# End:
+# vim: fileencoding=utf-8 filetype=python :
