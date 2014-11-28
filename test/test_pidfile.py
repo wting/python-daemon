@@ -324,6 +324,8 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(TimeoutPIDLockFile_TestCase, self).setUp()
+
         self.mock_tracker = scaffold.MockTracker()
 
         pidlockfile_scenarios = make_pidlockfile_scenarios()
@@ -352,6 +354,8 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(TimeoutPIDLockFile_TestCase, self).tearDown()
 
     def test_inherits_from_pidlockfile(self):
         """ Should inherit from PIDLockFile. """
