@@ -49,6 +49,7 @@ setup(
         tests_require=[
             "testtools",
             "testscenarios",
+            "mock >=1.0",
             "MiniMock >=1.2.2",
             ],
         install_requires=[

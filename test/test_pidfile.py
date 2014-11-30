@@ -15,13 +15,13 @@
 
 from __future__ import unicode_literals
 
-import __builtin__ as builtins
 import os
 from StringIO import StringIO
 import itertools
 import tempfile
 import errno
 
+import mock
 import lockfile
 from lockfile import pidlockfile
 
@@ -149,10 +149,10 @@ def setup_pidfile_fixtures(testcase):
             pass
         return value
 
-    scaffold.mock(
+    getpid_patcher = mock.patch(
             "os.getpid",
-            returns=scenarios['simple']['pid'],
-            tracker=testcase.mock_tracker)
+            return_value=scenarios['simple']['pid'])
+    getpid_patcher.start()
 
     def make_mock_open_funcs(testcase):
 
@@ -214,10 +214,10 @@ def setup_pidfile_fixtures(testcase):
             result = FakeFileDescriptorStringIO()
         return result
 
-    scaffold.mock(
-            "builtins.open",
-            returns_func=mock_open,
-            tracker=testcase.mock_tracker)
+    open_patcher = mock.patch(
+            "__builtin__.open",
+            new=mock_open)
+    open_patcher.start()
 
     def mock_os_open(filename, flags, mode=None):
         scenario_path = get_scenario_option(testcase, 'pidfile_path')
@@ -229,10 +229,10 @@ def setup_pidfile_fixtures(testcase):
             result = FakeFileDescriptorStringIO().fileno()
         return result
 
-    scaffold.mock(
+    os_open_patcher = mock.patch(
             "os.open",
-            returns_func=mock_os_open,
-            tracker=testcase.mock_tracker)
+            new=mock_os_open)
+    os_open_patcher.start()
 
     def mock_os_fdopen(fd, mode='r', buffering=None):
         scenario_pidfile = get_scenario_option(
@@ -243,10 +243,10 @@ def setup_pidfile_fixtures(testcase):
             raise OSError(errno.EBADF, "Bad file descriptor")
         return result
 
-    scaffold.mock(
+    os_fdopen_patcher = mock.patch(
             "os.fdopen",
-            returns_func=mock_os_fdopen,
-            tracker=testcase.mock_tracker)
+            new=mock_os_fdopen)
+    os_fdopen_patcher.start()
 
     testcase.scenario = NotImplemented
 
