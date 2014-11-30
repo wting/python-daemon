@@ -47,6 +47,8 @@ setup(
         zip_safe=False,
         test_suite="test.suite",
         tests_require=[
+            "testtools",
+            "testscenarios",
             "MiniMock >=1.2.2",
             ],
         install_requires=[
