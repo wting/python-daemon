@@ -129,7 +129,7 @@ def setup_runner_fixtures(testcase):
 
     simple_scenario = testcase.runner_scenarios['simple']
 
-    testcase.lockfile_class_name = "pidfile.TimeoutPIDLockFile"
+    testcase.lockfile_class_name = "daemon.pidfile.TimeoutPIDLockFile"
 
     testcase.mock_runner_lock = scaffold.Mock(
             testcase.lockfile_class_name,

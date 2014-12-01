@@ -281,17 +281,10 @@ def setup_lockfile_method_mocks(testcase, scenario, class_name):
             ]:
         mock_func = vars()["mock_%(func_name)s" % vars()]
         lockfile_func_name = "%(class_name)s.%(func_name)s" % vars()
-        mock_lockfile_func = scaffold.Mock(
-                lockfile_func_name,
-                returns_func=mock_func,
-                tracker=testcase.mock_tracker)
-        try:
-            scaffold.mock(
-                    lockfile_func_name,
-                    mock_obj=mock_lockfile_func,
-                    tracker=testcase.mock_tracker)
-        except NameError:
-            pass
+        lockfile_func_patcher = mock.patch(
+                lockfile_func_name, autospec=True,
+                side_effect=mock_func)
+        lockfile_func_patcher.start()
 
 
 def setup_pidlockfile_fixtures(testcase, scenario_name=None):
