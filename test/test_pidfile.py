@@ -52,16 +52,16 @@ class FakeFileDescriptorStringIO(StringIO, object):
 def make_pidlockfile_scenarios():
     """ Make a collection of scenarios for testing PIDLockFile instances. """
 
-    mock_current_pid = 235
-    mock_other_pid = 8642
-    mock_pidfile_path = tempfile.mktemp()
+    fake_current_pid = 235
+    fake_other_pid = 8642
+    fake_pidfile_path = tempfile.mktemp()
 
-    mock_pidfile_empty = FakeFileDescriptorStringIO()
-    mock_pidfile_current_pid = FakeFileDescriptorStringIO(
-            "%(mock_current_pid)d\n" % vars())
-    mock_pidfile_other_pid = FakeFileDescriptorStringIO(
-            "%(mock_other_pid)d\n" % vars())
-    mock_pidfile_bogus = FakeFileDescriptorStringIO(
+    fake_pidfile_empty = FakeFileDescriptorStringIO()
+    fake_pidfile_current_pid = FakeFileDescriptorStringIO(
+            "%(fake_current_pid)d\n" % vars())
+    fake_pidfile_other_pid = FakeFileDescriptorStringIO(
+            "%(fake_other_pid)d\n" % vars())
+    fake_pidfile_bogus = FakeFileDescriptorStringIO(
             "b0gUs")
 
     scenarios = {
@@ -83,39 +83,39 @@ def make_pidlockfile_scenarios():
                 'os_open_func_name': 'mock_os_open_read_denied',
                 },
             'exist-locked-read-denied': {
-                'locking_pid': mock_other_pid,
+                'locking_pid': fake_other_pid,
                 'open_func_name': 'mock_open_read_denied',
                 'os_open_func_name': 'mock_os_open_read_denied',
                 },
             'exist-empty': {},
             'exist-invalid': {
-                'pidfile': mock_pidfile_bogus,
+                'pidfile': fake_pidfile_bogus,
                 },
             'exist-current-pid': {
-                'pidfile': mock_pidfile_current_pid,
-                'pidfile_pid': mock_current_pid,
+                'pidfile': fake_pidfile_current_pid,
+                'pidfile_pid': fake_current_pid,
                 },
             'exist-current-pid-locked': {
-                'pidfile': mock_pidfile_current_pid,
-                'pidfile_pid': mock_current_pid,
-                'locking_pid': mock_current_pid,
+                'pidfile': fake_pidfile_current_pid,
+                'pidfile_pid': fake_current_pid,
+                'locking_pid': fake_current_pid,
                 },
             'exist-other-pid': {
-                'pidfile': mock_pidfile_other_pid,
-                'pidfile_pid': mock_other_pid,
+                'pidfile': fake_pidfile_other_pid,
+                'pidfile_pid': fake_other_pid,
                 },
             'exist-other-pid-locked': {
-                'pidfile': mock_pidfile_other_pid,
-                'pidfile_pid': mock_other_pid,
-                'locking_pid': mock_other_pid,
+                'pidfile': fake_pidfile_other_pid,
+                'pidfile_pid': fake_other_pid,
+                'locking_pid': fake_other_pid,
                 },
             }
 
     for scenario in scenarios.values():
-        scenario['pid'] = mock_current_pid
-        scenario['pidfile_path'] = mock_pidfile_path
+        scenario['pid'] = fake_current_pid
+        scenario['pidfile_path'] = fake_pidfile_path
         if 'pidfile' not in scenario:
-            scenario['pidfile'] = mock_pidfile_empty
+            scenario['pidfile'] = fake_pidfile_empty
         if 'pidfile_pid' not in scenario:
             scenario['pidfile_pid'] = None
         if 'locking_pid' not in scenario:
