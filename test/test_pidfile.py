@@ -27,7 +27,7 @@ from lockfile import pidlockfile
 
 import scaffold
 
-import daemon.pidfile
+from daemon import pidfile
 
 
 class FakeFileDescriptorStringIO(StringIO, object):
@@ -346,7 +346,7 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
                 path=self.scenario['pidfile_path'],
                 acquire_timeout=self.scenario['acquire_timeout'],
                 )
-        self.test_instance = daemon.pidfile.TimeoutPIDLockFile(
+        self.test_instance = pidfile.TimeoutPIDLockFile(
                 **self.test_kwargs)
 
     def tearDown(self):
@@ -366,7 +366,7 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
         test_func.__name__ = b'__init__'
         self.failUnlessFunctionSignatureMatch(
                 test_func, 
-                daemon.pidfile.TimeoutPIDLockFile.__init__)
+                pidfile.TimeoutPIDLockFile.__init__)
 
     def test_has_specified_acquire_timeout(self):
         """ Should have specified ‘acquire_timeout’ value. """
