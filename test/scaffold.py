@@ -327,10 +327,10 @@ class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
 
             """
         func_in_traceback = False
-        expect_code = function.func_code
+        expected_code = function.func_code
         current_traceback = traceback
         while current_traceback is not None:
-            if expect_code is current_traceback.tb_frame.f_code:
+            if expected_code is current_traceback.tb_frame.f_code:
                 func_in_traceback = True
                 break
             current_traceback = current_traceback.tb_next

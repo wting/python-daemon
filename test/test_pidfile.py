@@ -371,41 +371,41 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
     def test_has_specified_acquire_timeout(self):
         """ Should have specified ‘acquire_timeout’ value. """
         instance = self.test_instance
-        expect_timeout = self.test_kwargs['acquire_timeout']
-        self.failUnlessEqual(expect_timeout, instance.acquire_timeout)
+        expected_timeout = self.test_kwargs['acquire_timeout']
+        self.failUnlessEqual(expected_timeout, instance.acquire_timeout)
 
     def test_calls_superclass_init(self):
         """ Should call the superclass ‘__init__’. """
-        expect_path = self.test_kwargs['path']
-        expect_mock_output = """\
+        expected_path = self.test_kwargs['path']
+        expected_mock_output = """\
                 Called pidlockfile.PIDLockFile.__init__(
-                    %(expect_path)r)
+                    %(expected_path)r)
                 """ % vars()
-        self.failUnlessMockCheckerMatch(expect_mock_output)
+        self.failUnlessMockCheckerMatch(expected_mock_output)
 
     def test_acquire_uses_specified_timeout(self):
         """ Should call the superclass ‘acquire’ with specified timeout. """
         instance = self.test_instance
         test_timeout = self.getUniqueInteger()
-        expect_timeout = test_timeout
+        expected_timeout = test_timeout
         self.mock_tracker.clear()
-        expect_mock_output = """\
-                Called pidlockfile.PIDLockFile.acquire(%(expect_timeout)r)
+        expected_mock_output = """\
+                Called pidlockfile.PIDLockFile.acquire(%(expected_timeout)r)
                 """ % vars()
         instance.acquire(test_timeout)
-        self.failUnlessMockCheckerMatch(expect_mock_output)
+        self.failUnlessMockCheckerMatch(expected_mock_output)
 
     def test_acquire_uses_stored_timeout_by_default(self):
         """ Should call superclass ‘acquire’ with stored timeout by default. """
         instance = self.test_instance
         test_timeout = self.test_kwargs['acquire_timeout']
-        expect_timeout = test_timeout
+        expected_timeout = test_timeout
         self.mock_tracker.clear()
-        expect_mock_output = """\
-                Called pidlockfile.PIDLockFile.acquire(%(expect_timeout)r)
+        expected_mock_output = """\
+                Called pidlockfile.PIDLockFile.acquire(%(expected_timeout)r)
                 """ % vars()
         instance.acquire()
-        self.failUnlessMockCheckerMatch(expect_mock_output)
+        self.failUnlessMockCheckerMatch(expected_mock_output)
 
 
 # Local variables:
