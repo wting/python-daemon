@@ -248,8 +248,6 @@ def setup_pidfile_fixtures(testcase):
             new=mock_os_fdopen)
     os_fdopen_patcher.start()
 
-    testcase.scenario = NotImplemented
-
 
 def setup_lockfile_method_mocks(testcase, scenario, class_name):
     """ Set up common mock methods for lockfile class. """
