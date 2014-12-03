@@ -17,6 +17,7 @@ from __future__ import unicode_literals
 
 import __builtin__ as builtins
 import os
+import os.path
 import sys
 import tempfile
 import errno
@@ -166,8 +167,8 @@ def setup_runner_fixtures(testcase):
     testcase.test_app = testcase.TestApp()
 
     testcase.test_program_name = "bazprog"
-    testcase.test_program_path = (
-            "/foo/bar/%(test_program_name)s" % vars(testcase))
+    testcase.test_program_path = os.path.join(
+            "/foo/bar", testcase.test_program_name)
     testcase.valid_argv_params = {
             'start': [testcase.test_program_path, 'start'],
             'stop': [testcase.test_program_path, 'stop'],

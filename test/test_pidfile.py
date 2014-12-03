@@ -280,7 +280,7 @@ def setup_lockfile_method_mocks(testcase, scenario, class_name):
             'acquire', 'release', 'break_lock',
             ]:
         mock_func = vars()["mock_%(func_name)s" % vars()]
-        lockfile_func_name = "%(class_name)s.%(func_name)s" % vars()
+        lockfile_func_name = ".".join([class_name, func_name])
         lockfile_func_patcher = mock.patch(
                 lockfile_func_name, autospec=True,
                 side_effect=mock_func)
