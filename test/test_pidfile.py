@@ -322,18 +322,9 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
         """ Set up test fixtures. """
         super(TimeoutPIDLockFile_TestCase, self).setUp()
 
-        self.mock_tracker = scaffold.MockTracker()
-
         pidlockfile_scenarios = make_pidlockfile_scenarios()
         self.pidlockfile_scenario = pidlockfile_scenarios['simple']
         pidfile_path = self.pidlockfile_scenario['pidfile_path']
-
-        scaffold.mock(
-                "pidlockfile.PIDLockFile.__init__",
-                tracker=self.mock_tracker)
-        scaffold.mock(
-                "pidlockfile.PIDLockFile.acquire",
-                tracker=self.mock_tracker)
 
         self.scenario = {
                 'pidfile_path': self.pidlockfile_scenario['pidfile_path'],
@@ -349,8 +340,6 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
 
     def tearDown(self):
         """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
         super(TimeoutPIDLockFile_TestCase, self).tearDown()
 
     def test_inherits_from_pidlockfile(self):
@@ -372,38 +361,37 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
         expected_timeout = self.test_kwargs['acquire_timeout']
         self.failUnlessEqual(expected_timeout, instance.acquire_timeout)
 
-    def test_calls_superclass_init(self):
+    @mock.patch.object(
+            pidlockfile.PIDLockFile, "__init__",
+            autospec=True)
+    def test_calls_superclass_init(self, mock_init):
         """ Should call the superclass ‘__init__’. """
         expected_path = self.test_kwargs['path']
-        expected_mock_output = """\
-                Called pidlockfile.PIDLockFile.__init__(
-                    %(expected_path)r)
-                """ % vars()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        instance = pidfile.TimeoutPIDLockFile(
+                **self.test_kwargs)
+        mock_init.assert_called_with(instance, expected_path)
 
-    def test_acquire_uses_specified_timeout(self):
+    @mock.patch.object(
+            pidlockfile.PIDLockFile, "acquire",
+            autospec=True)
+    def test_acquire_uses_specified_timeout(self, mock_acquire):
         """ Should call the superclass ‘acquire’ with specified timeout. """
         instance = self.test_instance
         test_timeout = self.getUniqueInteger()
         expected_timeout = test_timeout
-        self.mock_tracker.clear()
-        expected_mock_output = """\
-                Called pidlockfile.PIDLockFile.acquire(%(expected_timeout)r)
-                """ % vars()
         instance.acquire(test_timeout)
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        mock_acquire.assert_called_with(instance, expected_timeout)
 
-    def test_acquire_uses_stored_timeout_by_default(self):
+    @mock.patch.object(
+            pidlockfile.PIDLockFile, "acquire",
+            autospec=True)
+    def test_acquire_uses_stored_timeout_by_default(self, mock_acquire):
         """ Should call superclass ‘acquire’ with stored timeout by default. """
         instance = self.test_instance
         test_timeout = self.test_kwargs['acquire_timeout']
         expected_timeout = test_timeout
-        self.mock_tracker.clear()
-        expected_mock_output = """\
-                Called pidlockfile.PIDLockFile.acquire(%(expected_timeout)r)
-                """ % vars()
         instance.acquire()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        mock_acquire.assert_called_with(instance, expected_timeout)
 
 
 # Local variables:
