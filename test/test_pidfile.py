@@ -339,7 +339,7 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
 
         self.scenario = {
                 'pidfile_path': self.pidlockfile_scenario['pidfile_path'],
-                'acquire_timeout': object(),
+                'acquire_timeout': self.getUniqueInteger(),
                 }
 
         self.test_kwargs = dict(
@@ -386,7 +386,7 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
     def test_acquire_uses_specified_timeout(self):
         """ Should call the superclass ‘acquire’ with specified timeout. """
         instance = self.test_instance
-        test_timeout = object()
+        test_timeout = self.getUniqueInteger()
         expect_timeout = test_timeout
         self.mock_tracker.clear()
         expect_mock_output = """\
