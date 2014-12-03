@@ -305,7 +305,7 @@ def set_pidlockfile_scenario(testcase, scenario_name, clear_tracker=True):
     """ Set up the test case to the specified scenario. """
     testcase.scenario = testcase.pidlockfile_scenarios[scenario_name]
     setup_lockfile_method_mocks(
-            testcase, testcase.scenario, "lockfile.LinkLockFile")
+            testcase, testcase.scenario, "lockfile.PIDLockFile")
     testcase.pidlockfile_args = dict(
             path=testcase.scenario['pidfile_path'],
             )
