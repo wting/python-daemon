@@ -1646,38 +1646,22 @@ class detach_process_context_TestCase(scaffold.TestCase):
         self.failUnlessMockCheckerMatch(expected_mock_output)
 
 
+@mock.patch(
+        "os.getppid", return_value=765)
 class is_process_started_by_init_TestCase(scaffold.TestCase):
     """ Test cases for is_process_started_by_init function. """
 
-    def setUp(self):
-        """ Set up test fixtures. """
-        super(is_process_started_by_init_TestCase, self).setUp()
-
-        self.mock_tracker = scaffold.MockTracker()
-
-        self.test_ppid = 765
-
-        scaffold.mock(
-                "os.getppid",
-                returns=self.test_ppid,
-                tracker=self.mock_tracker)
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(is_process_started_by_init_TestCase, self).tearDown()
-
-    def test_returns_false_by_default(self):
+    def test_returns_false_by_default(self, mock_func_os_getppid):
         """ Should return False under normal circumstances. """
         expected_result = False
         result = daemon.daemon.is_process_started_by_init()
         self.failUnlessIs(expected_result, result)
 
-    def test_returns_true_if_parent_process_is_init(self):
+    def test_returns_true_if_parent_process_is_init(
+            self, mock_func_os_getppid):
         """ Should return True if parent process is `init`. """
         init_pid = 1
-        os.getppid.mock_returns = init_pid
+        mock_func_os_getppid.return_value = init_pid
         expected_result = True
         result = daemon.daemon.is_process_started_by_init()
         self.failUnlessIs(expected_result, result)
@@ -1689,8 +1673,6 @@ class is_socket_TestCase(scaffold.TestCase):
     def setUp(self):
         """ Set up test fixtures. """
         super(is_socket_TestCase, self).setUp()
-
-        self.mock_tracker = scaffold.MockTracker()
 
         def fake_getsockopt(level, optname, buflen=None):
             result = object()
@@ -1704,22 +1686,20 @@ class is_socket_TestCase(scaffold.TestCase):
                 errno.ENOTSOCK,
                 "Socket operation on non-socket")
 
-        self.mock_socket = scaffold.Mock(
-                "socket.socket",
-                tracker=self.mock_tracker)
-        self.mock_socket.getsockopt.mock_raises = self.fake_socket_error
+        self.mock_socket = mock.MagicMock(spec=socket.socket)
+        self.mock_socket.getsockopt.side_effect = self.fake_socket_error
 
         def fake_socket_fromfd(fd, family, type, proto=None):
             return self.mock_socket
 
-        scaffold.mock(
+        self.func_socket_fromfd_patcher = mock.patch(
                 "socket.fromfd",
-                returns_func=fake_socket_fromfd,
-                tracker=self.mock_tracker)
+                side_effect=fake_socket_fromfd)
+        self.func_socket_fromfd_patcher.start()
 
     def tearDown(self):
         """ Tear down test fixtures. """
-        scaffold.mock_restore()
+        self.func_socket_fromfd_patcher.stop()
 
         super(is_socket_TestCase, self).tearDown()
 
@@ -1734,8 +1714,7 @@ class is_socket_TestCase(scaffold.TestCase):
         """ Should return True if `stdin` is a socket. """
         test_fd = 23
         getsockopt = self.mock_socket.getsockopt
-        getsockopt.mock_raises = None
-        getsockopt.mock_returns_func = self.fake_socket_getsockopt_func
+        getsockopt.side_effect = self.fake_socket_getsockopt_func
         expected_result = True
         result = daemon.daemon.is_socket(test_fd)
         self.failUnlessIs(expected_result, result)
@@ -1744,7 +1723,7 @@ class is_socket_TestCase(scaffold.TestCase):
         """ Should return True if `stdin` is a socket and raises error. """
         test_fd = 23
         getsockopt = self.mock_socket.getsockopt
-        getsockopt.mock_raises = socket.error(
+        getsockopt.side_effect = socket.error(
                 object(), "Weird socket stuff")
         expected_result = True
         result = daemon.daemon.is_socket(test_fd)
@@ -1758,8 +1737,6 @@ class is_process_started_by_superserver_TestCase(scaffold.TestCase):
         """ Set up test fixtures. """
         super(is_process_started_by_superserver_TestCase, self).setUp()
 
-        self.mock_tracker = scaffold.MockTracker()
-
         def fake_is_socket(fd):
             if sys.__stdin__.fileno() == fd:
                 result = self.fake_stdin_is_socket_func()
@@ -1769,14 +1746,14 @@ class is_process_started_by_superserver_TestCase(scaffold.TestCase):
 
         self.fake_stdin_is_socket_func = (lambda: False)
 
-        scaffold.mock(
-                "daemon.daemon.is_socket",
-                returns_func=fake_is_socket,
-                tracker=self.mock_tracker)
+        self.func_is_socket_patcher = mock.patch.object(
+                daemon.daemon, "is_socket",
+                side_effect=fake_is_socket)
+        self.func_is_socket_patcher.start()
 
     def tearDown(self):
         """ Tear down test fixtures. """
-        scaffold.mock_restore()
+        self.func_is_socket_patcher.stop()
 
         super(is_process_started_by_superserver_TestCase, self).tearDown()
 
@@ -1794,44 +1771,40 @@ class is_process_started_by_superserver_TestCase(scaffold.TestCase):
         self.failUnlessIs(expected_result, result)
 
 
+@mock.patch.object(
+        daemon.daemon, "is_process_started_by_init",
+        return_value=False)
+@mock.patch.object(
+        daemon.daemon, "is_process_started_by_superserver",
+        return_value=False)
 class is_detach_process_context_required_TestCase(scaffold.TestCase):
     """ Test cases for is_detach_process_context_required function. """
 
-    def setUp(self):
-        """ Set up test fixtures. """
-        super(is_detach_process_context_required_TestCase, self).setUp()
-
-        self.mock_tracker = scaffold.MockTracker()
-
-        scaffold.mock(
-                "daemon.daemon.is_process_started_by_init",
-                tracker=self.mock_tracker)
-        scaffold.mock(
-                "daemon.daemon.is_process_started_by_superserver",
-                tracker=self.mock_tracker)
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(is_detach_process_context_required_TestCase, self).tearDown()
-
-    def test_returns_true_by_default(self):
-        """ Should return False under normal circumstances. """
+    def test_returns_true_by_default(
+            self,
+            mock_func_is_process_started_by_init,
+            mock_func_is_process_started_by_superserver):
+        """ Should return True under normal circumstances. """
         expected_result = True
         result = daemon.daemon.is_detach_process_context_required()
         self.failUnlessIs(expected_result, result)
 
-    def test_returns_false_if_started_by_init(self):
+    def test_returns_false_if_started_by_init(
+            self,
+            mock_func_is_process_started_by_init,
+            mock_func_is_process_started_by_superserver):
         """ Should return False if current process started by init. """
-        daemon.daemon.is_process_started_by_init.mock_returns = True
+        mock_func_is_process_started_by_init.return_value = True
         expected_result = False
         result = daemon.daemon.is_detach_process_context_required()
         self.failUnlessIs(expected_result, result)
 
-    def test_returns_true_if_started_by_superserver(self):
+    def test_returns_true_if_started_by_superserver(
+            self,
+            mock_func_is_process_started_by_init,
+            mock_func_is_process_started_by_superserver):
         """ Should return False if current process started by superserver. """
-        daemon.daemon.is_process_started_by_superserver.mock_returns = True
+        mock_func_is_process_started_by_superserver.return_value = True
         expected_result = False
         result = daemon.daemon.is_detach_process_context_required()
         self.failUnlessIs(expected_result, result)
