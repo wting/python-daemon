@@ -122,10 +122,10 @@ def setup_runner_fixtures(testcase):
 
     testcase.runner_scenarios = make_runner_scenarios()
 
-    testcase.mock_stderr = FakeFileDescriptorStringIO()
+    testcase.fake_stderr = FakeFileDescriptorStringIO()
     scaffold.mock(
             "sys.stderr",
-            mock_obj=testcase.mock_stderr,
+            mock_obj=testcase.fake_stderr,
             tracker=testcase.mock_tracker)
 
     simple_scenario = testcase.runner_scenarios['simple']
@@ -175,7 +175,7 @@ def setup_runner_fixtures(testcase):
             'restart': [testcase.test_program_path, 'restart'],
             }
 
-    def mock_open(filename, mode=None, buffering=None):
+    def fake_open(filename, mode=None, buffering=None):
         if filename in testcase.stream_files_by_path:
             result = testcase.stream_files_by_path[filename]
         else:
@@ -186,7 +186,7 @@ def setup_runner_fixtures(testcase):
 
     scaffold.mock(
             "builtins.open",
-            returns_func=mock_open,
+            returns_func=fake_open,
             tracker=testcase.mock_tracker)
 
     scaffold.mock(
@@ -378,7 +378,7 @@ class DaemonRunner_usage_exit_TestCase(scaffold.TestCase):
                 SystemExit,
                 instance._usage_exit, argv)
         self.failUnlessOutputCheckerMatch(
-                expected_stderr_output, self.mock_stderr.getvalue())
+                expected_stderr_output, self.fake_stderr.getvalue())
 
 
 class DaemonRunner_parse_args_TestCase(scaffold.TestCase):
@@ -554,7 +554,7 @@ class DaemonRunner_do_action_start_TestCase(scaffold.TestCase):
                 """ % vars()
         instance.do_action()
         self.failUnlessOutputCheckerMatch(
-            expected_stderr, self.mock_stderr.getvalue())
+            expected_stderr, self.fake_stderr.getvalue())
 
     def test_requests_app_run(self):
         """ Should request the application to run. """

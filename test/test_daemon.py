@@ -66,11 +66,11 @@ def setup_daemon_context_fixtures(testcase):
 
     setup_pidfile_fixtures(testcase)
 
-    testcase.mock_pidfile_path = tempfile.mktemp()
+    testcase.fake_pidfile_path = tempfile.mktemp()
     testcase.mock_pidlockfile = scaffold.Mock(
             "pidlockfile.PIDLockFile",
             tracker=testcase.mock_tracker)
-    testcase.mock_pidlockfile.path = testcase.mock_pidfile_path
+    testcase.mock_pidlockfile.path = testcase.fake_pidfile_path
 
     scaffold.mock(
             "daemon.daemon.is_detach_process_context_required",
@@ -921,11 +921,11 @@ class DaemonContext_make_signal_handler_map_TestCase(scaffold.TestCase):
                 (key, self.test_signal_handlers[target])
                 for (key, target) in self.test_instance.signal_map.items())
 
-        def mock_make_signal_handler(target):
+        def fake_make_signal_handler(target):
             return self.test_signal_handlers[target]
         scaffold.mock(
                 "daemon.daemon.DaemonContext._make_signal_handler",
-                returns_func=mock_make_signal_handler,
+                returns_func=fake_make_signal_handler,
                 tracker=self.mock_tracker)
 
     def tearDown(self):
@@ -1280,12 +1280,12 @@ class prevent_core_dump_TestCase(scaffold.TestCase):
 
     def test_raises_error_when_no_core_resource(self):
         """ Should raise DaemonError if no RLIMIT_CORE resource. """
-        def mock_getrlimit(res):
+        def fake_getrlimit(res):
             if res == resource.RLIMIT_CORE:
                 raise ValueError("Bogus platform doesn't have RLIMIT_CORE")
             else:
                 return None
-        resource.getrlimit.mock_returns_func = mock_getrlimit
+        resource.getrlimit.mock_returns_func = fake_getrlimit
         expected_error = daemon.daemon.DaemonOSEnvironmentError
         self.failUnlessRaises(
                 expected_error,
@@ -1391,7 +1391,7 @@ class get_maximum_file_descriptors_TestCase(scaffold.TestCase):
         self.RLIM_INFINITY = object()
         self.test_rlimit_nofile = 2468
 
-        def mock_getrlimit(resource):
+        def fake_getrlimit(resource):
             result = (object(), self.test_rlimit_nofile)
             if resource != self.RLIMIT_NOFILE:
                 result = NotImplemented
@@ -1409,7 +1409,7 @@ class get_maximum_file_descriptors_TestCase(scaffold.TestCase):
                 "resource.RLIM_INFINITY", mock_obj=self.RLIM_INFINITY,
                 tracker=self.mock_tracker)
         scaffold.mock(
-                "resource.getrlimit", returns_func=mock_getrlimit,
+                "resource.getrlimit", returns_func=fake_getrlimit,
                 tracker=self.mock_tracker)
 
     def tearDown(self):
@@ -1445,7 +1445,7 @@ class close_all_open_files_TestCase(scaffold.TestCase):
         self.RLIM_INFINITY = object()
         self.test_rlimit_nofile = self.RLIM_INFINITY
 
-        def mock_getrlimit(resource):
+        def fake_getrlimit(resource):
             result = (self.test_rlimit_nofile, object())
             if resource != self.RLIMIT_NOFILE:
                 result = NotImplemented
@@ -1464,7 +1464,7 @@ class close_all_open_files_TestCase(scaffold.TestCase):
                 "resource.RLIM_INFINITY", mock_obj=self.RLIM_INFINITY,
                 tracker=self.mock_tracker)
         scaffold.mock(
-                "resource.getrlimit", returns_func=mock_getrlimit,
+                "resource.getrlimit", returns_func=fake_getrlimit,
                 tracker=self.mock_tracker)
 
         scaffold.mock(
@@ -1559,7 +1559,7 @@ class detach_process_context_TestCase(scaffold.TestCase):
         fork_error = OSError(fork_errno, fork_strerror)
         test_pids_iter = iter([fork_error])
 
-        def mock_fork():
+        def fake_fork():
             next_item = test_pids_iter.next()
             if isinstance(next_item, Exception):
                 raise next_item
@@ -1568,7 +1568,7 @@ class detach_process_context_TestCase(scaffold.TestCase):
 
         scaffold.mock(
                 "os.fork",
-                returns_func=mock_fork,
+                returns_func=fake_fork,
                 tracker=self.mock_tracker)
         expected_mock_output = """\
                 Called os.fork()
@@ -1613,7 +1613,7 @@ class detach_process_context_TestCase(scaffold.TestCase):
         fork_error = OSError(fork_errno, fork_strerror)
         test_pids_iter = iter([0, fork_error])
 
-        def mock_fork():
+        def fake_fork():
             next_item = test_pids_iter.next()
             if isinstance(next_item, Exception):
                 raise next_item
@@ -1622,7 +1622,7 @@ class detach_process_context_TestCase(scaffold.TestCase):
 
         scaffold.mock(
                 "os.fork",
-                returns_func=mock_fork,
+                returns_func=fake_fork,
                 tracker=self.mock_tracker)
         expected_mock_output = """\
                 Called os.fork()
@@ -1691,29 +1691,29 @@ class is_socket_TestCase(scaffold.TestCase):
 
         self.mock_tracker = scaffold.MockTracker()
 
-        def mock_getsockopt(level, optname, buflen=None):
+        def fake_getsockopt(level, optname, buflen=None):
             result = object()
             if optname is socket.SO_TYPE:
                 result = socket.SOCK_RAW
             return result
 
-        self.mock_socket_getsockopt_func = mock_getsockopt
+        self.fake_socket_getsockopt_func = fake_getsockopt
 
-        self.mock_socket_error = socket.error(
+        self.fake_socket_error = socket.error(
                 errno.ENOTSOCK,
                 "Socket operation on non-socket")
 
         self.mock_socket = scaffold.Mock(
                 "socket.socket",
                 tracker=self.mock_tracker)
-        self.mock_socket.getsockopt.mock_raises = self.mock_socket_error
+        self.mock_socket.getsockopt.mock_raises = self.fake_socket_error
 
-        def mock_socket_fromfd(fd, family, type, proto=None):
+        def fake_socket_fromfd(fd, family, type, proto=None):
             return self.mock_socket
 
         scaffold.mock(
                 "socket.fromfd",
-                returns_func=mock_socket_fromfd,
+                returns_func=fake_socket_fromfd,
                 tracker=self.mock_tracker)
 
     def tearDown(self):
@@ -1734,7 +1734,7 @@ class is_socket_TestCase(scaffold.TestCase):
         test_fd = 23
         getsockopt = self.mock_socket.getsockopt
         getsockopt.mock_raises = None
-        getsockopt.mock_returns_func = self.mock_socket_getsockopt_func
+        getsockopt.mock_returns_func = self.fake_socket_getsockopt_func
         expected_result = True
         result = daemon.daemon.is_socket(test_fd)
         self.failUnlessIs(expected_result, result)
@@ -1759,18 +1759,18 @@ class is_process_started_by_superserver_TestCase(scaffold.TestCase):
 
         self.mock_tracker = scaffold.MockTracker()
 
-        def mock_is_socket(fd):
+        def fake_is_socket(fd):
             if sys.__stdin__.fileno() == fd:
-                result = self.mock_stdin_is_socket_func()
+                result = self.fake_stdin_is_socket_func()
             else:
                 result = False
             return result
 
-        self.mock_stdin_is_socket_func = (lambda: False)
+        self.fake_stdin_is_socket_func = (lambda: False)
 
         scaffold.mock(
                 "daemon.daemon.is_socket",
-                returns_func=mock_is_socket,
+                returns_func=fake_is_socket,
                 tracker=self.mock_tracker)
 
     def tearDown(self):
@@ -1787,7 +1787,7 @@ class is_process_started_by_superserver_TestCase(scaffold.TestCase):
 
     def test_returns_true_if_stdin_is_socket(self):
         """ Should return True if `stdin` is a socket. """
-        self.mock_stdin_is_socket_func = (lambda: True)
+        self.fake_stdin_is_socket_func = (lambda: True)
         expected_result = True
         result = daemon.daemon.is_process_started_by_superserver()
         self.failUnlessIs(expected_result, result)
@@ -1875,7 +1875,7 @@ class redirect_stream_TestCase(scaffold.TestCase):
         self.test_target_stream = FakeFileDescriptorStringIO()
         self.test_null_file = FakeFileDescriptorStringIO()
 
-        def mock_open(path, flag, mode=None):
+        def fake_os_open(path, flag, mode=None):
             if path == os.devnull:
                 result = self.test_null_file.fileno()
             else:
@@ -1884,7 +1884,7 @@ class redirect_stream_TestCase(scaffold.TestCase):
 
         scaffold.mock(
                 "os.open",
-                returns_func=mock_open,
+                returns_func=fake_os_open,
                 tracker=self.mock_tracker)
 
     def tearDown(self):
@@ -1931,8 +1931,8 @@ class make_default_signal_map_TestCase(scaffold.TestCase):
 
         self.mock_tracker = scaffold.MockTracker()
 
-        mock_signal_module = ModuleType(b'signal')
-        mock_signal_names = [
+        fake_signal_module = ModuleType(b'signal')
+        fake_signal_names = [
                 'SIGHUP',
                 'SIGCLD',
                 'SIGSEGV',
@@ -1941,16 +1941,16 @@ class make_default_signal_map_TestCase(scaffold.TestCase):
                 'SIGTTOU',
                 'SIGTERM',
                 ]
-        for name in mock_signal_names:
-            setattr(mock_signal_module, name, object())
+        for name in fake_signal_names:
+            setattr(fake_signal_module, name, object())
 
         scaffold.mock(
                 "signal",
-                mock_obj=mock_signal_module,
+                mock_obj=fake_signal_module,
                 tracker=self.mock_tracker)
         scaffold.mock(
                 "daemon.daemon.signal",
-                mock_obj=mock_signal_module,
+                mock_obj=fake_signal_module,
                 tracker=self.mock_tracker)
 
         default_signal_map_by_name = {

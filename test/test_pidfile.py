@@ -154,9 +154,9 @@ def setup_pidfile_fixtures(testcase):
             return_value=scenarios['simple']['pid'])
     getpid_patcher.start()
 
-    def make_mock_open_funcs(testcase):
+    def make_fake_open_funcs(testcase):
 
-        def mock_open_nonexist(filename, mode, buffering):
+        def fake_open_nonexist(filename, mode, buffering):
             if 'r' in mode:
                 raise IOError(
                         errno.ENOENT, "No such file %(filename)r" % vars())
@@ -164,7 +164,7 @@ def setup_pidfile_fixtures(testcase):
                 result = testcase.scenario['pidfile']
             return result
 
-        def mock_open_read_denied(filename, mode, buffering):
+        def fake_open_read_denied(filename, mode, buffering):
             if 'r' in mode:
                 raise IOError(
                         errno.EPERM, "Read denied on %(filename)r" % vars())
@@ -172,11 +172,11 @@ def setup_pidfile_fixtures(testcase):
                 result = testcase.scenario['pidfile']
             return result
 
-        def mock_open_okay(filename, mode, buffering):
+        def fake_open_okay(filename, mode, buffering):
             result = testcase.scenario['pidfile']
             return result
 
-        def mock_os_open_nonexist(filename, flags, mode):
+        def fake_os_open_nonexist(filename, flags, mode):
             if (flags & os.O_CREAT):
                 result = testcase.scenario['pidfile'].fileno()
             else:
@@ -184,7 +184,7 @@ def setup_pidfile_fixtures(testcase):
                         errno.ENOENT, "No such file %(filename)r" % vars())
             return result
 
-        def mock_os_open_read_denied(filename, flags, mode):
+        def fake_os_open_read_denied(filename, flags, mode):
             if (flags & os.O_CREAT):
                 result = testcase.scenario['pidfile'].fileno()
             else:
@@ -192,7 +192,7 @@ def setup_pidfile_fixtures(testcase):
                         errno.EPERM, "Read denied on %(filename)r" % vars())
             return result
 
-        def mock_os_open_okay(filename, flags, mode):
+        def fake_os_open_okay(filename, flags, mode):
             result = testcase.scenario['pidfile'].fileno()
             return result
 
@@ -202,39 +202,44 @@ def setup_pidfile_fixtures(testcase):
 
         return funcs
 
-    testcase.mock_pidfile_open_funcs = make_mock_open_funcs(testcase)
+    testcase.fake_pidfile_open_funcs = make_fake_open_funcs(testcase)
 
-    def mock_open(filename, mode='r', buffering=None):
+    def fake_open(filename, mode='r', buffering=None):
         scenario_path = get_scenario_option(testcase, 'pidfile_path')
         if filename == scenario_path:
             func_name = testcase.scenario['open_func_name']
-            mock_open_func = testcase.mock_pidfile_open_funcs[func_name]
-            result = mock_open_func(filename, mode, buffering)
+            fake_open_func = testcase.fake_pidfile_open_funcs[func_name]
+            result = fake_open_func(filename, mode, buffering)
         else:
             result = FakeFileDescriptorStringIO()
         return result
+
+    mock_open = mock.mock_open()
+    mock_open.side_effect = fake_open
 
     open_patcher = mock.patch(
             "__builtin__.open",
             new=mock_open)
     open_patcher.start()
 
-    def mock_os_open(filename, flags, mode=None):
+    def fake_os_open(filename, flags, mode=None):
         scenario_path = get_scenario_option(testcase, 'pidfile_path')
         if filename == scenario_path:
             func_name = testcase.scenario['os_open_func_name']
-            mock_os_open_func = testcase.mock_pidfile_open_funcs[func_name]
-            result = mock_os_open_func(filename, flags, mode)
+            fake_os_open_func = testcase.fake_pidfile_open_funcs[func_name]
+            result = fake_os_open_func(filename, flags, mode)
         else:
             result = FakeFileDescriptorStringIO().fileno()
         return result
+
+    mock_os_open = mock.MagicMock(side_effect=fake_os_open)
 
     os_open_patcher = mock.patch(
             "os.open",
             new=mock_os_open)
     os_open_patcher.start()
 
-    def mock_os_fdopen(fd, mode='r', buffering=None):
+    def fake_os_fdopen(fd, mode='r', buffering=None):
         scenario_pidfile = get_scenario_option(
                 testcase, 'pidfile', FakeFileDescriptorStringIO())
         if fd == testcase.scenario['pidfile'].fileno():
@@ -242,6 +247,8 @@ def setup_pidfile_fixtures(testcase):
         else:
             raise OSError(errno.EBADF, "Bad file descriptor")
         return result
+
+    mock_os_fdopen = mock.MagicMock(side_effect=fake_os_fdopen)
 
     os_fdopen_patcher = mock.patch(
             "os.fdopen",
@@ -252,24 +259,24 @@ def setup_pidfile_fixtures(testcase):
 def setup_lockfile_method_mocks(testcase, scenario, class_name):
     """ Set up common mock methods for lockfile class. """
 
-    def mock_read_pid():
+    def fake_read_pid():
         return scenario['pidfile_pid']
-    def mock_is_locked():
+    def fake_is_locked():
         return (scenario['locking_pid'] is not None)
-    def mock_i_am_locking():
+    def fake_i_am_locking():
         return (
                 scenario['locking_pid'] == scenario['pid'])
-    def mock_acquire(timeout=None):
+    def fake_acquire(timeout=None):
         if scenario['locking_pid'] is not None:
             raise lockfile.AlreadyLocked()
         scenario['locking_pid'] = scenario['pid']
-    def mock_release():
+    def fake_release():
         if scenario['locking_pid'] is None:
             raise lockfile.NotLocked()
         if scenario['locking_pid'] != scenario['pid']:
             raise lockfile.NotMyLock()
         scenario['locking_pid'] = None
-    def mock_break_lock():
+    def fake_break_lock():
         scenario['locking_pid'] = None
 
     for func_name in [
@@ -277,11 +284,11 @@ def setup_lockfile_method_mocks(testcase, scenario, class_name):
             'is_locked', 'i_am_locking',
             'acquire', 'release', 'break_lock',
             ]:
-        mock_func = vars()["mock_%(func_name)s" % vars()]
+        fake_func = vars()["fake_%(func_name)s" % vars()]
         lockfile_func_name = ".".join([class_name, func_name])
         lockfile_func_patcher = mock.patch(
                 lockfile_func_name, autospec=True,
-                side_effect=mock_func)
+                side_effect=fake_func)
         lockfile_func_patcher.start()
 
 
