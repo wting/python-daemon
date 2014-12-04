@@ -23,8 +23,9 @@ import errno
 import signal
 import socket
 from types import ModuleType
-import atexit
 from StringIO import StringIO
+
+import mock
 
 import scaffold
 from test_pidfile import (
@@ -1857,11 +1858,8 @@ def setup_streams_fixtures(testcase):
             for name in ['stdin', 'stdout', 'stderr']
             )
 
-    scaffold.mock(
-            "os.dup2",
-            tracker=testcase.mock_tracker)
-
 
+@mock.patch.object(os, "dup2")
 class redirect_stream_TestCase(scaffold.TestCase):
     """ Test cases for redirect_stream function. """
 
@@ -1882,30 +1880,29 @@ class redirect_stream_TestCase(scaffold.TestCase):
                 raise OSError(errno.NOENT, "No such file", path)
             return result
 
-        scaffold.mock(
+        self.os_open_patcher = mock.patch(
                 "os.open",
-                returns_func=fake_os_open,
-                tracker=self.mock_tracker)
+                side_effect=fake_os_open)
+        self.mock_func_os_open = self.os_open_patcher.start()
 
     def tearDown(self):
         """ Tear down test fixtures. """
-        scaffold.mock_restore()
+        self.os_open_patcher.stop()
 
         super(redirect_stream_TestCase, self).tearDown()
 
-    def test_duplicates_target_file_descriptor(self):
+    def test_duplicates_target_file_descriptor(
+            self, mock_func_os_dup2):
         """ Should duplicate file descriptor from target to system stream. """
         system_stream = self.test_system_stream
         system_fileno = system_stream.fileno()
         target_stream = self.test_target_stream
         target_fileno = target_stream.fileno()
-        expected_mock_output = """\
-                Called os.dup2(%(target_fileno)r, %(system_fileno)r)
-                """ % vars()
         daemon.daemon.redirect_stream(system_stream, target_stream)
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        mock_func_os_dup2.assert_called_with(target_fileno, system_fileno)
 
-    def test_duplicates_null_file_descriptor_by_default(self):
+    def test_duplicates_null_file_descriptor_by_default(
+            self, mock_func_os_dup2):
         """ Should by default duplicate the null file to the system stream. """
         system_stream = self.test_system_stream
         system_fileno = system_stream.fileno()
@@ -1914,12 +1911,9 @@ class redirect_stream_TestCase(scaffold.TestCase):
         null_flag = os.O_RDWR
         null_file = self.test_null_file
         null_fileno = null_file.fileno()
-        expected_mock_output = """\
-                Called os.open(%(null_path)r, %(null_flag)r)
-                Called os.dup2(%(null_fileno)r, %(system_fileno)r)
-                """ % vars()
         daemon.daemon.redirect_stream(system_stream, target_stream)
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.mock_func_os_open.assert_called_with(null_path, null_flag)
+        mock_func_os_dup2.assert_called_with(null_fileno, system_fileno)
 
 
 class make_default_signal_map_TestCase(scaffold.TestCase):
@@ -1929,9 +1923,8 @@ class make_default_signal_map_TestCase(scaffold.TestCase):
         """ Set up test fixtures. """
         super(make_default_signal_map_TestCase, self).setUp()
 
-        self.mock_tracker = scaffold.MockTracker()
+        self.fake_signal_module = ModuleType(b'signal')
 
-        fake_signal_module = ModuleType(b'signal')
         fake_signal_names = [
                 'SIGHUP',
                 'SIGCLD',
@@ -1942,16 +1935,11 @@ class make_default_signal_map_TestCase(scaffold.TestCase):
                 'SIGTERM',
                 ]
         for name in fake_signal_names:
-            setattr(fake_signal_module, name, object())
+            setattr(self.fake_signal_module, name, object())
 
-        scaffold.mock(
-                "signal",
-                mock_obj=fake_signal_module,
-                tracker=self.mock_tracker)
-        scaffold.mock(
-                "daemon.daemon.signal",
-                mock_obj=fake_signal_module,
-                tracker=self.mock_tracker)
+        self.signal_module_patcher = mock.patch.object(
+                daemon.daemon, "signal", new=self.fake_signal_module)
+        self.signal_module_patcher.start()
 
         default_signal_map_by_name = {
                 'SIGTSTP': None,
@@ -1959,14 +1947,13 @@ class make_default_signal_map_TestCase(scaffold.TestCase):
                 'SIGTTOU': None,
                 'SIGTERM': 'terminate',
                 }
-
         self.default_signal_map = dict(
-                (getattr(signal, name), target)
-                for (name, target) in default_signal_map_by_name.items())
+                (getattr(self.fake_signal_module, name), target)
+                for (name, target) in default_signal_map_by_name.iteritems())
 
     def tearDown(self):
         """ Tear down test fixtures. """
-        scaffold.mock_restore()
+        self.signal_module_patcher.stop()
 
         super(make_default_signal_map_TestCase, self).tearDown()
 
@@ -1985,13 +1972,14 @@ class make_default_signal_map_TestCase(scaffold.TestCase):
             defined in the `signal` module.
 
             """
-        del(self.default_signal_map[signal.SIGTTOU])
-        del(signal.SIGTTOU)
+        del(self.default_signal_map[self.fake_signal_module.SIGTTOU])
+        del(self.fake_signal_module.SIGTTOU)
         expected_result = self.default_signal_map
         result = daemon.daemon.make_default_signal_map()
         self.failUnlessEqual(expected_result, result)
 
 
+@mock.patch.object(daemon.daemon.signal, "signal")
 class set_signal_handlers_TestCase(scaffold.TestCase):
     """ Test cases for set_signal_handlers function. """
 
@@ -1999,62 +1987,32 @@ class set_signal_handlers_TestCase(scaffold.TestCase):
         """ Set up test fixtures. """
         super(set_signal_handlers_TestCase, self).setUp()
 
-        self.mock_tracker = scaffold.MockTracker()
-
-        scaffold.mock(
-                "signal.signal",
-                tracker=self.mock_tracker)
-
         self.signal_handler_map = {
                 signal.SIGQUIT: object(),
                 signal.SIGSEGV: object(),
                 signal.SIGINT: object(),
                 }
 
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(set_signal_handlers_TestCase, self).tearDown()
-
-    def test_sets_signal_handler_for_each_item(self):
+    def test_sets_signal_handler_for_each_item(self, mock_func_signal_signal):
         """ Should set signal handler for each item in map. """
         signal_handler_map = self.signal_handler_map
-        expected_mock_output = "".join(
-                "Called signal.signal(%(signal_number)r, %(handler)r)\n"
-                    % vars()
-                for (signal_number, handler) in signal_handler_map.items())
+        expected_calls = [
+                mock.call(signal_number, handler)
+                for (signal_number, handler) in signal_handler_map.iteritems()]
         daemon.daemon.set_signal_handlers(signal_handler_map)
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.assertEquals(expected_calls, mock_func_signal_signal.mock_calls)
 
 
+@mock.patch.object(daemon.daemon.atexit, "register")
 class register_atexit_function_TestCase(scaffold.TestCase):
     """ Test cases for register_atexit_function function. """
 
-    def setUp(self):
-        """ Set up test fixtures. """
-        super(register_atexit_function_TestCase, self).setUp()
-
-        self.mock_tracker = scaffold.MockTracker()
-
-        scaffold.mock(
-                "atexit.register",
-                tracker=self.mock_tracker)
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(register_atexit_function_TestCase, self).tearDown()
-
-    def test_registers_function_for_atexit_processing(self):
+    def test_registers_function_for_atexit_processing(
+            self, mock_func_atexit_register):
         """ Should register specified function for atexit processing. """
         func = object()
-        expected_mock_output = """\
-                Called atexit.register(%(func)r)
-                """ % vars()
         daemon.daemon.register_atexit_function(func)
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        mock_func_atexit_register.assert_called_with(func)
 
 
 # Local variables:
