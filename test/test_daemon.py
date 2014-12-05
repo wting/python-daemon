@@ -1240,6 +1240,13 @@ class change_process_owner_TestCase(scaffold.TestCase):
         self.failUnlessIn(str(exc), str(test_error))
 
 
+RLimitResult = collections.namedtuple('RLimitResult', ['soft', 'hard'])
+
+fake_RLIMIT_CORE = object()
+
+@mock.patch.object(resource, "RLIMIT_CORE", new=fake_RLIMIT_CORE)
+@mock.patch.object(resource, "setrlimit", side_effect=(lambda x, y: None))
+@mock.patch.object(resource, "getrlimit", side_effect=(lambda x: None))
 class prevent_core_dump_TestCase(scaffold.TestCase):
     """ Test cases for prevent_core_dump function. """
 
@@ -1247,47 +1254,27 @@ class prevent_core_dump_TestCase(scaffold.TestCase):
         """ Set up test fixtures. """
         super(prevent_core_dump_TestCase, self).setUp()
 
-        self.mock_tracker = scaffold.MockTracker()
-
-        self.RLIMIT_CORE = object()
-        scaffold.mock(
-                "resource.RLIMIT_CORE", mock_obj=self.RLIMIT_CORE,
-                tracker=self.mock_tracker)
-        scaffold.mock(
-                "resource.getrlimit", returns=None,
-                tracker=self.mock_tracker)
-        scaffold.mock(
-                "resource.setrlimit", returns=None,
-                tracker=self.mock_tracker)
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(prevent_core_dump_TestCase, self).tearDown()
-
-    def test_sets_core_limit_to_zero(self):
+    def test_sets_core_limit_to_zero(
+            self,
+            mock_func_resource_getrlimit, mock_func_resource_setrlimit):
         """ Should set the RLIMIT_CORE resource to zero. """
-        expected_resource = self.RLIMIT_CORE
-        expected_limit = (0, 0)
-        expected_mock_output = """\
-                Called resource.getrlimit(
-                    %(expected_resource)r)
-                Called resource.setrlimit(
-                    %(expected_resource)r,
-                    %(expected_limit)r)
-                """ % vars()
+        expected_resource = fake_RLIMIT_CORE
+        expected_limit = tuple(RLimitResult(soft=0, hard=0))
         daemon.daemon.prevent_core_dump()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        mock_func_resource_getrlimit.assert_called_with(expected_resource)
+        mock_func_resource_setrlimit.assert_called_with(
+                expected_resource, expected_limit)
 
-    def test_raises_error_when_no_core_resource(self):
+    def test_raises_error_when_no_core_resource(
+            self,
+            mock_func_resource_getrlimit, mock_func_resource_setrlimit):
         """ Should raise DaemonError if no RLIMIT_CORE resource. """
         def fake_getrlimit(res):
             if res == resource.RLIMIT_CORE:
                 raise ValueError("Bogus platform doesn't have RLIMIT_CORE")
             else:
                 return None
-        resource.getrlimit.mock_returns_func = fake_getrlimit
+        mock_func_resource_getrlimit.side_effect = fake_getrlimit
         expected_error = daemon.daemon.DaemonOSEnvironmentError
         self.failUnlessRaises(
                 expected_error,
@@ -1367,8 +1354,6 @@ fake_default_maxfd = 8
 fake_RLIMIT_NOFILE = object()
 fake_RLIM_INFINITY = object()
 fake_rlimit_nofile_large = 2468
-
-RLimitResult = collections.namedtuple('RLimitResult', ['soft', 'hard'])
 
 def fake_getrlimit_nofile_soft_infinity(resource):
     result = RLimitResult(soft=fake_RLIM_INFINITY, hard=object())
@@ -1585,8 +1570,7 @@ class detach_process_context_TestCase(scaffold.TestCase):
                 ])
 
 
-@mock.patch(
-        "os.getppid", return_value=765)
+@mock.patch("os.getppid", return_value=765)
 class is_process_started_by_init_TestCase(scaffold.TestCase):
     """ Test cases for is_process_started_by_init function. """
 
@@ -1711,10 +1695,10 @@ class is_process_started_by_superserver_TestCase(scaffold.TestCase):
 
 
 @mock.patch.object(
-        daemon.daemon, "is_process_started_by_init",
+        daemon.daemon, "is_process_started_by_superserver",
         return_value=False)
 @mock.patch.object(
-        daemon.daemon, "is_process_started_by_superserver",
+        daemon.daemon, "is_process_started_by_init",
         return_value=False)
 class is_detach_process_context_required_TestCase(scaffold.TestCase):
     """ Test cases for is_detach_process_context_required function. """
