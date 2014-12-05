@@ -1398,9 +1398,9 @@ class get_maximum_file_descriptors_TestCase(scaffold.TestCase):
                 result = NotImplemented
             return result
 
-        self.test_maxfd = object()
+        self.fake_maxfd = object()
         scaffold.mock(
-                "daemon.daemon.MAXFD", mock_obj=self.test_maxfd,
+                "daemon.daemon.MAXFD", mock_obj=self.fake_maxfd,
                 tracker=self.mock_tracker)
 
         scaffold.mock(
@@ -1428,7 +1428,7 @@ class get_maximum_file_descriptors_TestCase(scaffold.TestCase):
     def test_returns_module_default_if_hard_limit_infinity(self):
         """ Should return module MAXFD if hard limit is infinity. """
         self.test_rlimit_nofile = self.RLIM_INFINITY
-        expected_result = self.test_maxfd
+        expected_result = self.fake_maxfd
         result = daemon.daemon.get_maximum_file_descriptors()
         self.failUnlessEqual(expected_result, result)
 
@@ -1452,10 +1452,10 @@ class close_all_open_files_TestCase(scaffold.TestCase):
                 result = NotImplemented
             return result
 
-        self.test_maxfd = 8
+        self.fake_maxfd = 8
         scaffold.mock(
                 "daemon.daemon.get_maximum_file_descriptors",
-                returns=self.test_maxfd,
+                returns=self.fake_maxfd,
                 tracker=self.mock_tracker)
 
         scaffold.mock(
@@ -1480,7 +1480,7 @@ class close_all_open_files_TestCase(scaffold.TestCase):
 
     def test_requests_all_open_files_to_close(self):
         """ Should request close of all open files. """
-        expected_file_descriptors = reversed(range(self.test_maxfd))
+        expected_file_descriptors = reversed(range(self.fake_maxfd))
         expected_mock_output = "...\n" + "".join(
                 "Called daemon.daemon.close_file_descriptor_if_open(%(fd)r)\n"
                     % vars()
@@ -1495,7 +1495,7 @@ class close_all_open_files_TestCase(scaffold.TestCase):
                 exclude=test_exclude,
                 )
         expected_file_descriptors = (
-            fd for fd in reversed(range(self.test_maxfd))
+            fd for fd in reversed(range(self.fake_maxfd))
             if fd not in test_exclude)
         expected_mock_output = "...\n" + "".join(
                 "Called daemon.daemon.close_file_descriptor_if_open(%(fd)r)\n"
