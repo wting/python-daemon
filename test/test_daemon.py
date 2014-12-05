@@ -571,27 +571,15 @@ class DaemonContext_close_TestCase(DaemonContext_BaseTestCase):
         """ Set up test fixtures. """
         super(DaemonContext_close_TestCase, self).setUp()
 
-        setup_daemon_context_fixtures(self)
-        self.mock_tracker.clear()
-
         self.test_instance._is_open = True
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(DaemonContext_close_TestCase, self).tearDown()
 
     def test_returns_immediately_if_not_is_open(self):
         """ Should return immediately if is_open property is false. """
         instance = self.test_instance
         instance._is_open = False
         instance.pidfile = object()
-        expected_mock_output = """\
-                """
-        self.mock_tracker.clear()
         instance.close()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.failIf(self.mock_pidlockfile.__exit__.called)
 
     def test_exits_pidfile_context(self):
         """ Should exit the PID file context manager. """
