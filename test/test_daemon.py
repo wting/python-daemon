@@ -90,20 +90,18 @@ fake_default_signal_map = object()
         new=(lambda: fake_default_signal_map))
 @mock.patch.object(os, "setgid", new=(lambda x: object()))
 @mock.patch.object(os, "setuid", new=(lambda x: object()))
-class DaemonContext_TestCase(scaffold.TestCase):
-    """ Test cases for DaemonContext class. """
+class DaemonContext_BaseTestCase(scaffold.TestCase):
+    """ Base class for DaemonContext test case classes. """
 
     def setUp(self):
         """ Set up test fixtures. """
-        super(DaemonContext_TestCase, self).setUp()
+        super(DaemonContext_BaseTestCase, self).setUp()
 
         setup_daemon_context_fixtures(self)
 
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(DaemonContext_TestCase, self).tearDown()
+
+class DaemonContext_TestCase(DaemonContext_BaseTestCase):
+    """ Test cases for DaemonContext class. """
 
     def test_instantiate(self):
         """ New instance of DaemonContext should be created. """
@@ -267,28 +265,8 @@ class DaemonContext_TestCase(scaffold.TestCase):
         self.failUnlessEqual(expected_signal_map, instance.signal_map)
 
 
-@mock.patch.object(
-        daemon.daemon, "is_detach_process_context_required",
-        new=(lambda: True))
-@mock.patch.object(
-        daemon.daemon, "make_default_signal_map",
-        new=(lambda: fake_default_signal_map))
-@mock.patch.object(os, "setgid", new=(lambda x: object()))
-@mock.patch.object(os, "setuid", new=(lambda x: object()))
-class DaemonContext_is_open_TestCase(scaffold.TestCase):
+class DaemonContext_is_open_TestCase(DaemonContext_BaseTestCase):
     """ Test cases for DaemonContext.is_open property. """
-
-    def setUp(self):
-        """ Set up test fixtures. """
-        super(DaemonContext_is_open_TestCase, self).setUp()
-
-        setup_daemon_context_fixtures(self)
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(DaemonContext_is_open_TestCase, self).tearDown()
 
     def test_begin_false(self):
         """ Initial value of is_open should be False. """
@@ -303,22 +281,13 @@ class DaemonContext_is_open_TestCase(scaffold.TestCase):
                 setattr, instance, 'is_open', object())
 
 
-@mock.patch.object(
-        daemon.daemon, "is_detach_process_context_required",
-        new=(lambda: True))
-@mock.patch.object(
-        daemon.daemon, "make_default_signal_map",
-        new=(lambda: fake_default_signal_map))
-@mock.patch.object(os, "setgid", new=(lambda x: object()))
-@mock.patch.object(os, "setuid", new=(lambda x: object()))
-class DaemonContext_open_TestCase(scaffold.TestCase):
+class DaemonContext_open_TestCase(DaemonContext_BaseTestCase):
     """ Test cases for DaemonContext.open method. """
 
     def setUp(self):
         """ Set up test fixtures. """
         super(DaemonContext_open_TestCase, self).setUp()
 
-        setup_daemon_context_fixtures(self)
         self.mock_tracker.clear()
 
         self.test_instance._is_open = False
@@ -595,15 +564,7 @@ class DaemonContext_open_TestCase(scaffold.TestCase):
         self.failUnlessMockCheckerMatch(expected_mock_output)
 
 
-@mock.patch.object(
-        daemon.daemon, "is_detach_process_context_required",
-        new=(lambda: True))
-@mock.patch.object(
-        daemon.daemon, "make_default_signal_map",
-        new=(lambda: fake_default_signal_map))
-@mock.patch.object(os, "setgid", new=(lambda x: object()))
-@mock.patch.object(os, "setuid", new=(lambda x: object()))
-class DaemonContext_close_TestCase(scaffold.TestCase):
+class DaemonContext_close_TestCase(DaemonContext_BaseTestCase):
     """ Test cases for DaemonContext.close method. """
 
     def setUp(self):
@@ -653,23 +614,9 @@ class DaemonContext_close_TestCase(scaffold.TestCase):
         self.failUnlessEqual(False, instance.is_open)
 
 
-@mock.patch.object(
-        daemon.daemon, "is_detach_process_context_required",
-        new=(lambda: True))
-@mock.patch.object(
-        daemon.daemon, "make_default_signal_map",
-        new=(lambda: fake_default_signal_map))
-@mock.patch.object(os, "setgid", new=(lambda x: object()))
-@mock.patch.object(os, "setuid", new=(lambda x: object()))
 @mock.patch.object(daemon.daemon.DaemonContext, "open")
-class DaemonContext_context_manager_enter_TestCase(scaffold.TestCase):
+class DaemonContext_context_manager_enter_TestCase(DaemonContext_BaseTestCase):
     """ Test cases for DaemonContext.__enter__ method. """
-
-    def setUp(self):
-        """ Set up test fixtures. """
-        super(DaemonContext_context_manager_enter_TestCase, self).setUp()
-
-        setup_daemon_context_fixtures(self)
 
     def test_opens_daemon_context(self, mock_func_daemoncontext_open):
         """ Should open the DaemonContext. """
@@ -688,23 +635,13 @@ class DaemonContext_context_manager_enter_TestCase(scaffold.TestCase):
         self.failUnlessIs(expected_result, result)
 
 
-@mock.patch.object(
-        daemon.daemon, "is_detach_process_context_required",
-        new=(lambda: True))
-@mock.patch.object(
-        daemon.daemon, "make_default_signal_map",
-        new=(lambda: fake_default_signal_map))
-@mock.patch.object(os, "setgid", new=(lambda x: object()))
-@mock.patch.object(os, "setuid", new=(lambda x: object()))
 @mock.patch.object(daemon.daemon.DaemonContext, "close")
-class DaemonContext_context_manager_exit_TestCase(scaffold.TestCase):
+class DaemonContext_context_manager_exit_TestCase(DaemonContext_BaseTestCase):
     """ Test cases for DaemonContext.__exit__ method. """
 
     def setUp(self):
         """ Set up test fixtures. """
         super(DaemonContext_context_manager_exit_TestCase, self).setUp()
-
-        setup_daemon_context_fixtures(self)
 
         self.test_args = dict(
                 exc_type=object(),
@@ -728,22 +665,12 @@ class DaemonContext_context_manager_exit_TestCase(scaffold.TestCase):
         self.failUnlessIs(expected_result, result)
 
 
-@mock.patch.object(
-        daemon.daemon, "is_detach_process_context_required",
-        new=(lambda: True))
-@mock.patch.object(
-        daemon.daemon, "make_default_signal_map",
-        new=(lambda: fake_default_signal_map))
-@mock.patch.object(os, "setgid", new=(lambda x: object()))
-@mock.patch.object(os, "setuid", new=(lambda x: object()))
-class DaemonContext_terminate_TestCase(scaffold.TestCase):
+class DaemonContext_terminate_TestCase(DaemonContext_BaseTestCase):
     """ Test cases for DaemonContext.terminate method. """
 
     def setUp(self):
         """ Set up test fixtures. """
         super(DaemonContext_terminate_TestCase, self).setUp()
-
-        setup_daemon_context_fixtures(self)
 
         self.test_signal = signal.SIGTERM
         self.test_frame = None
@@ -771,15 +698,8 @@ class DaemonContext_terminate_TestCase(scaffold.TestCase):
         self.failUnlessIn(str(exc), str(signal_number))
 
 
-@mock.patch.object(
-        daemon.daemon, "is_detach_process_context_required",
-        new=(lambda: True))
-@mock.patch.object(
-        daemon.daemon, "make_default_signal_map",
-        new=(lambda: fake_default_signal_map))
-@mock.patch.object(os, "setgid", new=(lambda x: object()))
-@mock.patch.object(os, "setuid", new=(lambda x: object()))
-class DaemonContext_get_exclude_file_descriptors_TestCase(scaffold.TestCase):
+class DaemonContext_get_exclude_file_descriptors_TestCase(
+        DaemonContext_BaseTestCase):
     """ Test cases for DaemonContext._get_exclude_file_descriptors function. """
 
     def setUp(self):
@@ -787,8 +707,6 @@ class DaemonContext_get_exclude_file_descriptors_TestCase(scaffold.TestCase):
         super(
                 DaemonContext_get_exclude_file_descriptors_TestCase,
                 self).setUp()
-
-        setup_daemon_context_fixtures(self)
 
         self.test_files = {
                 2: FakeFileDescriptorStringIO(),
@@ -852,22 +770,8 @@ class DaemonContext_get_exclude_file_descriptors_TestCase(scaffold.TestCase):
         self.failUnlessEqual(expected_result, result)
 
 
-@mock.patch.object(
-        daemon.daemon, "is_detach_process_context_required",
-        new=(lambda: True))
-@mock.patch.object(
-        daemon.daemon, "make_default_signal_map",
-        new=(lambda: fake_default_signal_map))
-@mock.patch.object(os, "setgid", new=(lambda x: object()))
-@mock.patch.object(os, "setuid", new=(lambda x: object()))
-class DaemonContext_make_signal_handler_TestCase(scaffold.TestCase):
+class DaemonContext_make_signal_handler_TestCase(DaemonContext_BaseTestCase):
     """ Test cases for DaemonContext._make_signal_handler function. """
-
-    def setUp(self):
-        """ Set up test fixtures. """
-        super(DaemonContext_make_signal_handler_TestCase, self).setUp()
-
-        setup_daemon_context_fixtures(self)
 
     def test_returns_ignore_for_none(self):
         """ Should return SIG_IGN when None handler specified. """
@@ -903,22 +807,13 @@ class DaemonContext_make_signal_handler_TestCase(scaffold.TestCase):
         self.failUnlessEqual(expected_result, result)
 
 
-@mock.patch.object(
-        daemon.daemon, "is_detach_process_context_required",
-        new=(lambda: True))
-@mock.patch.object(
-        daemon.daemon, "make_default_signal_map",
-        new=(lambda: fake_default_signal_map))
-@mock.patch.object(os, "setgid", new=(lambda x: object()))
-@mock.patch.object(os, "setuid", new=(lambda x: object()))
-class DaemonContext_make_signal_handler_map_TestCase(scaffold.TestCase):
+class DaemonContext_make_signal_handler_map_TestCase(
+        DaemonContext_BaseTestCase):
     """ Test cases for DaemonContext._make_signal_handler_map function. """
 
     def setUp(self):
         """ Set up test fixtures. """
         super(DaemonContext_make_signal_handler_map_TestCase, self).setUp()
-
-        setup_daemon_context_fixtures(self)
 
         self.test_instance.signal_map = {
                 object(): object(),
