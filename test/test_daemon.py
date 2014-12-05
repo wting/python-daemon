@@ -83,15 +83,6 @@ def setup_daemon_context_fixtures(testcase):
             returns=object(),
             tracker=testcase.mock_tracker)
 
-    scaffold.mock(
-            "os.getuid",
-            returns=object(),
-            tracker=testcase.mock_tracker)
-    scaffold.mock(
-            "os.getgid",
-            returns=object(),
-            tracker=testcase.mock_tracker)
-
     testcase.daemon_context_args = dict(
             stdin=testcase.stream_files_by_name['stdin'],
             stdout=testcase.stream_files_by_name['stdout'],
@@ -101,6 +92,8 @@ def setup_daemon_context_fixtures(testcase):
             **testcase.daemon_context_args)
 
 
+@mock.patch.object(os, "setgid", new=(lambda x: object()))
+@mock.patch.object(os, "setuid", new=(lambda x: object()))
 class DaemonContext_TestCase(scaffold.TestCase):
     """ Test cases for DaemonContext class. """
 
@@ -278,6 +271,8 @@ class DaemonContext_TestCase(scaffold.TestCase):
         self.failUnlessEqual(expected_signal_map, instance.signal_map)
 
 
+@mock.patch.object(os, "setgid", new=(lambda x: object()))
+@mock.patch.object(os, "setuid", new=(lambda x: object()))
 class DaemonContext_is_open_TestCase(scaffold.TestCase):
     """ Test cases for DaemonContext.is_open property. """
 
@@ -306,6 +301,8 @@ class DaemonContext_is_open_TestCase(scaffold.TestCase):
                 setattr, instance, 'is_open', object())
 
 
+@mock.patch.object(os, "setgid", new=(lambda x: object()))
+@mock.patch.object(os, "setuid", new=(lambda x: object()))
 class DaemonContext_open_TestCase(scaffold.TestCase):
     """ Test cases for DaemonContext.open method. """
 
@@ -595,6 +592,8 @@ class DaemonContext_open_TestCase(scaffold.TestCase):
         self.failUnlessMockCheckerMatch(expected_mock_output)
 
 
+@mock.patch.object(os, "setgid", new=(lambda x: object()))
+@mock.patch.object(os, "setuid", new=(lambda x: object()))
 class DaemonContext_close_TestCase(scaffold.TestCase):
     """ Test cases for DaemonContext.close method. """
 
@@ -648,6 +647,8 @@ class DaemonContext_close_TestCase(scaffold.TestCase):
         self.failUnlessEqual(False, instance.is_open)
 
 
+@mock.patch.object(os, "setgid", new=(lambda x: object()))
+@mock.patch.object(os, "setuid", new=(lambda x: object()))
 class DaemonContext_context_manager_enter_TestCase(scaffold.TestCase):
     """ Test cases for DaemonContext.__enter__ method. """
 
@@ -685,6 +686,8 @@ class DaemonContext_context_manager_enter_TestCase(scaffold.TestCase):
         self.failUnlessIs(expected_result, result)
 
 
+@mock.patch.object(os, "setgid", new=(lambda x: object()))
+@mock.patch.object(os, "setuid", new=(lambda x: object()))
 class DaemonContext_context_manager_exit_TestCase(scaffold.TestCase):
     """ Test cases for DaemonContext.__exit__ method. """
 
@@ -730,6 +733,8 @@ class DaemonContext_context_manager_exit_TestCase(scaffold.TestCase):
         self.failUnlessIs(expected_result, result)
 
 
+@mock.patch.object(os, "setgid", new=(lambda x: object()))
+@mock.patch.object(os, "setuid", new=(lambda x: object()))
 class DaemonContext_terminate_TestCase(scaffold.TestCase):
     """ Test cases for DaemonContext.terminate method. """
 
@@ -771,6 +776,8 @@ class DaemonContext_terminate_TestCase(scaffold.TestCase):
         self.failUnlessIn(str(exc), str(signal_number))
 
 
+@mock.patch.object(os, "setgid", new=(lambda x: object()))
+@mock.patch.object(os, "setuid", new=(lambda x: object()))
 class DaemonContext_get_exclude_file_descriptors_TestCase(scaffold.TestCase):
     """ Test cases for DaemonContext._get_exclude_file_descriptors function. """
 
@@ -801,14 +808,6 @@ class DaemonContext_get_exclude_file_descriptors_TestCase(scaffold.TestCase):
                 self.stream_files_by_name[name].fileno()
                 for name in ['stdin', 'stdout', 'stderr']
                 )
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(
-                DaemonContext_get_exclude_file_descriptors_TestCase,
-                self).tearDown()
 
     def test_returns_expected_file_descriptors(self):
         """ Should return expected set of file descriptors. """
@@ -852,6 +851,8 @@ class DaemonContext_get_exclude_file_descriptors_TestCase(scaffold.TestCase):
         self.failUnlessEqual(expected_result, result)
 
 
+@mock.patch.object(os, "setgid", new=(lambda x: object()))
+@mock.patch.object(os, "setuid", new=(lambda x: object()))
 class DaemonContext_make_signal_handler_TestCase(scaffold.TestCase):
     """ Test cases for DaemonContext._make_signal_handler function. """
 
@@ -860,12 +861,6 @@ class DaemonContext_make_signal_handler_TestCase(scaffold.TestCase):
         super(DaemonContext_make_signal_handler_TestCase, self).setUp()
 
         setup_daemon_context_fixtures(self)
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(DaemonContext_make_signal_handler_TestCase, self).tearDown()
 
     def test_returns_ignore_for_none(self):
         """ Should return SIG_IGN when None handler specified. """
@@ -901,6 +896,8 @@ class DaemonContext_make_signal_handler_TestCase(scaffold.TestCase):
         self.failUnlessEqual(expected_result, result)
 
 
+@mock.patch.object(os, "setgid", new=(lambda x: object()))
+@mock.patch.object(os, "setuid", new=(lambda x: object()))
 class DaemonContext_make_signal_handler_map_TestCase(scaffold.TestCase):
     """ Test cases for DaemonContext._make_signal_handler_map function. """
 
@@ -925,14 +922,16 @@ class DaemonContext_make_signal_handler_map_TestCase(scaffold.TestCase):
 
         def fake_make_signal_handler(target):
             return self.test_signal_handlers[target]
-        scaffold.mock(
-                "daemon.daemon.DaemonContext._make_signal_handler",
-                returns_func=fake_make_signal_handler,
-                tracker=self.mock_tracker)
+
+        self.func_patcher_make_signal_handler = mock.patch.object(
+                daemon.daemon.DaemonContext, "_make_signal_handler",
+                side_effect=fake_make_signal_handler)
+        self.mock_func_make_signal_handler = (
+                self.func_patcher_make_signal_handler.start())
 
     def tearDown(self):
         """ Tear down test fixtures. """
-        scaffold.mock_restore()
+        self.func_patcher_make_signal_handler.stop()
 
         super(DaemonContext_make_signal_handler_map_TestCase, self).tearDown()
 
