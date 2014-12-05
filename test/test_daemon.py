@@ -24,6 +24,7 @@ import signal
 import socket
 from types import ModuleType
 from StringIO import StringIO
+import collections
 
 import mock
 
@@ -1293,6 +1294,7 @@ class prevent_core_dump_TestCase(scaffold.TestCase):
                 daemon.daemon.prevent_core_dump)
 
 
+@mock.patch.object(os, "close")
 class close_file_descriptor_if_open_TestCase(scaffold.TestCase):
     """ Test cases for close_file_descriptor_if_open function. """
 
@@ -1300,49 +1302,31 @@ class close_file_descriptor_if_open_TestCase(scaffold.TestCase):
         """ Set up test fixtures. """
         super(close_file_descriptor_if_open_TestCase, self).setUp()
 
-        self.mock_tracker = scaffold.MockTracker()
+        self.fake_fd = 274
 
-        self.test_fd = 274
-
-        scaffold.mock(
-                "os.close",
-                tracker=self.mock_tracker)
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(close_file_descriptor_if_open_TestCase, self).tearDown()
-
-    def test_requests_file_descriptor_close(self):
+    def test_requests_file_descriptor_close(self, mock_func_os_close):
         """ Should request close of file descriptor. """
-        fd = self.test_fd
-        expected_mock_output = """\
-                Called os.close(%(fd)r)
-                """ % vars()
+        fd = self.fake_fd
         daemon.daemon.close_file_descriptor_if_open(fd)
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        mock_func_os_close.assert_called_with(fd)
 
-    def test_ignores_badfd_error_on_close(self):
+    def test_ignores_badfd_error_on_close(self, mock_func_os_close):
         """ Should ignore OSError EBADF when closing. """
-        fd = self.test_fd
+        fd = self.fake_fd
         test_error = OSError(errno.EBADF, "Bad file descriptor")
-        def os_close(fd):
+        def fake_os_close(fd):
             raise test_error
-        os.close.mock_returns_func = os_close
-        expected_mock_output = """\
-                Called os.close(%(fd)r)
-                """ % vars()
+        mock_func_os_close.side_effect = fake_os_close
         daemon.daemon.close_file_descriptor_if_open(fd)
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        mock_func_os_close.assert_called_with(fd)
 
-    def test_raises_error_if_error_on_close(self):
+    def test_raises_error_if_error_on_close(self, mock_func_os_close):
         """ Should raise DaemonError if an OSError occurs when closing. """
-        fd = self.test_fd
+        fd = self.fake_fd
         test_error = OSError(object(), "Unexpected error")
-        def os_close(fd):
+        def fake_os_close(fd):
             raise test_error
-        os.close.mock_returns_func = os_close
+        mock_func_os_close.side_effect = fake_os_close
         expected_error = daemon.daemon.DaemonOSEnvironmentError
         self.failUnlessRaises(
                 expected_error,
@@ -1379,77 +1363,64 @@ class maxfd_TestCase(scaffold.TestCase):
                     % vars())
 
 
+fake_default_maxfd = 8
+fake_RLIMIT_NOFILE = object()
+fake_RLIM_INFINITY = object()
+fake_rlimit_nofile_large = 2468
+
+RLimitResult = collections.namedtuple('RLimitResult', ['soft', 'hard'])
+
+def fake_getrlimit_nofile_soft_infinity(resource):
+    result = RLimitResult(soft=fake_RLIM_INFINITY, hard=object())
+    if resource != fake_RLIMIT_NOFILE:
+        result = NotImplemented
+    return result
+
+def fake_getrlimit_nofile_hard_infinity(resource):
+    result = RLimitResult(soft=object(), hard=fake_RLIM_INFINITY)
+    if resource != fake_RLIMIT_NOFILE:
+        result = NotImplemented
+    return result
+
+def fake_getrlimit_nofile_hard_large(resource):
+    result = RLimitResult(soft=object(), hard=fake_rlimit_nofile_large)
+    if resource != fake_RLIMIT_NOFILE:
+        result = NotImplemented
+    return result
+
+@mock.patch.object(daemon.daemon, "MAXFD", new=fake_default_maxfd)
+@mock.patch.object(resource, "RLIMIT_NOFILE", new=fake_RLIMIT_NOFILE)
+@mock.patch.object(resource, "RLIM_INFINITY", new=fake_RLIM_INFINITY)
+@mock.patch.object(
+        resource, "getrlimit",
+        side_effect=fake_getrlimit_nofile_hard_large)
 class get_maximum_file_descriptors_TestCase(scaffold.TestCase):
     """ Test cases for get_maximum_file_descriptors function. """
 
-    def setUp(self):
-        """ Set up test fixtures. """
-        super(get_maximum_file_descriptors_TestCase, self).setUp()
-
-        self.mock_tracker = scaffold.MockTracker()
-
-        self.RLIMIT_NOFILE = object()
-        self.RLIM_INFINITY = object()
-        self.test_rlimit_nofile = 2468
-
-        def fake_getrlimit(resource):
-            result = (object(), self.test_rlimit_nofile)
-            if resource != self.RLIMIT_NOFILE:
-                result = NotImplemented
-            return result
-
-        self.fake_maxfd = object()
-        scaffold.mock(
-                "daemon.daemon.MAXFD", mock_obj=self.fake_maxfd,
-                tracker=self.mock_tracker)
-
-        scaffold.mock(
-                "resource.RLIMIT_NOFILE", mock_obj=self.RLIMIT_NOFILE,
-                tracker=self.mock_tracker)
-        scaffold.mock(
-                "resource.RLIM_INFINITY", mock_obj=self.RLIM_INFINITY,
-                tracker=self.mock_tracker)
-        scaffold.mock(
-                "resource.getrlimit", returns_func=fake_getrlimit,
-                tracker=self.mock_tracker)
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(get_maximum_file_descriptors_TestCase, self).tearDown()
-
-    def test_returns_system_hard_limit(self):
+    def test_returns_system_hard_limit(self, mock_func_resource_getrlimit):
         """ Should return process hard limit on number of files. """
-        expected_result = self.test_rlimit_nofile
+        expected_result = fake_rlimit_nofile_large
         result = daemon.daemon.get_maximum_file_descriptors()
         self.failUnlessEqual(expected_result, result)
 
-    def test_returns_module_default_if_hard_limit_infinity(self):
+    def test_returns_module_default_if_hard_limit_infinity(
+            self, mock_func_resource_getrlimit):
         """ Should return module MAXFD if hard limit is infinity. """
-        self.test_rlimit_nofile = self.RLIM_INFINITY
-        expected_result = self.fake_maxfd
+        mock_func_resource_getrlimit.side_effect = (
+                fake_getrlimit_nofile_hard_infinity)
+        expected_result = fake_default_maxfd
         result = daemon.daemon.get_maximum_file_descriptors()
         self.failUnlessEqual(expected_result, result)
 
 
-fake_maxfd = 8
-fake_RLIMIT_NOFILE = object()
-fake_RLIM_INFINITY = object()
-
-def fake_getrlimit(resource):
-    rlimit_nofile = self.RLIM_INFINITY
-    result = (rlimit_nofile, object())
-    if resource != self.RLIMIT_NOFILE:
-        result = NotImplemented
-    return result
-
 def fake_get_maximum_file_descriptors():
-    return fake_maxfd
+    return fake_default_maxfd
 
 @mock.patch.object(resource, "RLIMIT_NOFILE", new=fake_RLIMIT_NOFILE)
 @mock.patch.object(resource, "RLIM_INFINITY", new=fake_RLIM_INFINITY)
-@mock.patch.object(resource, "getrlimit", new=fake_getrlimit)
+@mock.patch.object(
+        resource, "getrlimit",
+        new=fake_getrlimit_nofile_soft_infinity)
 @mock.patch.object(
         daemon.daemon, "get_maximum_file_descriptors",
         new=fake_get_maximum_file_descriptors)
@@ -1460,7 +1431,7 @@ class close_all_open_files_TestCase(scaffold.TestCase):
     def test_requests_all_open_files_to_close(
             self, mock_func_close_file_descriptor_if_open):
         """ Should request close of all open files. """
-        expected_file_descriptors = reversed(range(fake_maxfd))
+        expected_file_descriptors = reversed(xrange(fake_default_maxfd))
         expected_calls = [
                 mock.call(fd) for fd in expected_file_descriptors]
         daemon.daemon.close_all_open_files()
@@ -1475,7 +1446,7 @@ class close_all_open_files_TestCase(scaffold.TestCase):
                 exclude=test_exclude,
                 )
         expected_file_descriptors = (
-                fd for fd in reversed(range(fake_maxfd))
+                fd for fd in reversed(xrange(fake_default_maxfd))
                 if fd not in test_exclude)
         expected_calls = [
                 mock.call(fd) for fd in expected_file_descriptors]
