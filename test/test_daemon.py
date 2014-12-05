@@ -671,6 +671,7 @@ class DaemonContext_close_TestCase(scaffold.TestCase):
         new=(lambda: fake_default_signal_map))
 @mock.patch.object(os, "setgid", new=(lambda x: object()))
 @mock.patch.object(os, "setuid", new=(lambda x: object()))
+@mock.patch.object(daemon.daemon.DaemonContext, "open")
 class DaemonContext_context_manager_enter_TestCase(scaffold.TestCase):
     """ Test cases for DaemonContext.__enter__ method. """
 
@@ -679,28 +680,17 @@ class DaemonContext_context_manager_enter_TestCase(scaffold.TestCase):
         super(DaemonContext_context_manager_enter_TestCase, self).setUp()
 
         setup_daemon_context_fixtures(self)
-        self.mock_tracker.clear()
 
-        scaffold.mock(
-                "daemon.daemon.DaemonContext.open",
-                tracker=self.mock_tracker)
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(DaemonContext_context_manager_enter_TestCase, self).tearDown()
-
-    def test_opens_daemon_context(self):
+    def test_opens_daemon_context(self, mock_func_daemoncontext_open):
         """ Should open the DaemonContext. """
         instance = self.test_instance
         expected_mock_output = """\
                 Called daemon.daemon.DaemonContext.open()
                 """
         instance.__enter__()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        mock_func_daemoncontext_open.assert_called_with()
 
-    def test_returns_self_instance(self):
+    def test_returns_self_instance(self, mock_func_daemoncontext_open):
         """ Should return DaemonContext instance. """
         instance = self.test_instance
         expected_result = instance
@@ -716,6 +706,7 @@ class DaemonContext_context_manager_enter_TestCase(scaffold.TestCase):
         new=(lambda: fake_default_signal_map))
 @mock.patch.object(os, "setgid", new=(lambda x: object()))
 @mock.patch.object(os, "setuid", new=(lambda x: object()))
+@mock.patch.object(daemon.daemon.DaemonContext, "close")
 class DaemonContext_context_manager_exit_TestCase(scaffold.TestCase):
     """ Test cases for DaemonContext.__exit__ method. """
 
@@ -724,7 +715,6 @@ class DaemonContext_context_manager_exit_TestCase(scaffold.TestCase):
         super(DaemonContext_context_manager_exit_TestCase, self).setUp()
 
         setup_daemon_context_fixtures(self)
-        self.mock_tracker.clear()
 
         self.test_args = dict(
                 exc_type=object(),
@@ -732,27 +722,14 @@ class DaemonContext_context_manager_exit_TestCase(scaffold.TestCase):
                 traceback=object(),
                 )
 
-        scaffold.mock(
-                "daemon.daemon.DaemonContext.close",
-                tracker=self.mock_tracker)
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(DaemonContext_context_manager_exit_TestCase, self).tearDown()
-
-    def test_closes_daemon_context(self):
+    def test_closes_daemon_context(self, mock_func_daemoncontext_close):
         """ Should close the DaemonContext. """
         instance = self.test_instance
         args = self.test_args
-        expected_mock_output = """\
-                Called daemon.daemon.DaemonContext.close()
-                """
         instance.__exit__(**args)
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        mock_func_daemoncontext_close.assert_called_with()
 
-    def test_returns_none(self):
+    def test_returns_none(self, mock_func_daemoncontext_close):
         """ Should return None, indicating exception was not handled. """
         instance = self.test_instance
         args = self.test_args
@@ -781,12 +758,6 @@ class DaemonContext_terminate_TestCase(scaffold.TestCase):
         self.test_signal = signal.SIGTERM
         self.test_frame = None
         self.test_args = (self.test_signal, self.test_frame)
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(DaemonContext_terminate_TestCase, self).tearDown()
 
     def test_raises_system_exit(self):
         """ Should raise SystemExit. """
