@@ -1515,43 +1515,47 @@ class detach_process_context_TestCase(scaffold.TestCase):
         """ Set up test fixtures. """
         super(detach_process_context_TestCase, self).setUp()
 
-        self.mock_tracker = scaffold.MockTracker()
+        self.mock_module_os = mock.MagicMock(wraps=os)
 
-        test_pids = [0, 0]
-        scaffold.mock(
-                "os.fork", returns_iter=test_pids,
-                tracker=self.mock_tracker)
-        scaffold.mock(
-                "os.setsid",
-                tracker=self.mock_tracker)
+        fake_pids = [0, 0]
+        self.func_patcher_os_fork = mock.patch.object(
+                os, "fork",
+                side_effect=iter(fake_pids))
+        self.mock_func_os_fork = self.func_patcher_os_fork.start()
+        self.mock_module_os.attach_mock(self.mock_func_os_fork, "fork")
+
+        self.func_patcher_os_setsid = mock.patch.object(os, "setsid")
+        self.mock_func_os_setsid = self.func_patcher_os_setsid.start()
+        self.mock_module_os.attach_mock(self.mock_func_os_setsid, "setsid")
 
         def raise_os_exit(status=None):
             raise self.FakeOSExit(status)
 
-        scaffold.mock(
-                "os._exit", returns_func=raise_os_exit,
-                tracker=self.mock_tracker)
+        self.func_patcher_os_force_exit = mock.patch.object(
+                os, "_exit",
+                side_effect=raise_os_exit)
+        self.mock_func_os_force_exit = self.func_patcher_os_force_exit.start()
+        self.mock_module_os.attach_mock(self.mock_func_os_force_exit, "_exit")
 
     def tearDown(self):
         """ Tear down test fixtures. """
-        scaffold.mock_restore()
+        self.func_patcher_os_fork.stop()
+        self.func_patcher_os_setsid.stop()
+        self.func_patcher_os_force_exit.stop()
 
         super(detach_process_context_TestCase, self).tearDown()
 
     def test_parent_exits(self):
         """ Parent process should exit. """
         parent_pid = 23
-        scaffold.mock(
-                "os.fork", returns_iter=[parent_pid],
-                tracker=self.mock_tracker)
-        expected_mock_output = """\
-                Called os.fork()
-                Called os._exit(0)
-                """
+        self.mock_func_os_fork.side_effect = iter([parent_pid])
         self.failUnlessRaises(
                 self.FakeOSExit,
                 daemon.daemon.detach_process_context)
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.mock_module_os.assert_has_calls([
+                mock.call.fork(),
+                mock.call._exit(0),
+                ])
 
     def test_first_fork_error_raises_error(self):
         """ Error on first fork should raise DaemonProcessDetachError. """
@@ -1567,45 +1571,35 @@ class detach_process_context_TestCase(scaffold.TestCase):
             else:
                 return next_item
 
-        scaffold.mock(
-                "os.fork",
-                returns_func=fake_fork,
-                tracker=self.mock_tracker)
-        expected_mock_output = """\
-                Called os.fork()
-                """
+        self.mock_func_os_fork.side_effect = fake_fork
         self.failUnlessRaises(
                 daemon.daemon.DaemonProcessDetachError,
                 daemon.daemon.detach_process_context)
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.mock_module_os.assert_has_calls([
+                mock.call.fork(),
+                ])
 
     def test_child_starts_new_process_group(self):
         """ Child should start new process group. """
-        expected_mock_output = """\
-                Called os.fork()
-                Called os.setsid()
-                ...
-                """
         daemon.daemon.detach_process_context()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.mock_module_os.assert_has_calls([
+                mock.call.fork(),
+                mock.call.setsid(),
+                ])
 
     def test_child_forks_next_parent_exits(self):
         """ Child should fork, then exit if parent. """
-        test_pids = [0, 42]
-        scaffold.mock(
-                "os.fork",
-                returns_iter=test_pids,
-                tracker=self.mock_tracker)
-        expected_mock_output = """\
-                Called os.fork()
-                Called os.setsid()
-                Called os.fork()
-                Called os._exit(0)
-                """
+        fake_pids = [0, 42]
+        self.mock_func_os_fork.side_effect = iter(fake_pids)
         self.failUnlessRaises(
                 self.FakeOSExit,
                 daemon.daemon.detach_process_context)
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.mock_module_os.assert_has_calls([
+                mock.call.fork(),
+                mock.call.setsid(),
+                mock.call.fork(),
+                mock.call._exit(0),
+                ])
 
     def test_second_fork_error_reports_to_stderr(self):
         """ Error on second fork should cause report to stderr. """
@@ -1621,29 +1615,24 @@ class detach_process_context_TestCase(scaffold.TestCase):
             else:
                 return next_item
 
-        scaffold.mock(
-                "os.fork",
-                returns_func=fake_fork,
-                tracker=self.mock_tracker)
-        expected_mock_output = """\
-                Called os.fork()
-                Called os.setsid()
-                Called os.fork()
-                """
+        self.mock_func_os_fork.side_effect = fake_fork
         self.failUnlessRaises(
                 daemon.daemon.DaemonProcessDetachError,
                 daemon.daemon.detach_process_context)
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.mock_module_os.assert_has_calls([
+                mock.call.fork(),
+                mock.call.setsid(),
+                mock.call.fork(),
+                ])
 
     def test_child_forks_next_child_continues(self):
         """ Child should fork, then continue if child. """
-        expected_mock_output = """\
-                Called os.fork()
-                Called os.setsid()
-                Called os.fork()
-                """ % vars()
         daemon.daemon.detach_process_context()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.mock_module_os.assert_has_calls([
+                mock.call.fork(),
+                mock.call.setsid(),
+                mock.call.fork(),
+                ])
 
 
 @mock.patch(
@@ -1692,14 +1681,14 @@ class is_socket_TestCase(scaffold.TestCase):
         def fake_socket_fromfd(fd, family, type, proto=None):
             return self.mock_socket
 
-        self.func_socket_fromfd_patcher = mock.patch(
+        self.func_patcher_socket_fromfd = mock.patch(
                 "socket.fromfd",
                 side_effect=fake_socket_fromfd)
-        self.func_socket_fromfd_patcher.start()
+        self.func_patcher_socket_fromfd.start()
 
     def tearDown(self):
         """ Tear down test fixtures. """
-        self.func_socket_fromfd_patcher.stop()
+        self.func_patcher_socket_fromfd.stop()
 
         super(is_socket_TestCase, self).tearDown()
 
@@ -1746,14 +1735,14 @@ class is_process_started_by_superserver_TestCase(scaffold.TestCase):
 
         self.fake_stdin_is_socket_func = (lambda: False)
 
-        self.func_is_socket_patcher = mock.patch.object(
+        self.func_patcher_is_socket = mock.patch.object(
                 daemon.daemon, "is_socket",
                 side_effect=fake_is_socket)
-        self.func_is_socket_patcher.start()
+        self.func_patcher_is_socket.start()
 
     def tearDown(self):
         """ Tear down test fixtures. """
-        self.func_is_socket_patcher.stop()
+        self.func_patcher_is_socket.stop()
 
         super(is_process_started_by_superserver_TestCase, self).tearDown()
 
@@ -1853,14 +1842,14 @@ class redirect_stream_TestCase(scaffold.TestCase):
                 raise OSError(errno.NOENT, "No such file", path)
             return result
 
-        self.os_open_patcher = mock.patch(
+        self.func_patcher_os_open = mock.patch(
                 "os.open",
                 side_effect=fake_os_open)
-        self.mock_func_os_open = self.os_open_patcher.start()
+        self.mock_func_os_open = self.func_patcher_os_open.start()
 
     def tearDown(self):
         """ Tear down test fixtures. """
-        self.os_open_patcher.stop()
+        self.func_patcher_os_open.stop()
 
         super(redirect_stream_TestCase, self).tearDown()
 
@@ -1910,9 +1899,9 @@ class make_default_signal_map_TestCase(scaffold.TestCase):
         for name in fake_signal_names:
             setattr(self.fake_signal_module, name, object())
 
-        self.signal_module_patcher = mock.patch.object(
+        self.module_patcher_signal = mock.patch.object(
                 daemon.daemon, "signal", new=self.fake_signal_module)
-        self.signal_module_patcher.start()
+        self.module_patcher_signal.start()
 
         default_signal_map_by_name = {
                 'SIGTSTP': None,
@@ -1926,7 +1915,7 @@ class make_default_signal_map_TestCase(scaffold.TestCase):
 
     def tearDown(self):
         """ Tear down test fixtures. """
-        self.signal_module_patcher.stop()
+        self.module_patcher_signal.stop()
 
         super(make_default_signal_map_TestCase, self).tearDown()
 
