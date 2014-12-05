@@ -69,9 +69,7 @@ def setup_daemon_context_fixtures(testcase):
     setup_pidfile_fixtures(testcase)
 
     testcase.fake_pidfile_path = tempfile.mktemp()
-    testcase.mock_pidlockfile = scaffold.Mock(
-            "pidlockfile.PIDLockFile",
-            tracker=testcase.mock_tracker)
+    testcase.mock_pidlockfile = mock.MagicMock()
     testcase.mock_pidlockfile.path = testcase.fake_pidfile_path
 
     testcase.daemon_context_args = dict(
@@ -404,12 +402,12 @@ class DaemonContext_open_TestCase(scaffold.TestCase):
                 Called daemon.daemon.redirect_stream(...)
                 Called daemon.daemon.redirect_stream(...)
                 Called daemon.daemon.redirect_stream(...)
-                Called pidlockfile.PIDLockFile.__enter__()
                 Called daemon.daemon.register_atexit_function(...)
                 """ % vars()
         self.mock_tracker.clear()
         instance.open()
         self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.mock_pidlockfile.__enter__.assert_called_with()
 
     def test_returns_immediately_if_is_open(self):
         """ Should return immediately if is_open property is true. """
@@ -576,13 +574,8 @@ class DaemonContext_open_TestCase(scaffold.TestCase):
         """ Should enter the PID file context manager. """
         instance = self.test_instance
         instance.pidfile = self.mock_pidlockfile
-        expected_mock_output = """\
-                ...
-                Called pidlockfile.PIDLockFile.__enter__()
-                ...
-                """
         instance.open()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.mock_pidlockfile.__enter__.assert_called_with()
 
     def test_sets_is_open_true(self):
         """ Should set the `is_open` property to True. """
@@ -643,11 +636,8 @@ class DaemonContext_close_TestCase(scaffold.TestCase):
         """ Should exit the PID file context manager. """
         instance = self.test_instance
         instance.pidfile = self.mock_pidlockfile
-        expected_mock_output = """\
-                Called pidlockfile.PIDLockFile.__exit__(None, None, None)
-                """
         instance.close()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.mock_pidlockfile.__exit__.assert_called_with(None, None, None)
 
     def test_returns_none(self):
         """ Should return None. """
@@ -1397,12 +1387,12 @@ class close_all_open_files_TestCase(scaffold.TestCase):
     def test_requests_all_open_files_to_close(
             self, mock_func_close_file_descriptor_if_open):
         """ Should request close of all open files. """
-        expected_file_descriptors = reversed(xrange(fake_default_maxfd))
+        expected_file_descriptors = xrange(fake_default_maxfd)
         expected_calls = [
                 mock.call(fd) for fd in expected_file_descriptors]
         daemon.daemon.close_all_open_files()
         mock_func_close_file_descriptor_if_open.assert_has_calls(
-                expected_calls)
+                expected_calls, any_order=True)
 
     def test_requests_all_but_excluded_files_to_close(
             self, mock_func_close_file_descriptor_if_open):
@@ -1411,14 +1401,14 @@ class close_all_open_files_TestCase(scaffold.TestCase):
         args = dict(
                 exclude=test_exclude,
                 )
-        expected_file_descriptors = (
-                fd for fd in reversed(xrange(fake_default_maxfd))
+        expected_file_descriptors = set(
+                fd for fd in xrange(fake_default_maxfd)
                 if fd not in test_exclude)
         expected_calls = [
                 mock.call(fd) for fd in expected_file_descriptors]
         daemon.daemon.close_all_open_files(**args)
         mock_func_close_file_descriptor_if_open.assert_has_calls(
-                expected_calls)
+                expected_calls, any_order=True)
 
 
 class detach_process_context_TestCase(scaffold.TestCase):
