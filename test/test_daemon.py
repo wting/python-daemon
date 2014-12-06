@@ -62,8 +62,6 @@ class ModuleExceptions_TestCase(scaffold.Exception_TestCase):
 
 def setup_daemon_context_fixtures(testcase):
     """ Set up common test fixtures for DaemonContext test case. """
-    testcase.mock_tracker = scaffold.MockTracker()
-
     setup_streams_fixtures(testcase)
 
     setup_pidfile_fixtures(testcase)
@@ -288,66 +286,63 @@ class DaemonContext_open_TestCase(DaemonContext_BaseTestCase):
         """ Set up test fixtures. """
         super(DaemonContext_open_TestCase, self).setUp()
 
-        self.mock_tracker.clear()
-
         self.test_instance._is_open = False
 
-        scaffold.mock(
-                "daemon.daemon.detach_process_context",
-                tracker=self.mock_tracker)
-        scaffold.mock(
-                "daemon.daemon.change_working_directory",
-                tracker=self.mock_tracker)
-        scaffold.mock(
-                "daemon.daemon.change_root_directory",
-                tracker=self.mock_tracker)
-        scaffold.mock(
-                "daemon.daemon.change_file_creation_mask",
-                tracker=self.mock_tracker)
-        scaffold.mock(
-                "daemon.daemon.change_process_owner",
-                tracker=self.mock_tracker)
-        scaffold.mock(
-                "daemon.daemon.prevent_core_dump",
-                tracker=self.mock_tracker)
-        scaffold.mock(
-                "daemon.daemon.close_all_open_files",
-                tracker=self.mock_tracker)
-        scaffold.mock(
-                "daemon.daemon.redirect_stream",
-                tracker=self.mock_tracker)
-        scaffold.mock(
-                "daemon.daemon.set_signal_handlers",
-                tracker=self.mock_tracker)
-        scaffold.mock(
-                "daemon.daemon.register_atexit_function",
-                tracker=self.mock_tracker)
+        self.mock_module_daemon = mock.MagicMock()
+        self.daemon_func_patchers = dict(
+                (func_name, mock.patch.object(
+                    daemon.daemon, func_name))
+                for func_name in [
+                    "detach_process_context",
+                    "change_working_directory",
+                    "change_root_directory",
+                    "change_file_creation_mask",
+                    "change_process_owner",
+                    "prevent_core_dump",
+                    "close_all_open_files",
+                    "redirect_stream",
+                    "set_signal_handlers",
+                    "register_atexit_function",
+                    ])
+        self.daemon_mock_funcs = dict(
+                (func_name, patcher.start())
+                for (func_name, patcher) in
+                    self.daemon_func_patchers.iteritems())
+        for (func_name, mock_func) in self.daemon_mock_funcs.iteritems():
+            self.mock_module_daemon.attach_mock(mock_func, func_name)
+
+        self.mock_module_daemon.attach_mock(mock.Mock(), 'DaemonContext')
 
         self.test_files_preserve_fds = object()
-        scaffold.mock(
-                "daemon.daemon.DaemonContext._get_exclude_file_descriptors",
-                returns=self.test_files_preserve_fds,
-                tracker=self.mock_tracker)
-
         self.test_signal_handler_map = object()
-        scaffold.mock(
-                "daemon.daemon.DaemonContext._make_signal_handler_map",
-                returns=self.test_signal_handler_map,
-                tracker=self.mock_tracker)
-
-        scaffold.mock(
-                "sys.stdin",
-                tracker=self.mock_tracker)
-        scaffold.mock(
-                "sys.stdout",
-                tracker=self.mock_tracker)
-        scaffold.mock(
-                "sys.stderr",
-                tracker=self.mock_tracker)
+        daemoncontext_method_return_values = {
+                '_get_exclude_file_descriptors':
+                    self.test_files_preserve_fds,
+                '_make_signal_handler_map':
+                    self.test_signal_handler_map,
+                }
+        self.daemoncontext_func_patchers = dict(
+                (func_name, mock.patch.object(
+                    daemon.daemon.DaemonContext,
+                    func_name,
+                    return_value=return_value))
+                for (func_name, return_value) in
+                    daemoncontext_method_return_values.iteritems())
+        self.daemoncontext_mock_funcs = dict(
+                (func_name, patcher.start())
+                for (func_name, patcher) in
+                    self.daemoncontext_func_patchers.iteritems())
+        for (func_name, mock_func) in (
+                self.daemoncontext_mock_funcs.iteritems()):
+            self.mock_module_daemon.DaemonContext.attach_mock(
+                    mock_func, func_name)
 
     def tearDown(self):
         """ Tear down test fixtures. """
-        scaffold.mock_restore()
+        for patcher in self.daemon_func_patchers.values():
+            patcher.stop()
+        for patcher in self.daemoncontext_func_patchers.values():
+            patcher.stop()
 
         super(DaemonContext_open_TestCase, self).tearDown()
 
@@ -357,117 +352,92 @@ class DaemonContext_open_TestCase(DaemonContext_BaseTestCase):
         instance.chroot_directory = object()
         instance.detach_process = True
         instance.pidfile = self.mock_pidlockfile
-        expected_mock_output = """\
-                Called daemon.daemon.change_root_directory(...)
-                Called daemon.daemon.prevent_core_dump()
-                Called daemon.daemon.change_file_creation_mask(...)
-                Called daemon.daemon.change_working_directory(...)
-                Called daemon.daemon.change_process_owner(...)
-                Called daemon.daemon.detach_process_context()
-                Called daemon.daemon.DaemonContext._make_signal_handler_map()
-                Called daemon.daemon.set_signal_handlers(...)
-                Called daemon.daemon.DaemonContext._get_exclude_file_descriptors()
-                Called daemon.daemon.close_all_open_files(...)
-                Called daemon.daemon.redirect_stream(...)
-                Called daemon.daemon.redirect_stream(...)
-                Called daemon.daemon.redirect_stream(...)
-                Called daemon.daemon.register_atexit_function(...)
-                """ % vars()
-        self.mock_tracker.clear()
+        self.mock_module_daemon.attach_mock(
+                self.mock_pidlockfile, 'pidlockfile')
+        expected_call_log = """\
+                call.change_root_directory(...)
+                call.prevent_core_dump()
+                call.change_file_creation_mask(...)
+                call.change_working_directory(...)
+                call.change_process_owner(...)
+                call.detach_process_context()
+                call.DaemonContext._make_signal_handler_map()
+                call.set_signal_handlers(...)
+                call.DaemonContext._get_exclude_file_descriptors()
+                call.close_all_open_files(...)
+                call.redirect_stream(...)
+                call.redirect_stream(...)
+                call.redirect_stream(...)
+                call.pidlockfile.__enter__()
+                call.register_atexit_function(...)
+                """
         instance.open()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
-        self.mock_pidlockfile.__enter__.assert_called_with()
+        call_log = "".join(
+                "%(call)r\n" % {'call': call}
+                for call in self.mock_module_daemon.mock_calls)
+        self.failUnlessOutputCheckerMatch(expected_call_log, call_log)
 
     def test_returns_immediately_if_is_open(self):
         """ Should return immediately if is_open property is true. """
         instance = self.test_instance
         instance._is_open = True
-        expected_mock_output = """\
-                """
-        self.mock_tracker.clear()
         instance.open()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.failUnlessEqual(0, len(self.mock_module_daemon.mock_calls))
 
     def test_changes_root_directory_to_chroot_directory(self):
         """ Should change root directory to `chroot_directory` option. """
         instance = self.test_instance
         chroot_directory = object()
         instance.chroot_directory = chroot_directory
-        expected_mock_output = """\
-                Called daemon.daemon.change_root_directory(
-                    %(chroot_directory)r)
-                ...
-                """ % vars()
         instance.open()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.mock_module_daemon.change_root_directory.assert_called_with(
+                chroot_directory)
 
     def test_omits_chroot_if_no_chroot_directory(self):
         """ Should omit changing root directory if no `chroot_directory`. """
         instance = self.test_instance
         instance.chroot_directory = None
-        unwanted_output = """\
-                ...Called daemon.daemon.change_root_directory(...)..."""
         instance.open()
-        self.failIfMockCheckerMatch(unwanted_output)
+        self.failIf(self.mock_module_daemon.change_root_directory.called)
 
     def test_prevents_core_dump(self):
         """ Should request prevention of core dumps. """
         instance = self.test_instance
-        expected_mock_output = """\
-                Called daemon.daemon.prevent_core_dump()
-                ...
-                """ % vars()
         instance.open()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.mock_module_daemon.prevent_core_dump.assert_called_with()
 
     def test_omits_prevent_core_dump_if_prevent_core_false(self):
         """ Should omit preventing core dumps if `prevent_core` is false. """
         instance = self.test_instance
         instance.prevent_core = False
-        unwanted_output = """\
-                ...Called daemon.daemon.prevent_core_dump()..."""
         instance.open()
-        self.failIfMockCheckerMatch(unwanted_output)
+        self.failIf(self.mock_module_daemon.prevent_core_dump.called)
 
     def test_closes_open_files(self):
         """ Should close all open files, excluding `files_preserve`. """
         instance = self.test_instance
         expected_exclude = self.test_files_preserve_fds
-        expected_mock_output = """\
-                ...
-                Called daemon.daemon.close_all_open_files(
-                    exclude=%(expected_exclude)r)
-                ...
-                """ % vars()
         instance.open()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.mock_module_daemon.close_all_open_files.assert_called_with(
+                exclude=expected_exclude)
 
     def test_changes_directory_to_working_directory(self):
         """ Should change current directory to `working_directory` option. """
         instance = self.test_instance
         working_directory = object()
         instance.working_directory = working_directory
-        expected_mock_output = """\
-                ...
-                Called daemon.daemon.change_working_directory(
-                    %(working_directory)r)
-                ...
-                """ % vars()
         instance.open()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.mock_module_daemon.change_working_directory.assert_called_with(
+                working_directory)
 
     def test_changes_creation_mask_to_umask(self):
         """ Should change file creation mask to `umask` option. """
         instance = self.test_instance
         umask = object()
         instance.umask = umask
-        expected_mock_output = """\
-                ...
-                Called daemon.daemon.change_file_creation_mask(%(umask)r)
-                ...
-                """ % vars()
         instance.open()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.mock_module_daemon.change_file_creation_mask.assert_called_with(
+                umask)
 
     def test_changes_owner_to_specified_uid_and_gid(self):
         """ Should change process UID and GID to `uid` and `gid` options. """
@@ -476,47 +446,31 @@ class DaemonContext_open_TestCase(DaemonContext_BaseTestCase):
         gid = object()
         instance.uid = uid
         instance.gid = gid
-        expected_mock_output = """\
-                ...
-                Called daemon.daemon.change_process_owner(%(uid)r, %(gid)r)
-                ...
-                """ % vars()
         instance.open()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.mock_module_daemon.change_process_owner.assert_called_with(
+                uid, gid)
 
     def test_detaches_process_context(self):
         """ Should request detach of process context. """
         instance = self.test_instance
-        expected_mock_output = """\
-                ...
-                Called daemon.daemon.detach_process_context()
-                ...
-                """ % vars()
         instance.open()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.mock_module_daemon.detach_process_context.assert_called_with()
 
     def test_omits_process_detach_if_not_required(self):
         """ Should omit detach of process context if not required. """
         instance = self.test_instance
         instance.detach_process = False
-        unwanted_output = """\
-                ...Called daemon.daemon.detach_process_context(...)..."""
         instance.open()
-        self.failIfMockCheckerMatch(unwanted_output)
+        self.failIf(self.mock_module_daemon.detach_process_context.called)
 
     def test_sets_signal_handlers_from_signal_map(self):
         """ Should set signal handlers according to `signal_map`. """
         instance = self.test_instance
         instance.signal_map = object()
         expected_signal_handler_map = self.test_signal_handler_map
-        expected_mock_output = """\
-                ...
-                Called daemon.daemon.set_signal_handlers(
-                    %(expected_signal_handler_map)r)
-                ...
-                """ % vars()
         instance.open()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.mock_module_daemon.set_signal_handlers.assert_called_with(
+                expected_signal_handler_map)
 
     def test_redirects_standard_streams(self):
         """ Should request redirection of standard stream files. """
@@ -526,18 +480,14 @@ class DaemonContext_open_TestCase(DaemonContext_BaseTestCase):
         (target_stdin, target_stdout, target_stderr) = (
                 self.stream_files_by_name[name]
                 for name in ['stdin', 'stdout', 'stderr'])
-        expected_mock_output = """\
-                ...
-                Called daemon.daemon.redirect_stream(
-                    %(system_stdin)r, %(target_stdin)r)
-                Called daemon.daemon.redirect_stream(
-                    %(system_stdout)r, %(target_stdout)r)
-                Called daemon.daemon.redirect_stream(
-                    %(system_stderr)r, %(target_stderr)r)
-                ...
-                """ % vars()
+        expected_calls = [
+                mock.call(system_stdin, target_stdin),
+                mock.call(system_stdout, target_stdout),
+                mock.call(system_stderr, target_stderr),
+                ]
         instance.open()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.mock_module_daemon.redirect_stream.assert_has_calls(
+                expected_calls, any_order=True)
 
     def test_enters_pidfile_context(self):
         """ Should enter the PID file context manager. """
@@ -556,12 +506,9 @@ class DaemonContext_open_TestCase(DaemonContext_BaseTestCase):
         """ Should register the `close` method for atexit processing. """
         instance = self.test_instance
         close_method = instance.close
-        expected_mock_output = """\
-                ...
-                Called daemon.daemon.register_atexit_function(%(close_method)r)
-                """ % vars()
         instance.open()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.mock_module_daemon.register_atexit_function.assert_called_with(
+                close_method)
 
 
 class DaemonContext_close_TestCase(DaemonContext_BaseTestCase):
