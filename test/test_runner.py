@@ -280,14 +280,14 @@ class DaemonRunner_TestCase(scaffold.TestCase):
                 """ % vars()
         scaffold.mock_restore()
         self.failUnlessMockCheckerMatch(expected_mock_output)
- 
+
     def test_has_created_pidfile(self):
         """ Should have new PID lock file as `pidfile` attribute. """
         expected_pidfile = self.mock_runner_lock
         instance = self.test_instance
         self.failUnlessIs(
                 expected_pidfile, instance.pidfile)
- 
+
     def test_daemon_context_has_created_pidfile(self):
         """ DaemonContext component should have new PID lock file. """
         expected_pidfile = self.mock_runner_lock
