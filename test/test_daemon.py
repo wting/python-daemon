@@ -289,7 +289,7 @@ class DaemonContext_open_TestCase(DaemonContext_BaseTestCase):
         self.test_instance._is_open = False
 
         self.mock_module_daemon = mock.MagicMock()
-        self.daemon_func_patchers = dict(
+        daemon_func_patchers = dict(
                 (func_name, mock.patch.object(
                     daemon.daemon, func_name))
                 for func_name in [
@@ -304,11 +304,9 @@ class DaemonContext_open_TestCase(DaemonContext_BaseTestCase):
                     "set_signal_handlers",
                     "register_atexit_function",
                     ])
-        self.daemon_mock_funcs = dict(
-                (func_name, patcher.start())
-                for (func_name, patcher) in
-                    self.daemon_func_patchers.iteritems())
-        for (func_name, mock_func) in self.daemon_mock_funcs.iteritems():
+        for (func_name, patcher) in daemon_func_patchers.iteritems():
+            mock_func = patcher.start()
+            self.addCleanup(patcher.stop)
             self.mock_module_daemon.attach_mock(mock_func, func_name)
 
         self.mock_module_daemon.attach_mock(mock.Mock(), 'DaemonContext')
@@ -321,30 +319,18 @@ class DaemonContext_open_TestCase(DaemonContext_BaseTestCase):
                 '_make_signal_handler_map':
                     self.test_signal_handler_map,
                 }
-        self.daemoncontext_func_patchers = dict(
+        daemoncontext_func_patchers = dict(
                 (func_name, mock.patch.object(
                     daemon.daemon.DaemonContext,
                     func_name,
                     return_value=return_value))
                 for (func_name, return_value) in
                     daemoncontext_method_return_values.iteritems())
-        self.daemoncontext_mock_funcs = dict(
-                (func_name, patcher.start())
-                for (func_name, patcher) in
-                    self.daemoncontext_func_patchers.iteritems())
-        for (func_name, mock_func) in (
-                self.daemoncontext_mock_funcs.iteritems()):
+        for (func_name, patcher) in daemoncontext_func_patchers.iteritems():
+            mock_func = patcher.start()
+            self.addCleanup(patcher.stop)
             self.mock_module_daemon.DaemonContext.attach_mock(
                     mock_func, func_name)
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        for patcher in self.daemon_func_patchers.values():
-            patcher.stop()
-        for patcher in self.daemoncontext_func_patchers.values():
-            patcher.stop()
-
-        super(DaemonContext_open_TestCase, self).tearDown()
 
     def test_performs_steps_in_expected_sequence(self):
         """ Should perform daemonisation steps in expected sequence. """
@@ -766,17 +752,12 @@ class DaemonContext_make_signal_handler_map_TestCase(
         def fake_make_signal_handler(target):
             return self.test_signal_handlers[target]
 
-        self.func_patcher_make_signal_handler = mock.patch.object(
+        func_patcher_make_signal_handler = mock.patch.object(
                 daemon.daemon.DaemonContext, "_make_signal_handler",
                 side_effect=fake_make_signal_handler)
         self.mock_func_make_signal_handler = (
-                self.func_patcher_make_signal_handler.start())
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        self.func_patcher_make_signal_handler.stop()
-
-        super(DaemonContext_make_signal_handler_map_TestCase, self).tearDown()
+                func_patcher_make_signal_handler.start())
+        self.addCleanup(func_patcher_make_signal_handler.stop)
 
     def test_returns_constructed_signal_handler_items(self):
         """ Should return items as constructed via make_signal_handler. """
@@ -1254,32 +1235,27 @@ class detach_process_context_TestCase(scaffold.TestCase):
         self.mock_module_os = mock.MagicMock(wraps=os)
 
         fake_pids = [0, 0]
-        self.func_patcher_os_fork = mock.patch.object(
+        func_patcher_os_fork = mock.patch.object(
                 os, "fork",
                 side_effect=iter(fake_pids))
-        self.mock_func_os_fork = self.func_patcher_os_fork.start()
+        self.mock_func_os_fork = func_patcher_os_fork.start()
+        self.addCleanup(func_patcher_os_fork.stop)
         self.mock_module_os.attach_mock(self.mock_func_os_fork, "fork")
 
-        self.func_patcher_os_setsid = mock.patch.object(os, "setsid")
-        self.mock_func_os_setsid = self.func_patcher_os_setsid.start()
+        func_patcher_os_setsid = mock.patch.object(os, "setsid")
+        self.mock_func_os_setsid = func_patcher_os_setsid.start()
+        self.addCleanup(func_patcher_os_setsid.stop)
         self.mock_module_os.attach_mock(self.mock_func_os_setsid, "setsid")
 
         def raise_os_exit(status=None):
             raise self.FakeOSExit(status)
 
-        self.func_patcher_os_force_exit = mock.patch.object(
+        func_patcher_os_force_exit = mock.patch.object(
                 os, "_exit",
                 side_effect=raise_os_exit)
-        self.mock_func_os_force_exit = self.func_patcher_os_force_exit.start()
+        self.mock_func_os_force_exit = func_patcher_os_force_exit.start()
+        self.addCleanup(func_patcher_os_force_exit.stop)
         self.mock_module_os.attach_mock(self.mock_func_os_force_exit, "_exit")
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        self.func_patcher_os_fork.stop()
-        self.func_patcher_os_setsid.stop()
-        self.func_patcher_os_force_exit.stop()
-
-        super(detach_process_context_TestCase, self).tearDown()
 
     def test_parent_exits(self):
         """ Parent process should exit. """
@@ -1416,16 +1392,11 @@ class is_socket_TestCase(scaffold.TestCase):
         def fake_socket_fromfd(fd, family, type, proto=None):
             return self.mock_socket
 
-        self.func_patcher_socket_fromfd = mock.patch(
+        func_patcher_socket_fromfd = mock.patch(
                 "socket.fromfd",
                 side_effect=fake_socket_fromfd)
-        self.func_patcher_socket_fromfd.start()
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        self.func_patcher_socket_fromfd.stop()
-
-        super(is_socket_TestCase, self).tearDown()
+        func_patcher_socket_fromfd.start()
+        self.addCleanup(func_patcher_socket_fromfd.stop)
 
     def test_returns_false_by_default(self):
         """ Should return False under normal circumstances. """
@@ -1470,16 +1441,11 @@ class is_process_started_by_superserver_TestCase(scaffold.TestCase):
 
         self.fake_stdin_is_socket_func = (lambda: False)
 
-        self.func_patcher_is_socket = mock.patch.object(
+        func_patcher_is_socket = mock.patch.object(
                 daemon.daemon, "is_socket",
                 side_effect=fake_is_socket)
-        self.func_patcher_is_socket.start()
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        self.func_patcher_is_socket.stop()
-
-        super(is_process_started_by_superserver_TestCase, self).tearDown()
+        func_patcher_is_socket.start()
+        self.addCleanup(func_patcher_is_socket.stop)
 
     def test_returns_false_by_default(self):
         """ Should return False under normal circumstances. """
@@ -1577,16 +1543,11 @@ class redirect_stream_TestCase(scaffold.TestCase):
                 raise OSError(errno.NOENT, "No such file", path)
             return result
 
-        self.func_patcher_os_open = mock.patch(
+        func_patcher_os_open = mock.patch(
                 "os.open",
                 side_effect=fake_os_open)
-        self.mock_func_os_open = self.func_patcher_os_open.start()
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        self.func_patcher_os_open.stop()
-
-        super(redirect_stream_TestCase, self).tearDown()
+        self.mock_func_os_open = func_patcher_os_open.start()
+        self.addCleanup(func_patcher_os_open.stop)
 
     def test_duplicates_target_file_descriptor(
             self, mock_func_os_dup2):
@@ -1634,9 +1595,10 @@ class make_default_signal_map_TestCase(scaffold.TestCase):
         for name in fake_signal_names:
             setattr(self.fake_signal_module, name, object())
 
-        self.module_patcher_signal = mock.patch.object(
+        module_patcher_signal = mock.patch.object(
                 daemon.daemon, "signal", new=self.fake_signal_module)
-        self.module_patcher_signal.start()
+        module_patcher_signal.start()
+        self.addCleanup(module_patcher_signal.stop)
 
         default_signal_map_by_name = {
                 'SIGTSTP': None,
@@ -1647,12 +1609,6 @@ class make_default_signal_map_TestCase(scaffold.TestCase):
         self.default_signal_map = dict(
                 (getattr(self.fake_signal_module, name), target)
                 for (name, target) in default_signal_map_by_name.iteritems())
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        self.module_patcher_signal.stop()
-
-        super(make_default_signal_map_TestCase, self).tearDown()
 
     def test_returns_constructed_signal_map(self):
         """ Should return map per default. """

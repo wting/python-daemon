@@ -47,6 +47,7 @@ setup(
         zip_safe=False,
         test_suite="test.suite",
         tests_require=[
+            "unittest2",
             "testtools",
             "testscenarios",
             "mock >=1.0",

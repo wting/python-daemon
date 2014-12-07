@@ -149,10 +149,11 @@ def setup_pidfile_fixtures(testcase):
             pass
         return value
 
-    getpid_patcher = mock.patch(
-            "os.getpid",
+    func_patcher_os_getpid = mock.patch.object(
+            os, "getpid",
             return_value=scenarios['simple']['pid'])
-    getpid_patcher.start()
+    func_patcher_os_getpid.start()
+    testcase.addCleanup(func_patcher_os_getpid.stop)
 
     def make_fake_open_funcs(testcase):
 
@@ -217,10 +218,11 @@ def setup_pidfile_fixtures(testcase):
     mock_open = mock.mock_open()
     mock_open.side_effect = fake_open
 
-    open_patcher = mock.patch(
+    func_patcher_builtin_open = mock.patch(
             "__builtin__.open",
             new=mock_open)
-    open_patcher.start()
+    func_patcher_builtin_open.start()
+    testcase.addCleanup(func_patcher_builtin_open.stop)
 
     def fake_os_open(filename, flags, mode=None):
         scenario_path = get_scenario_option(testcase, 'pidfile_path')
@@ -234,10 +236,11 @@ def setup_pidfile_fixtures(testcase):
 
     mock_os_open = mock.MagicMock(side_effect=fake_os_open)
 
-    os_open_patcher = mock.patch(
-            "os.open",
+    func_patcher_os_open = mock.patch.object(
+            os, "open",
             new=mock_os_open)
-    os_open_patcher.start()
+    func_patcher_os_open.start()
+    testcase.addCleanup(func_patcher_os_open.stop)
 
     def fake_os_fdopen(fd, mode='r', buffering=None):
         scenario_pidfile = get_scenario_option(
@@ -250,10 +253,11 @@ def setup_pidfile_fixtures(testcase):
 
     mock_os_fdopen = mock.MagicMock(side_effect=fake_os_fdopen)
 
-    os_fdopen_patcher = mock.patch(
-            "os.fdopen",
+    func_patcher_os_fdopen = mock.patch.object(
+            os, "fdopen",
             new=mock_os_fdopen)
-    os_fdopen_patcher.start()
+    func_patcher_os_fdopen.start()
+    testcase.addCleanup(func_patcher_os_fdopen.stop)
 
 
 def make_lockfile_method_fakes(scenario):
