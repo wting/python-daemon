@@ -24,6 +24,7 @@ import errno
 import signal
 
 import lockfile
+import mock
 
 import scaffold
 from test_pidfile import (
@@ -624,6 +625,8 @@ class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
         self.failUnlessIn(unicode(exc), expected_message_content)
 
 
+@mock.patch.object(daemon.runner.DaemonRunner, "_start")
+@mock.patch.object(daemon.runner.DaemonRunner, "_stop")
 class DaemonRunner_do_action_restart_TestCase(DaemonRunner_BaseTestCase):
     """ Test cases for DaemonRunner.do_action method, action 'restart'. """
 
@@ -635,21 +638,14 @@ class DaemonRunner_do_action_restart_TestCase(DaemonRunner_BaseTestCase):
 
         self.test_instance.action = 'restart'
 
-    def test_requests_stop_then_start(self):
+    def test_requests_stop_then_start(
+            self,
+            mock_func_daemonrunner_start, mock_func_daemonrunner_stop):
         """ Should request stop, then start. """
         instance = self.test_instance
-        scaffold.mock(
-                "daemon.runner.DaemonRunner._start",
-                tracker=self.mock_tracker)
-        scaffold.mock(
-                "daemon.runner.DaemonRunner._stop",
-                tracker=self.mock_tracker)
-        expected_mock_output = """\
-                Called daemon.runner.DaemonRunner._stop()
-                Called daemon.runner.DaemonRunner._start()
-                """
         instance.do_action()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        mock_func_daemonrunner_start.assert_called_with()
+        mock_func_daemonrunner_stop.assert_called_with()
 
 
 # Local variables:
