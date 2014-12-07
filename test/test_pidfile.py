@@ -136,8 +136,6 @@ def make_pidlockfile_scenarios():
 
 def setup_pidfile_fixtures(testcase):
     """ Set up common fixtures for PID file test cases. """
-    testcase.mock_tracker = scaffold.MockTracker()
-
     scenarios = make_pidlockfile_scenarios()
     testcase.pidlockfile_scenarios = scenarios
 
@@ -316,12 +314,13 @@ def setup_pidlockfile_fixtures(testcase, scenario_name=None):
 
     setup_pidfile_fixtures(testcase)
 
-    scaffold.mock(
-            "pidlockfile.write_pid_to_pidfile",
-            tracker=testcase.mock_tracker)
-    scaffold.mock(
-            "pidlockfile.remove_existing_pidfile",
-            tracker=testcase.mock_tracker)
+    for func_name in [
+            'write_pid_to_pidfile',
+            'pidlockfile.remove_existing_pidfile',
+            ]:
+        patcher = mock.patch.object(pidlockfile, func_name)
+        patcher.start()
+        testcase.addCleanup(patcher.stop)
 
     if scenario_name is not None:
         set_pidlockfile_scenario(testcase, scenario_name, clear_tracker=False)
