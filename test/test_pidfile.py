@@ -256,40 +256,55 @@ def setup_pidfile_fixtures(testcase):
     os_fdopen_patcher.start()
 
 
-def setup_lockfile_method_mocks(testcase, scenario, class_name):
-    """ Set up common mock methods for lockfile class. """
+def make_lockfile_method_fakes(scenario):
+    """ Make common fake methods for lockfile class. """
 
-    def fake_read_pid():
+    def fake_func_read_pid():
         return scenario['pidfile_pid']
-    def fake_is_locked():
+    def fake_func_is_locked():
         return (scenario['locking_pid'] is not None)
-    def fake_i_am_locking():
+    def fake_func_i_am_locking():
         return (
                 scenario['locking_pid'] == scenario['pid'])
-    def fake_acquire(timeout=None):
+    def fake_func_acquire(timeout=None):
         if scenario['locking_pid'] is not None:
             raise lockfile.AlreadyLocked()
         scenario['locking_pid'] = scenario['pid']
-    def fake_release():
+    def fake_func_release():
         if scenario['locking_pid'] is None:
             raise lockfile.NotLocked()
         if scenario['locking_pid'] != scenario['pid']:
             raise lockfile.NotMyLock()
         scenario['locking_pid'] = None
-    def fake_break_lock():
+    def fake_func_break_lock():
         scenario['locking_pid'] = None
 
-    for func_name in [
-            'read_pid',
-            'is_locked', 'i_am_locking',
-            'acquire', 'release', 'break_lock',
-            ]:
-        fake_func = vars()["fake_%(func_name)s" % vars()]
+    fake_methods = dict(
+            (func_name.replace('fake_func_', ''), fake_func)
+            for (func_name, fake_func) in vars().iteritems()
+                if func_name.startswith('fake_func_'))
+
+    return fake_methods
+
+
+def setup_lockfile_method_mocks(testcase, scenario, class_name):
+    """ Set up common mock methods for lockfile class. """
+    fake_methods = make_lockfile_method_fakes(scenario)
+
+    for (func_name, fake_func) in fake_methods.iteritems():
         lockfile_func_name = ".".join([class_name, func_name])
         lockfile_func_patcher = mock.patch(
                 lockfile_func_name, autospec=True,
                 side_effect=fake_func)
         lockfile_func_patcher.start()
+
+
+def apply_lockfile_method_mocks(mock_lockfile, scenario):
+    """ Apply common fake methods to mock lockfile. """
+    fake_methods = make_lockfile_method_fakes(scenario)
+
+    for (func_name, fake_func) in fake_methods.iteritems():
+        setattr(mock_lockfile, func_name, fake_func)
 
 
 def setup_pidlockfile_fixtures(testcase, scenario_name=None):
