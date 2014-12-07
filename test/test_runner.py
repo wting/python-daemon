@@ -123,11 +123,9 @@ def setup_runner_fixtures(testcase):
 
     testcase.runner_scenarios = make_runner_scenarios()
 
-    testcase.fake_stderr = FakeFileDescriptorStringIO()
-    scaffold.mock(
-            "sys.stderr",
-            mock_obj=testcase.fake_stderr,
-            tracker=testcase.mock_tracker)
+    testcase.patcher_stderr = mock.patch.object(
+            sys, "stderr",
+            new=FakeFileDescriptorStringIO())
 
     simple_scenario = testcase.runner_scenarios['simple']
 
@@ -214,9 +212,12 @@ class DaemonRunner_BaseTestCase(scaffold.TestCase):
         setup_runner_fixtures(self)
         set_runner_scenario(self, 'simple')
 
+        self.fake_stderr = self.patcher_stderr.start()
+
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+        self.patcher_stderr.stop()
 
         super(DaemonRunner_BaseTestCase, self).tearDown()
 
