@@ -126,10 +126,10 @@ def make_pidlockfile_scenarios():
             scenario['os_open_func_name'] = 'mock_os_open_okay'
 
         scenario['pidlockfile_args'] = dict(
-            path=scenario['pidfile_path'],
-            )
+                path=scenario['pidfile_path'],
+                )
         scenario['test_instance'] = pidlockfile.PIDLockFile(
-            **scenario['pidlockfile_args'])
+                **scenario['pidlockfile_args'])
 
     return scenarios
 
