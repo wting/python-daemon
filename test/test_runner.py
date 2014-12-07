@@ -202,16 +202,30 @@ def setup_runner_fixtures(testcase):
 
     testcase.scenario = NotImplemented
 
+
+class DaemonRunner_BaseTestCase(scaffold.TestCase):
+    """ Base class for DaemonRunner test case classes. """
+
+    def setUp(self):
+        """ Set up test fixtures. """
+        super(DaemonRunner_BaseTestCase, self).setUp()
+
+        setup_runner_fixtures(self)
+        set_runner_scenario(self, 'simple')
+
+    def tearDown(self):
+        """ Tear down test fixtures. """
+        scaffold.mock_restore()
+
+        super(DaemonRunner_BaseTestCase, self).tearDown()
+
 
-class DaemonRunner_TestCase(scaffold.TestCase):
+class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
     """ Test cases for DaemonRunner class. """
 
     def setUp(self):
         """ Set up test fixtures. """
         super(DaemonRunner_TestCase, self).setUp()
-
-        setup_runner_fixtures(self)
-        set_runner_scenario(self, 'simple')
 
         scaffold.mock(
                 "runner.DaemonRunner.parse_args",
@@ -342,21 +356,8 @@ class DaemonRunner_TestCase(scaffold.TestCase):
                 expected_buffering, daemon_context.stderr.buffering)
 
 
-class DaemonRunner_usage_exit_TestCase(scaffold.TestCase):
+class DaemonRunner_usage_exit_TestCase(DaemonRunner_BaseTestCase):
     """ Test cases for DaemonRunner.usage_exit method. """
-
-    def setUp(self):
-        """ Set up test fixtures. """
-        super(DaemonRunner_usage_exit_TestCase, self).setUp()
-
-        setup_runner_fixtures(self)
-        set_runner_scenario(self, 'simple')
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(DaemonRunner_usage_exit_TestCase, self).tearDown()
 
     def test_raises_system_exit(self):
         """ Should raise SystemExit exception. """
@@ -381,26 +382,17 @@ class DaemonRunner_usage_exit_TestCase(scaffold.TestCase):
                 expected_stderr_output, self.fake_stderr.getvalue())
 
 
-class DaemonRunner_parse_args_TestCase(scaffold.TestCase):
+class DaemonRunner_parse_args_TestCase(DaemonRunner_BaseTestCase):
     """ Test cases for DaemonRunner.parse_args method. """
 
     def setUp(self):
         """ Set up test fixtures. """
         super(DaemonRunner_parse_args_TestCase, self).setUp()
 
-        setup_runner_fixtures(self)
-        set_runner_scenario(self, 'simple')
-
         scaffold.mock(
                 "daemon.runner.DaemonRunner._usage_exit",
                 raises=NotImplementedError,
                 tracker=self.mock_tracker)
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(DaemonRunner_parse_args_TestCase, self).tearDown()
 
     def test_emits_usage_message_if_insufficient_args(self):
         """ Should emit a usage message and exit if too few arguments. """
@@ -450,21 +442,8 @@ class DaemonRunner_parse_args_TestCase(scaffold.TestCase):
             self.failUnlessEqual(expected_action, instance.action)
 
 
-class DaemonRunner_do_action_TestCase(scaffold.TestCase):
+class DaemonRunner_do_action_TestCase(DaemonRunner_BaseTestCase):
     """ Test cases for DaemonRunner.do_action method. """
-
-    def setUp(self):
-        """ Set up test fixtures. """
-        super(DaemonRunner_do_action_TestCase, self).setUp()
-
-        setup_runner_fixtures(self)
-        set_runner_scenario(self, 'simple')
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(DaemonRunner_do_action_TestCase, self).tearDown()
 
     def test_raises_error_if_unknown_action(self):
         """ Should emit a usage message and exit if action is unknown. """
@@ -476,23 +455,14 @@ class DaemonRunner_do_action_TestCase(scaffold.TestCase):
             instance.do_action)
 
 
-class DaemonRunner_do_action_start_TestCase(scaffold.TestCase):
+class DaemonRunner_do_action_start_TestCase(DaemonRunner_BaseTestCase):
     """ Test cases for DaemonRunner.do_action method, action 'start'. """
 
     def setUp(self):
         """ Set up test fixtures. """
         super(DaemonRunner_do_action_start_TestCase, self).setUp()
 
-        setup_runner_fixtures(self)
-        set_runner_scenario(self, 'simple')
-
         self.test_instance.action = 'start'
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(DaemonRunner_do_action_start_TestCase, self).tearDown()
 
     def test_raises_error_if_pidfile_locked(self):
         """ Should raise error if PID file is locked. """
@@ -567,14 +537,13 @@ class DaemonRunner_do_action_start_TestCase(scaffold.TestCase):
         self.failUnlessMockCheckerMatch(expected_mock_output)
 
 
-class DaemonRunner_do_action_stop_TestCase(scaffold.TestCase):
+class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
     """ Test cases for DaemonRunner.do_action method, action 'stop'. """
 
     def setUp(self):
         """ Set up test fixtures. """
         super(DaemonRunner_do_action_stop_TestCase, self).setUp()
 
-        setup_runner_fixtures(self)
         set_runner_scenario(self, 'pidfile-locked')
 
         self.test_instance.action = 'stop'
@@ -583,12 +552,6 @@ class DaemonRunner_do_action_stop_TestCase(scaffold.TestCase):
         self.mock_runner_lock.i_am_locking.mock_returns = False
         self.mock_runner_lock.read_pid.mock_returns = (
                 self.scenario['pidlockfile_scenario']['pidfile_pid'])
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(DaemonRunner_do_action_stop_TestCase, self).tearDown()
 
     def test_raises_error_if_pidfile_not_locked(self):
         """ Should raise error if PID file is not locked. """
@@ -661,23 +624,16 @@ class DaemonRunner_do_action_stop_TestCase(scaffold.TestCase):
         self.failUnlessIn(unicode(exc), expected_message_content)
 
 
-class DaemonRunner_do_action_restart_TestCase(scaffold.TestCase):
+class DaemonRunner_do_action_restart_TestCase(DaemonRunner_BaseTestCase):
     """ Test cases for DaemonRunner.do_action method, action 'restart'. """
 
     def setUp(self):
         """ Set up test fixtures. """
         super(DaemonRunner_do_action_restart_TestCase, self).setUp()
 
-        setup_runner_fixtures(self)
         set_runner_scenario(self, 'pidfile-locked')
 
         self.test_instance.action = 'restart'
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(DaemonRunner_do_action_restart_TestCase, self).tearDown()
 
     def test_requests_stop_then_start(self):
         """ Should request stop, then start. """
