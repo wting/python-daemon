@@ -126,7 +126,7 @@ def format_function_signature(func):
     return signature_text
 
 
-class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
+class TestCase(testtools.testcase.TestCase):
     """ Test case behaviour. """
 
     def failUnlessOutputCheckerMatch(self, want, got, msg=None):
@@ -225,8 +225,12 @@ class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
 
     assertFunctionSignatureMatch = failUnlessFunctionSignatureMatch
 
+
+class TestCaseWithScenarios(testscenarios.WithScenarios, TestCase):
+    """ Test cases run per scenario. """
+
 
-class Exception_TestCase(TestCase):
+class Exception_TestCase(TestCaseWithScenarios):
     """ Test cases for exception classes. """
 
     def test_exception_instance(self):
