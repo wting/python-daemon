@@ -192,10 +192,11 @@ def setup_runner_fixtures(testcase):
             "os.kill",
             tracker=testcase.mock_tracker)
 
-    scaffold.mock(
-            "sys.argv",
-            mock_obj=testcase.valid_argv_params['start'],
-            tracker=testcase.mock_tracker)
+    patcher_sys_argv = mock.patch.object(
+            sys, "argv",
+            new=testcase.valid_argv_params['start'])
+    patcher_sys_argv.start()
+    testcase.addCleanup(patcher_sys_argv.stop)
 
     testcase.test_instance = runner.DaemonRunner(testcase.test_app)
 
