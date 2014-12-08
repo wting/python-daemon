@@ -381,7 +381,7 @@ def make_exception_scenarios(scenarios):
 # This monkey-patch is needed only until ‘testscenarios’ incorporates
 # this behaviour for scenario short descriptions.
 
-def apply_scenario((name, parameters), test):
+def apply_scenario(scenario, test):
     """Apply scenario to test.
 
     :param scenario: A tuple (name, parameters) to apply to the test. The test
@@ -390,6 +390,7 @@ def apply_scenario((name, parameters), test):
     :param test: The test to apply the scenario to. This test is unaltered.
     :return: A new test cloned from test, with the scenario applied.
     """
+    (name, parameters) = scenario
     scenario_suffix = '(' + name + ')'
     newtest = testscenarios.scenarios.clone_test_with_new_id(test,
         test.id() + scenario_suffix)
