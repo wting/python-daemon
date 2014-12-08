@@ -99,20 +99,9 @@ def set_runner_scenario(testcase, scenario_name):
     """ Set the DaemonRunner test scenario for the test case. """
     scenarios = testcase.runner_scenarios
     testcase.scenario = scenarios[scenario_name]
-    set_pidlockfile_scenario(
-            testcase, testcase.scenario['pidlockfile_scenario_name'])
     apply_lockfile_method_mocks(
             testcase.mock_runner_lockfile,
             testcase.scenario['pidlockfile_scenario'])
-
-
-def set_pidlockfile_scenario(testcase, scenario_name):
-    """ Set the PIDLockFile test scenario for the test case. """
-    scenarios = testcase.pidlockfile_scenarios
-    testcase.pidlockfile_scenario = scenarios[scenario_name]
-    apply_lockfile_method_mocks(
-            testcase.pidlockfile_scenario['test_instance'],
-            testcase.pidlockfile_scenario)
 
 
 def setup_runner_fixtures(testcase):
@@ -441,7 +430,7 @@ class DaemonRunner_do_action_start_TestCase(DaemonRunner_BaseTestCase):
 
     def test_raises_error_if_pidfile_locked(self):
         """ Should raise error if PID file is locked. """
-        set_pidlockfile_scenario(self, 'exist-other-pid-locked')
+
         instance = self.test_instance
         instance.daemon_context.open.side_effect = lockfile.AlreadyLocked
         pidfile_path = self.scenario['pidfile_path']

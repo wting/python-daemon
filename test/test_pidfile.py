@@ -291,18 +291,6 @@ def make_lockfile_method_fakes(scenario):
     return fake_methods
 
 
-def setup_lockfile_method_mocks(testcase, scenario, class_name):
-    """ Set up common mock methods for lockfile class. """
-    fake_methods = make_lockfile_method_fakes(scenario)
-
-    for (func_name, fake_func) in fake_methods.iteritems():
-        lockfile_func_name = ".".join([class_name, func_name])
-        lockfile_func_patcher = mock.patch(
-                lockfile_func_name, autospec=True,
-                side_effect=fake_func)
-        lockfile_func_patcher.start()
-
-
 def apply_lockfile_method_mocks(mock_lockfile, scenario):
     """ Apply common fake methods to mock lockfile. """
     fake_methods = make_lockfile_method_fakes(scenario)
@@ -323,21 +311,6 @@ def setup_pidlockfile_fixtures(testcase, scenario_name=None):
         patcher = mock.patch.object(pidlockfile, func_name)
         patcher.start()
         testcase.addCleanup(patcher.stop)
-
-    if scenario_name is not None:
-        set_pidlockfile_scenario(testcase, scenario_name)
-
-
-def set_pidlockfile_scenario(testcase, scenario_name):
-    """ Set up the test case to the specified scenario. """
-    testcase.scenario = testcase.pidlockfile_scenarios[scenario_name]
-    setup_lockfile_method_mocks(
-            testcase, testcase.scenario, "lockfile.PIDLockFile")
-    testcase.pidlockfile_args = dict(
-            path=testcase.scenario['pidfile_path'],
-            )
-    testcase.test_instance = pidlockfile.PIDLockFile(
-            **testcase.pidlockfile_args)
 
 
 class TimeoutPIDLockFile_TestCase(scaffold.TestCase):

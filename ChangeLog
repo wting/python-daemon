@@ -3,6 +3,7 @@
     * Migrate to ‘mock’ library for mock objects in tests.
       This will ease the port to Python 3, which has ‘mock’ in the
       standard library.
+    * Migrate to ‘testscenarios’ library for unit test scenarios.
 
 2014-11-28  Ben Finney  <ben+python@benfinney.id.au>
 
