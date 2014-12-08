@@ -1,6 +1,8 @@
-2014-12-01  Ben Finney  <ben+python@benfinney.id.au>
+2014-12-08  Ben Finney  <ben+python@benfinney.id.au>
 
     * Migrate to ‘mock’ library for mock objects in tests.
+      This will ease the port to Python 3, which has ‘mock’ in the
+      standard library.
 
 2014-11-28  Ben Finney  <ben+python@benfinney.id.au>
 
