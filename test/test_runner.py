@@ -158,12 +158,10 @@ def setup_runner_fixtures(testcase):
 
     testcase.TestApp = TestApp
 
-    scaffold.mock(
-            "daemon.runner.DaemonContext",
-            returns=scaffold.Mock(
-                "DaemonContext",
-                tracker=testcase.mock_tracker),
-            tracker=testcase.mock_tracker)
+    patcher_daemoncontext = mock.patch.object(
+            daemon.runner, "DaemonContext", autospec=True)
+    patcher_daemoncontext.start()
+    testcase.addCleanup(patcher_daemoncontext.stop)
 
     testcase.test_app = testcase.TestApp()
 
@@ -452,8 +450,8 @@ class DaemonRunner_do_action_TestCase(DaemonRunner_BaseTestCase):
         instance.action = 'bogus'
         expected_error = runner.DaemonRunnerInvalidActionError
         self.failUnlessRaises(
-            expected_error,
-            instance.do_action)
+                expected_error,
+                instance.do_action)
 
 
 class DaemonRunner_do_action_start_TestCase(DaemonRunner_BaseTestCase):
@@ -469,8 +467,7 @@ class DaemonRunner_do_action_start_TestCase(DaemonRunner_BaseTestCase):
         """ Should raise error if PID file is locked. """
         set_pidlockfile_scenario(self, 'exist-other-pid-locked')
         instance = self.test_instance
-        instance.daemon_context.open.mock_raises = (
-                lockfile.AlreadyLocked)
+        instance.daemon_context.open.side_effect = lockfile.AlreadyLocked
         pidfile_path = self.scenario['pidfile_path']
         expected_error = runner.DaemonRunnerStartFailureError
         expected_message_content = pidfile_path
@@ -488,7 +485,7 @@ class DaemonRunner_do_action_start_TestCase(DaemonRunner_BaseTestCase):
         set_runner_scenario(self, 'pidfile-locked')
         instance = self.test_instance
         self.mock_runner_lock.read_pid.mock_returns = (
-            self.scenario['pidlockfile_scenario']['pidfile_pid'])
+                self.scenario['pidlockfile_scenario']['pidfile_pid'])
         pidfile_path = self.scenario['pidfile_path']
         test_pid = self.scenario['pidlockfile_scenario']['pidfile_pid']
         expected_signal = signal.SIG_DFL
@@ -508,13 +505,8 @@ class DaemonRunner_do_action_start_TestCase(DaemonRunner_BaseTestCase):
     def test_requests_daemon_context_open(self):
         """ Should request the daemon context to open. """
         instance = self.test_instance
-        expected_mock_output = """\
-                ...
-                Called DaemonContext.open()
-                ...
-                """
         instance.do_action()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        instance.daemon_context.open.assert_called_with()
 
     def test_emits_start_message_to_stderr(self):
         """ Should emit start message to stderr. """
@@ -525,7 +517,7 @@ class DaemonRunner_do_action_start_TestCase(DaemonRunner_BaseTestCase):
                 """ % vars()
         instance.do_action()
         self.failUnlessOutputCheckerMatch(
-            expected_stderr, self.fake_stderr.getvalue())
+                expected_stderr, self.fake_stderr.getvalue())
 
     def test_requests_app_run(self):
         """ Should request the application to run. """
