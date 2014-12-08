@@ -129,28 +129,6 @@ def format_function_signature(func):
 class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
     """ Test case behaviour. """
 
-    def failUnlessRaises(self, exc_class, func, *args, **kwargs):
-        """ Fail unless the function call raises the expected exception.
-
-            Fail the test if an instance of the exception class
-            ``exc_class`` is not raised when calling ``func`` with the
-            arguments ``*args`` and ``**kwargs``.
-
-            """
-        try:
-            super(TestCase, self).failUnlessRaises(
-                    exc_class, func, *args, **kwargs)
-        except self.failureException:
-            exc_class_name = exc_class.__name__
-            msg = (
-                    "Exception %(exc_class_name)s not raised"
-                    " for function call:"
-                    " func=%(func)r args=%(args)r kwargs=%(kwargs)r"
-                    ) % vars()
-            raise self.failureException(msg)
-
-    assertRaises = failUnlessRaises
-
     def failUnlessOutputCheckerMatch(self, want, got, msg=None):
         """ Fail unless the specified string matches the expected.
 
