@@ -340,28 +340,25 @@ class DaemonContext_open_TestCase(DaemonContext_BaseTestCase):
         instance.pidfile = self.mock_pidlockfile
         self.mock_module_daemon.attach_mock(
                 self.mock_pidlockfile, 'pidlockfile')
-        expected_call_log = """\
-                call.change_root_directory(...)
-                call.prevent_core_dump()
-                call.change_file_creation_mask(...)
-                call.change_working_directory(...)
-                call.change_process_owner(...)
-                call.detach_process_context()
-                call.DaemonContext._make_signal_handler_map()
-                call.set_signal_handlers(...)
-                call.DaemonContext._get_exclude_file_descriptors()
-                call.close_all_open_files(...)
-                call.redirect_stream(...)
-                call.redirect_stream(...)
-                call.redirect_stream(...)
-                call.pidlockfile.__enter__()
-                call.register_atexit_function(...)
-                """
+        expected_calls = [
+                mock.call.change_root_directory(mock.ANY),
+                mock.call.prevent_core_dump(),
+                mock.call.change_file_creation_mask(mock.ANY),
+                mock.call.change_working_directory(mock.ANY),
+                mock.call.change_process_owner(mock.ANY, mock.ANY),
+                mock.call.detach_process_context(),
+                mock.call.DaemonContext._make_signal_handler_map(),
+                mock.call.set_signal_handlers(mock.ANY),
+                mock.call.DaemonContext._get_exclude_file_descriptors(),
+                mock.call.close_all_open_files(exclude=mock.ANY),
+                mock.call.redirect_stream(mock.ANY, mock.ANY),
+                mock.call.redirect_stream(mock.ANY, mock.ANY),
+                mock.call.redirect_stream(mock.ANY, mock.ANY),
+                mock.call.pidlockfile.__enter__(),
+                mock.call.register_atexit_function(mock.ANY),
+                ]
         instance.open()
-        call_log = "".join(
-                "%(call)r\n" % {'call': call}
-                for call in self.mock_module_daemon.mock_calls)
-        self.failUnlessOutputCheckerMatch(expected_call_log, call_log)
+        self.mock_module_daemon.assert_has_calls(expected_calls)
 
     def test_returns_immediately_if_is_open(self):
         """ Should return immediately if is_open property is true. """
