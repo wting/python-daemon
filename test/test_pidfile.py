@@ -282,7 +282,9 @@ def make_lockfile_method_fakes(scenario):
         scenario['locking_pid'] = None
 
     fake_methods = dict(
-            (func_name.replace('fake_func_', ''), fake_func)
+            (
+                func_name.replace('fake_func_', ''),
+                mock.MagicMock(side_effect=fake_func))
             for (func_name, fake_func) in vars().iteritems()
                 if func_name.startswith('fake_func_'))
 
