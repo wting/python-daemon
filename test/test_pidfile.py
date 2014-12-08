@@ -343,13 +343,13 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
     def test_inherits_from_pidlockfile(self):
         """ Should inherit from PIDLockFile. """
         instance = self.test_instance
-        self.failUnlessIsInstance(instance, pidlockfile.PIDLockFile)
+        self.assertIsInstance(instance, pidlockfile.PIDLockFile)
 
     def test_init_has_expected_signature(self):
         """ Should have expected signature for ‘__init__’. """
         def test_func(self, path, acquire_timeout=None, *args, **kwargs): pass
         test_func.__name__ = b'__init__'
-        self.failUnlessFunctionSignatureMatch(
+        self.assertFunctionSignatureMatch(
                 test_func,
                 pidfile.TimeoutPIDLockFile.__init__)
 
@@ -357,7 +357,7 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
         """ Should have specified ‘acquire_timeout’ value. """
         instance = self.test_instance
         expected_timeout = self.test_kwargs['acquire_timeout']
-        self.failUnlessEqual(expected_timeout, instance.acquire_timeout)
+        self.assertEqual(expected_timeout, instance.acquire_timeout)
 
     @mock.patch.object(
             pidlockfile.PIDLockFile, "__init__",

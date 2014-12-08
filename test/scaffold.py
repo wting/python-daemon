@@ -149,6 +149,8 @@ class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
                     ) % vars()
             raise self.failureException(msg)
 
+    assertRaises = failUnlessRaises
+
     def failIfIs(self, first, second, msg=None):
         """ Fail if the two objects are identical.
 
@@ -336,12 +338,12 @@ class Exception_TestCase(TestCase):
 
     def test_exception_instance(self):
         """ Exception instance should be created. """
-        self.failIfIs(None, self.instance)
+        self.assertIsNot(None, self.instance)
 
     def test_exception_types(self):
         """ Exception instance should match expected types. """
         for match_type in self.types:
-            self.failUnlessIsInstance(self.instance, match_type)
+            self.assertIsInstance(self.instance, match_type)
 
 
 def make_exception_scenarios(scenarios):
