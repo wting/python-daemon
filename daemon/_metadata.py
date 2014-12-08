@@ -20,14 +20,21 @@ from ._version_info import version_info
 
 
 distribution_name = "python-daemon"
-try:
-    distribution = pkg_resources.get_distribution(distribution_name)
-except pkg_resources.DistributionNotFound:
-    distribution = None
 
-version_installed = None
-if distribution is not None:
-    version_installed = distribution.version
+def get_distribution_version():
+    """ Get the version from the installed distribution. """
+    try:
+        distribution = pkg_resources.get_distribution(distribution_name)
+    except pkg_resources.DistributionNotFound:
+        distribution = None
+
+    version = None
+    if distribution is not None:
+        version = distribution.version
+
+    return version
+
+version_installed = get_distribution_version()
 
 author_name = "Ben Finney"
 author_email = "ben+python@benfinney.id.au"
