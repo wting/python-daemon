@@ -111,7 +111,7 @@ def make_pidlockfile_scenarios():
                 },
             }
 
-    for scenario in scenarios.values():
+    for scenario in scenarios.itervalues():
         scenario['pid'] = fake_current_pid
         scenario['pidfile_path'] = fake_pidfile_path
         if 'pidfile' not in scenario:
@@ -196,7 +196,7 @@ def setup_pidfile_fixtures(testcase):
             return result
 
         funcs = dict(
-                (name, obj) for (name, obj) in vars().items()
+                (name, obj) for (name, obj) in vars().iteritems()
                 if hasattr(obj, '__call__'))
 
         return funcs

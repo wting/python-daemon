@@ -27,6 +27,7 @@ import sys
 import operator
 import textwrap
 from copy import deepcopy
+import itertools
 import functools
 
 import testscenarios
@@ -79,7 +80,7 @@ def get_function_signature(func):
     func_defaults = ()
     if func.func_defaults is not None:
         func_defaults = func.func_defaults
-    for (name, value) in zip(arg_names[::-1], func_defaults[::-1]):
+    for (name, value) in itertools.izip(arg_names[::-1], func_defaults[::-1]):
         arg_defaults[name] = value
 
     signature = {

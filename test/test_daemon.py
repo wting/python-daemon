@@ -632,11 +632,11 @@ class DaemonContext_get_exclude_file_descriptors_TestCase(
                 37: 37,
                 42: FakeFileDescriptorStringIO(),
                 }
-        for (fileno, item) in self.test_files.items():
+        for (fileno, item) in self.test_files.iteritems():
             if hasattr(item, '_fileno'):
                 item._fileno = fileno
         self.test_file_descriptors = set(
-                fd for (fd, item) in self.test_files.items()
+                fd for (fd, item) in self.test_files.iteritems()
                 if item is not None)
         self.test_file_descriptors.update(
                 self.stream_files_by_name[name].fileno()
@@ -657,7 +657,7 @@ class DaemonContext_get_exclude_file_descriptors_TestCase(
         instance.files_preserve = None
         expected_result = set(
                 stream.fileno()
-                for stream in self.stream_files_by_name.values())
+                for stream in self.stream_files_by_name.itervalues())
         result = instance._get_exclude_file_descriptors()
         self.failUnlessEqual(expected_result, result)
 
@@ -675,9 +675,8 @@ class DaemonContext_get_exclude_file_descriptors_TestCase(
         instance = self.test_instance
         instance.files_preserve = self.test_files.values()
         stream_files = self.stream_files_by_name
-        stream_names = stream_files.keys()
         expected_result = self.test_file_descriptors.copy()
-        for (pseudo_stream_name, pseudo_stream) in stream_files.items():
+        for (pseudo_stream_name, pseudo_stream) in stream_files.iteritems():
             setattr(instance, pseudo_stream_name, StringIO())
             stream_fd = pseudo_stream.fileno()
             expected_result.discard(stream_fd)
@@ -738,10 +737,10 @@ class DaemonContext_make_signal_handler_map_TestCase(
 
         self.test_signal_handlers = dict(
                 (key, object())
-                for key in self.test_instance.signal_map.values())
+                for key in self.test_instance.signal_map.itervalues())
         self.test_signal_handler_map = dict(
                 (key, self.test_signal_handlers[target])
-                for (key, target) in self.test_instance.signal_map.items())
+                for (key, target) in self.test_instance.signal_map.iteritems())
 
         def fake_make_signal_handler(target):
             return self.test_signal_handlers[target]
