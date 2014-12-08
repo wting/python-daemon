@@ -325,10 +325,10 @@ def setup_pidlockfile_fixtures(testcase, scenario_name=None):
         testcase.addCleanup(patcher.stop)
 
     if scenario_name is not None:
-        set_pidlockfile_scenario(testcase, scenario_name, clear_tracker=False)
+        set_pidlockfile_scenario(testcase, scenario_name)
 
 
-def set_pidlockfile_scenario(testcase, scenario_name, clear_tracker=True):
+def set_pidlockfile_scenario(testcase, scenario_name):
     """ Set up the test case to the specified scenario. """
     testcase.scenario = testcase.pidlockfile_scenarios[scenario_name]
     setup_lockfile_method_mocks(
@@ -338,8 +338,6 @@ def set_pidlockfile_scenario(testcase, scenario_name, clear_tracker=True):
             )
     testcase.test_instance = pidlockfile.PIDLockFile(
             **testcase.pidlockfile_args)
-    if clear_tracker:
-        testcase.mock_tracker.clear()
 
 
 class TimeoutPIDLockFile_TestCase(scaffold.TestCase):

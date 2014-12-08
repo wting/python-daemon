@@ -17,9 +17,9 @@ from __future__ import unicode_literals
 
 import unittest
 from unittest import (
-    TestSuite,
-    TestLoader,
-    )
+        TestSuite,
+        TestLoader,
+        )
 import doctest
 import logging
 import os
@@ -39,12 +39,6 @@ except ImportError:
 
 import testscenarios
 import testtools.testcase
-from minimock import (
-        Mock,
-        TraceTracker as MockTracker,
-        mock,
-        restore as mock_restore,
-        )
 
 
 test_dir = os.path.dirname(os.path.abspath(__file__))
@@ -244,49 +238,6 @@ class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
             raise self.failureException(msg)
 
     assertOutputCheckerMatch = failUnlessOutputCheckerMatch
-
-    def failUnlessMockCheckerMatch(self, want, tracker=None, msg=None):
-        """ Fail unless the mock tracker matches the wanted output.
-
-            Fail the test unless `want` matches the output tracked by
-            `tracker` (defaults to ``self.mock_tracker``. This is not
-            an equality check, but a pattern match according to the
-            ``minimock.MinimockOutputChecker`` rules.
-
-            """
-        if tracker is None:
-            tracker = self.mock_tracker
-        if not tracker.check(want):
-            if msg is None:
-                diff = tracker.diff(want)
-                msg = "\n".join([
-                        "Output received did not match expected output",
-                        "%(diff)s",
-                        ]) % vars()
-            raise self.failureException(msg)
-
-    def failIfMockCheckerMatch(self, want, tracker=None, msg=None):
-        """ Fail if the mock tracker matches the specified output.
-
-            Fail the test if `want` matches the output tracked by
-            `tracker` (defaults to ``self.mock_tracker``. This is not
-            an equality check, but a pattern match according to the
-            ``minimock.MinimockOutputChecker`` rules.
-
-            """
-        if tracker is None:
-            tracker = self.mock_tracker
-        if tracker.check(want):
-            if msg is None:
-                diff = tracker.diff(want)
-                msg = "\n".join([
-                        "Output received matched specified undesired output",
-                        "%(diff)s",
-                        ]) % vars()
-            raise self.failureException(msg)
-
-    assertMockCheckerMatch = failUnlessMockCheckerMatch
-    assertNotMockCheckerMatch = failIfMockCheckerMatch
 
     def failIfIsInstance(self, obj, classes, msg=None):
         """ Fail if the object is an instance of the specified classes.

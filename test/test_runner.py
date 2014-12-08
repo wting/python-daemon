@@ -95,7 +95,7 @@ def make_runner_scenarios():
     return scenarios
 
 
-def set_runner_scenario(testcase, scenario_name, clear_tracker=True):
+def set_runner_scenario(testcase, scenario_name):
     """ Set the DaemonRunner test scenario for the test case. """
     scenarios = testcase.runner_scenarios
     testcase.scenario = scenarios[scenario_name]
@@ -104,8 +104,6 @@ def set_runner_scenario(testcase, scenario_name, clear_tracker=True):
     apply_lockfile_method_mocks(
             testcase.mock_runner_lockfile,
             testcase.scenario['pidlockfile_scenario'])
-    if clear_tracker:
-        testcase.mock_tracker.clear()
 
 
 def set_pidlockfile_scenario(testcase, scenario_name):
@@ -119,8 +117,6 @@ def set_pidlockfile_scenario(testcase, scenario_name):
 
 def setup_runner_fixtures(testcase):
     """ Set up common test fixtures for DaemonRunner test case. """
-    testcase.mock_tracker = scaffold.MockTracker()
-
     setup_pidfile_fixtures(testcase)
     setup_streams_fixtures(testcase)
 
