@@ -539,9 +539,6 @@ class DaemonContext_context_manager_enter_TestCase(DaemonContext_BaseTestCase):
     def test_opens_daemon_context(self, mock_func_daemoncontext_open):
         """ Should open the DaemonContext. """
         instance = self.test_instance
-        expected_mock_output = """\
-                Called daemon.daemon.DaemonContext.open()
-                """
         instance.__enter__()
         mock_func_daemoncontext_open.assert_called_with()
 
