@@ -8,7 +8,7 @@
 # This is free software: you may copy, modify, and/or distribute this work
 # under the terms of the Apache License, version 2.0 as published by the
 # Apache Software Foundation.
-# No warranty expressed or implied. See the file LICENSE.ASF-2 for details.
+# No warranty expressed or implied. See the file ‘LICENSE.ASF-2’ for details.
 
 """ Scaffolding for unit test modules.
     """
@@ -16,12 +16,20 @@
 from __future__ import unicode_literals
 
 import unittest
+from unittest import (
+        TestSuite,
+        TestLoader,
+        )
 import doctest
 import logging
 import os
 import sys
+import fnmatch
+import pkgutil
+import imp
 import operator
 import textwrap
+from copy import deepcopy
 try:
     # Python 2.6 or greater?
     from functools import reduce
@@ -31,13 +39,8 @@ except ImportError:
 
 import testscenarios
 import testtools.testcase
-from minimock import (
-        Mock,
-        TraceTracker as MockTracker,
-        mock,
-        restore as mock_restore,
-        )
 
+
 test_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(test_dir)
 if not test_dir in sys.path:
@@ -45,7 +48,7 @@ if not test_dir in sys.path:
 if not parent_dir in sys.path:
     sys.path.insert(1, parent_dir)
 
-# Disable all but the most critical logging messages
+# Disable all but the most critical logging messages.
 logging.disable(logging.CRITICAL)
 
 
@@ -236,49 +239,6 @@ class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
 
     assertOutputCheckerMatch = failUnlessOutputCheckerMatch
 
-    def failUnlessMockCheckerMatch(self, want, tracker=None, msg=None):
-        """ Fail unless the mock tracker matches the wanted output.
-
-            Fail the test unless `want` matches the output tracked by
-            `tracker` (defaults to ``self.mock_tracker``. This is not
-            an equality check, but a pattern match according to the
-            ``minimock.MinimockOutputChecker`` rules.
-
-            """
-        if tracker is None:
-            tracker = self.mock_tracker
-        if not tracker.check(want):
-            if msg is None:
-                diff = tracker.diff(want)
-                msg = "\n".join([
-                        "Output received did not match expected output",
-                        "%(diff)s",
-                        ]) % vars()
-            raise self.failureException(msg)
-
-    def failIfMockCheckerMatch(self, want, tracker=None, msg=None):
-        """ Fail if the mock tracker matches the specified output.
-
-            Fail the test if `want` matches the output tracked by
-            `tracker` (defaults to ``self.mock_tracker``. This is not
-            an equality check, but a pattern match according to the
-            ``minimock.MinimockOutputChecker`` rules.
-
-            """
-        if tracker is None:
-            tracker = self.mock_tracker
-        if tracker.check(want):
-            if msg is None:
-                diff = tracker.diff(want)
-                msg = "\n".join([
-                        "Output received matched specified undesired output",
-                        "%(diff)s",
-                        ]) % vars()
-            raise self.failureException(msg)
-
-    assertMockCheckerMatch = failUnlessMockCheckerMatch
-    assertNotMockCheckerMatch = failIfMockCheckerMatch
-
     def failIfIsInstance(self, obj, classes, msg=None):
         """ Fail if the object is an instance of the specified classes.
 
@@ -318,10 +278,10 @@ class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
 
             """
         func_in_traceback = False
-        expect_code = function.func_code
+        expected_code = function.func_code
         current_traceback = traceback
         while current_traceback is not None:
-            if expect_code is current_traceback.tb_frame.f_code:
+            if expected_code is current_traceback.tb_frame.f_code:
                 func_in_traceback = True
                 break
             current_traceback = current_traceback.tb_next
@@ -381,40 +341,75 @@ class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
 class Exception_TestCase(TestCase):
     """ Test cases for exception classes. """
 
-    def __init__(self, *args, **kwargs):
-        """ Set up a new instance. """
-        self.valid_exceptions = NotImplemented
-        super(Exception_TestCase, self).__init__(*args, **kwargs)
-
-    def setUp(self):
-        """ Set up test fixtures. """
-        for exc_type, params in self.valid_exceptions.items():
-            args = (None, ) * params['min_args']
-            params['args'] = args
-            instance = exc_type(*args)
-            params['instance'] = instance
-
-        super(Exception_TestCase, self).setUp()
-
     def test_exception_instance(self):
         """ Exception instance should be created. """
-        for params in self.valid_exceptions.values():
-            instance = params['instance']
-            self.failIfIs(None, instance)
+        self.failIfIs(None, self.instance)
 
     def test_exception_types(self):
-        """ Exception instances should match expected types. """
-        for params in self.valid_exceptions.values():
-            instance = params['instance']
-            for match_type in params['types']:
-                match_type_name = match_type.__name__
-                fail_msg = (
-                        "%(instance)r is not an instance of"
-                        " %(match_type_name)s"
-                        ) % vars()
-                self.failUnless(
-                        isinstance(instance, match_type),
-                        msg=fail_msg)
+        """ Exception instance should match expected types. """
+        for match_type in self.types:
+            self.failUnlessIsInstance(self.instance, match_type)
+
+
+def make_exception_scenarios(scenarios):
+    """ Make test scenarios for exception classes.
+
+        Use this with `testscenarios` to adapt `Exception_TestCase`_
+        for any exceptions that need testing.
+
+        :param scenarios:
+            List of scenarios Each scenario is a tuple (`name`, `map`)
+            where `map` is a mapping of attributes to be applied to
+            each test case. Attributes map must contain items for:
+
+            :key exc_type:
+                The exception type to be tested.
+            :key min_args:
+                The minimum argument count for the exception instance
+                initialiser.
+            :key types:
+                Sequence of types that should be superclasses of each
+                instance of the exception type.
+
+        :return:
+            List of scenarios with additional mapping entries.
+
+        """
+    updated_scenarios = deepcopy(scenarios)
+    for (name, scenario) in updated_scenarios:
+        args = (None,) * scenario['min_args']
+        scenario['args'] = args
+        instance = scenario['exc_type'](*args)
+        scenario['instance'] = instance
+
+    return updated_scenarios
+
+
+# This monkey-patch is needed only until ‘testscenarios’ incorporates
+# this behaviour for scenario short descriptions.
+
+def apply_scenario((name, parameters), test):
+    """Apply scenario to test.
+
+    :param scenario: A tuple (name, parameters) to apply to the test. The test
+        is cloned, its id adjusted to have (name) after it, and the parameters
+        dict is used to update the new test.
+    :param test: The test to apply the scenario to. This test is unaltered.
+    :return: A new test cloned from test, with the scenario applied.
+    """
+    scenario_suffix = '(' + name + ')'
+    newtest = testscenarios.scenarios.clone_test_with_new_id(test,
+        test.id() + scenario_suffix)
+    test_desc = test.shortDescription()
+    if test_desc is not None:
+        newtest_desc = "%(test_desc)s %(scenario_suffix)s" % vars()
+        newtest.shortDescription = (lambda: newtest_desc)
+    for key, value in parameters.iteritems():
+        setattr(newtest, key, value)
+    return newtest
+
+testscenarios.scenarios.apply_scenario = apply_scenario
+testscenarios.apply_scenario = apply_scenario
 
 
 # Local variables:

@@ -9,7 +9,7 @@
 # This is free software: you may copy, modify, and/or distribute this work
 # under the terms of the Apache License, version 2.0 as published by the
 # Apache Software Foundation.
-# No warranty expressed or implied. See the file LICENSE.ASF-2 for details.
+# No warranty expressed or implied. See the file ‘LICENSE.ASF-2’ for details.
 
 """ Library to implement a well-behaved Unix daemon process.
 

@@ -9,7 +9,7 @@
 # This is free software: you may copy, modify, and/or distribute this work
 # under the terms of the GNU General Public License as published by the
 # Free Software Foundation; version 3 of that license or any later version.
-# No warranty expressed or implied. See the file LICENSE.GPL-3 for details.
+# No warranty expressed or implied. See the file ‘LICENSE.GPL-3’ for details.
 
 """ Distribution setup for ‘python-daemon’ library.
     """
@@ -47,9 +47,10 @@ setup(
         zip_safe=False,
         test_suite="test.suite",
         tests_require=[
+            "unittest2",
             "testtools",
             "testscenarios",
-            "MiniMock >=1.2.2",
+            "mock >=1.0",
             ],
         install_requires=[
             "setuptools",
