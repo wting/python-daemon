@@ -1502,8 +1502,6 @@ class is_detach_process_context_required_TestCase(scaffold.TestCase):
 
 def setup_streams_fixtures(testcase):
     """ Set up common test fixtures for standard streams. """
-    testcase.mock_tracker = scaffold.MockTracker()
-
     testcase.stream_file_paths = dict(
             stdin=tempfile.mktemp(),
             stdout=tempfile.mktemp(),
