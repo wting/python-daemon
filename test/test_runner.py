@@ -292,7 +292,7 @@ class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
         """ DaemonContext component should open stdin file for read. """
         expected_mode = 'r'
         daemon_context = self.test_instance.daemon_context
-        self.assertIn(daemon_context.stdin.mode, expected_mode)
+        self.assertIn(expected_mode, daemon_context.stdin.mode)
 
     def test_daemon_context_has_specified_stdout_stream(self):
         """ DaemonContext component should have specified stdout file. """
@@ -305,7 +305,7 @@ class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
         """ DaemonContext component should open stdout file for append. """
         expected_mode = 'w+'
         daemon_context = self.test_instance.daemon_context
-        self.assertIn(daemon_context.stdout.mode, expected_mode)
+        self.assertIn(expected_mode, daemon_context.stdout.mode)
 
     def test_daemon_context_has_specified_stderr_stream(self):
         """ DaemonContext component should have specified stderr file. """
@@ -318,7 +318,7 @@ class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
         """ DaemonContext component should open stderr file for append. """
         expected_mode = 'w+'
         daemon_context = self.test_instance.daemon_context
-        self.assertIn(daemon_context.stderr.mode, expected_mode)
+        self.assertIn(expected_mode, daemon_context.stderr.mode)
 
     def test_daemon_context_has_stderr_with_no_buffering(self):
         """ DaemonContext component should open stderr file unbuffered. """
@@ -443,7 +443,7 @@ class DaemonRunner_do_action_start_TestCase(DaemonRunner_BaseTestCase):
         else:
             raise self.failureException(
                     "Failed to raise " + expected_error.__name__)
-        self.assertIn(unicode(exc.message), expected_message_content)
+        self.assertIn(expected_message_content, unicode(exc.message))
 
     def test_breaks_lock_if_no_such_process(self):
         """ Should request breaking lock if PID file process is not running. """
@@ -518,7 +518,7 @@ class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
         else:
             raise self.failureException(
                     "Failed to raise " + expected_error.__name__)
-        self.assertIn(str(exc), expected_message_content)
+        self.assertIn(expected_message_content, unicode(exc))
 
     def test_breaks_lock_if_pidfile_stale(self):
         """ Should break lock if PID file is stale. """
@@ -555,7 +555,7 @@ class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
         else:
             raise self.failureException(
                     "Failed to raise " + expected_error.__name__)
-        self.assertIn(unicode(exc), expected_message_content)
+        self.assertIn(expected_message_content, unicode(exc))
 
 
 @mock.patch.object(daemon.runner.DaemonRunner, "_start")

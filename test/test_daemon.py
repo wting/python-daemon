@@ -109,7 +109,7 @@ class DaemonContext_TestCase(DaemonContext_BaseTestCase):
     def test_minimum_zero_arguments(self):
         """ Initialiser should not require any arguments. """
         instance = daemon.daemon.DaemonContext()
-        self.assertIsNot(None, instance)
+        self.assertIsNot(instance, None)
 
     def test_has_specified_chroot_directory(self):
         """ Should have specified chroot_directory option. """
@@ -523,7 +523,7 @@ class DaemonContext_close_TestCase(DaemonContext_BaseTestCase):
         instance = self.test_instance
         expected_result = None
         result = instance.close()
-        self.assertIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
     def test_sets_is_open_false(self):
         """ Should set the `is_open` property to False. """
@@ -547,7 +547,7 @@ class DaemonContext_context_manager_enter_TestCase(DaemonContext_BaseTestCase):
         instance = self.test_instance
         expected_result = instance
         result = instance.__enter__()
-        self.assertIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
 
 @mock.patch.object(daemon.daemon.DaemonContext, "close")
@@ -577,7 +577,7 @@ class DaemonContext_context_manager_exit_TestCase(DaemonContext_BaseTestCase):
         args = self.test_args
         expected_result = None
         result = instance.__exit__(**args)
-        self.assertIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
 
 class DaemonContext_terminate_TestCase(DaemonContext_BaseTestCase):
@@ -610,7 +610,7 @@ class DaemonContext_terminate_TestCase(DaemonContext_BaseTestCase):
             instance.terminate(*args)
         except expected_exception as exc:
             pass
-        self.assertIn(str(exc), str(signal_number))
+        self.assertIn(unicode(signal_number), unicode(exc))
 
 
 class DaemonContext_get_exclude_file_descriptors_TestCase(
@@ -806,7 +806,7 @@ class change_working_directory_TestCase(scaffold.TestCase):
             daemon.daemon.change_working_directory(**args)
         except expected_error as exc:
             pass
-        self.assertIn(str(exc), str(test_error))
+        self.assertIn(unicode(test_error), unicode(exc))
 
 
 @mock.patch.object(os, "chroot")
@@ -877,7 +877,7 @@ class change_root_directory_TestCase(scaffold.TestCase):
             daemon.daemon.change_root_directory(**args)
         except expected_error as exc:
             pass
-        self.assertIn(str(exc), str(test_error))
+        self.assertIn(unicode(test_error), unicode(exc))
 
 
 @mock.patch.object(os, "umask")
@@ -924,7 +924,7 @@ class change_file_creation_mask_TestCase(scaffold.TestCase):
             daemon.daemon.change_file_creation_mask(**args)
         except expected_error as exc:
             pass
-        self.assertIn(str(exc), str(test_error))
+        self.assertIn(unicode(test_error), unicode(exc))
 
 
 @mock.patch.object(os, "setgid")
@@ -1012,7 +1012,7 @@ class change_process_owner_TestCase(scaffold.TestCase):
             daemon.daemon.change_process_owner(**args)
         except expected_error as exc:
             pass
-        self.assertIn(str(exc), str(test_error))
+        self.assertIn(unicode(test_error), unicode(exc))
 
 
 RLimitResult = collections.namedtuple('RLimitResult', ['soft', 'hard'])
@@ -1348,7 +1348,7 @@ class is_process_started_by_init_TestCase(scaffold.TestCase):
         """ Should return False under normal circumstances. """
         expected_result = False
         result = daemon.daemon.is_process_started_by_init()
-        self.assertIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
     def test_returns_true_if_parent_process_is_init(
             self, mock_func_os_getppid):
@@ -1357,7 +1357,7 @@ class is_process_started_by_init_TestCase(scaffold.TestCase):
         mock_func_os_getppid.return_value = init_pid
         expected_result = True
         result = daemon.daemon.is_process_started_by_init()
-        self.assertIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
 
 class is_socket_TestCase(scaffold.TestCase):
@@ -1396,7 +1396,7 @@ class is_socket_TestCase(scaffold.TestCase):
         test_fd = 23
         expected_result = False
         result = daemon.daemon.is_socket(test_fd)
-        self.assertIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
     def test_returns_true_if_stdin_is_socket(self):
         """ Should return True if `stdin` is a socket. """
@@ -1405,7 +1405,7 @@ class is_socket_TestCase(scaffold.TestCase):
         getsockopt.side_effect = self.fake_socket_getsockopt_func
         expected_result = True
         result = daemon.daemon.is_socket(test_fd)
-        self.assertIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
     def test_returns_false_if_stdin_socket_raises_error(self):
         """ Should return True if `stdin` is a socket and raises error. """
@@ -1415,7 +1415,7 @@ class is_socket_TestCase(scaffold.TestCase):
                 object(), "Weird socket stuff")
         expected_result = True
         result = daemon.daemon.is_socket(test_fd)
-        self.assertIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
 
 class is_process_started_by_superserver_TestCase(scaffold.TestCase):
@@ -1444,14 +1444,14 @@ class is_process_started_by_superserver_TestCase(scaffold.TestCase):
         """ Should return False under normal circumstances. """
         expected_result = False
         result = daemon.daemon.is_process_started_by_superserver()
-        self.assertIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
     def test_returns_true_if_stdin_is_socket(self):
         """ Should return True if `stdin` is a socket. """
         self.fake_stdin_is_socket_func = (lambda: True)
         expected_result = True
         result = daemon.daemon.is_process_started_by_superserver()
-        self.assertIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
 
 @mock.patch.object(
@@ -1470,7 +1470,7 @@ class is_detach_process_context_required_TestCase(scaffold.TestCase):
         """ Should return True under normal circumstances. """
         expected_result = True
         result = daemon.daemon.is_detach_process_context_required()
-        self.assertIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
     def test_returns_false_if_started_by_init(
             self,
@@ -1480,7 +1480,7 @@ class is_detach_process_context_required_TestCase(scaffold.TestCase):
         mock_func_is_process_started_by_init.return_value = True
         expected_result = False
         result = daemon.daemon.is_detach_process_context_required()
-        self.assertIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
     def test_returns_true_if_started_by_superserver(
             self,
@@ -1490,7 +1490,7 @@ class is_detach_process_context_required_TestCase(scaffold.TestCase):
         mock_func_is_process_started_by_superserver.return_value = True
         expected_result = False
         result = daemon.daemon.is_detach_process_context_required()
-        self.assertIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
 
 def setup_streams_fixtures(testcase):

@@ -151,60 +151,6 @@ class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
 
     assertRaises = failUnlessRaises
 
-    def failIfIs(self, first, second, msg=None):
-        """ Fail if the two objects are identical.
-
-            Fail the test if ``first`` and ``second`` are identical,
-            as determined by the ``is`` operator.
-
-            """
-        if first is second:
-            if msg is None:
-                msg = "%(first)r is %(second)r" % vars()
-            raise self.failureException(msg)
-
-    def failUnlessIs(self, first, second, msg=None):
-        """ Fail unless the two objects are identical.
-
-            Fail the test unless ``first`` and ``second`` are
-            identical, as determined by the ``is`` operator.
-
-            """
-        if first is not second:
-            if msg is None:
-                msg = "%(first)r is not %(second)r" % vars()
-            raise self.failureException(msg)
-
-    assertIs = failUnlessIs
-    assertNotIs = failIfIs
-
-    def failIfIn(self, first, second, msg=None):
-        """ Fail if the second object is in the first.
-
-            Fail the test if ``first`` contains ``second``, as
-            determined by the ``in`` operator.
-
-            """
-        if second in first:
-            if msg is None:
-                msg = "%(second)r is in %(first)r" % vars()
-            raise self.failureException(msg)
-
-    def failUnlessIn(self, first, second, msg=None):
-        """ Fail unless the second object is in the first.
-
-            Fail the test unless ``first`` contains ``second``, as
-            determined by the ``in`` operator.
-
-            """
-        if second not in first:
-            if msg is None:
-                msg = "%(second)r is not in %(first)r" % vars()
-            raise self.failureException(msg)
-
-    assertIn = failUnlessIn
-    assertNotIn = failIfIn
-
     def failUnlessOutputCheckerMatch(self, want, got, msg=None):
         """ Fail unless the specified string matches the expected.
 
@@ -233,37 +179,6 @@ class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
             raise self.failureException(msg)
 
     assertOutputCheckerMatch = failUnlessOutputCheckerMatch
-
-    def failIfIsInstance(self, obj, classes, msg=None):
-        """ Fail if the object is an instance of the specified classes.
-
-            Fail the test if the object ``obj`` is an instance of any
-            of ``classes``.
-
-            """
-        if isinstance(obj, classes):
-            if msg is None:
-                msg = (
-                        "%(obj)r is an instance of one of %(classes)r"
-                        ) % vars()
-            raise self.failureException(msg)
-
-    def failUnlessIsInstance(self, obj, classes, msg=None):
-        """ Fail unless the object is an instance of the specified classes.
-
-            Fail the test unless the object ``obj`` is an instance of
-            any of ``classes``.
-
-            """
-        if not isinstance(obj, classes):
-            if msg is None:
-                msg = (
-                        "%(obj)r is not an instance of any of %(classes)r"
-                        ) % vars()
-            raise self.failureException(msg)
-
-    assertIsInstance = failUnlessIsInstance
-    assertNotIsInstance = failIfIsInstance
 
     def failUnlessFunctionInTraceback(self, traceback, function, msg=None):
         """ Fail if the function is not in the traceback.
@@ -338,7 +253,7 @@ class Exception_TestCase(TestCase):
 
     def test_exception_instance(self):
         """ Exception instance should be created. """
-        self.assertIsNot(None, self.instance)
+        self.assertIsNot(self.instance, None)
 
     def test_exception_types(self):
         """ Exception instance should match expected types. """
