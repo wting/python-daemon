@@ -226,10 +226,12 @@ class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
         """ Set up test fixtures. """
         super(DaemonRunner_TestCase, self).setUp()
 
-        scaffold.mock(
-                "runner.DaemonRunner.parse_args",
-                tracker=self.mock_tracker)
+        func_patcher_parse_args = mock.patch.object(
+                runner.DaemonRunner, "parse_args")
+        func_patcher_parse_args.start()
+        self.addCleanup(func_patcher_parse_args.stop)
 
+        # Create a new instance now with our custom patches.
         self.test_instance = runner.DaemonRunner(self.test_app)
 
     def tearDown(self):
@@ -244,11 +246,7 @@ class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
 
     def test_parses_commandline_args(self):
         """ Should parse commandline arguments. """
-        expected_mock_output = """\
-                Called runner.DaemonRunner.parse_args()
-                ...
-                """
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.test_instance.parse_args.assert_called_with()
 
     def test_has_specified_app(self):
         """ Should have specified application object. """
