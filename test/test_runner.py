@@ -186,9 +186,9 @@ def setup_runner_fixtures(testcase):
             returns_func=fake_open,
             tracker=testcase.mock_tracker)
 
-    scaffold.mock(
-            "os.kill",
-            tracker=testcase.mock_tracker)
+    func_patcher_os_kill = mock.patch.object(os, "kill")
+    func_patcher_os_kill.start()
+    testcase.addCleanup(func_patcher_os_kill.stop)
 
     patcher_sys_argv = mock.patch.object(
             sys, "argv",
@@ -479,14 +479,14 @@ class DaemonRunner_do_action_start_TestCase(DaemonRunner_BaseTestCase):
         test_pid = self.scenario['pidlockfile_scenario']['pidfile_pid']
         expected_signal = signal.SIG_DFL
         error = OSError(errno.ESRCH, "Not running")
-        os.kill.mock_raises = error
+        os.kill.side_effect = error
         lockfile_class_name = self.lockfile_class_name
         expected_mock_output = """\
                 ...
-                Called os.kill(%(test_pid)r, %(expected_signal)r)
                 Called %(lockfile_class_name)s.break_lock()
                 """ % vars()
         instance.do_action()
+        os.kill.assert_called_with(test_pid, expected_signal)
         scaffold.mock_restore()
         self.failUnlessMockCheckerMatch(expected_mock_output)
 
@@ -558,7 +558,7 @@ class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
         test_pid = self.scenario['pidlockfile_scenario']['pidfile_pid']
         expected_signal = signal.SIG_DFL
         error = OSError(errno.ESRCH, "Not running")
-        os.kill.mock_raises = error
+        os.kill.side_effect = error
         lockfile_class_name = self.lockfile_class_name
         expected_mock_output = """\
                 ...
@@ -573,13 +573,8 @@ class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
         instance = self.test_instance
         test_pid = self.scenario['pidlockfile_scenario']['pidfile_pid']
         expected_signal = signal.SIGTERM
-        expected_mock_output = """\
-                ...
-                Called os.kill(%(test_pid)r, %(expected_signal)r)
-                """ % vars()
         instance.do_action()
-        scaffold.mock_restore()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        os.kill.assert_called_with(test_pid, expected_signal)
 
     def test_raises_error_if_cannot_send_signal_to_process(self):
         """ Should raise error if cannot send signal to daemon process. """
@@ -587,7 +582,7 @@ class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
         test_pid = self.scenario['pidlockfile_scenario']['pidfile_pid']
         pidfile_path = self.scenario['pidfile_path']
         error = OSError(errno.EPERM, "Nice try")
-        os.kill.mock_raises = error
+        os.kill.side_effect = error
         expected_error = runner.DaemonRunnerStopFailureError
         expected_message_content = str(test_pid)
         try:
