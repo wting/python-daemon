@@ -187,10 +187,14 @@ def setup_runner_fixtures(testcase):
         result.buffering = buffering
         return result
 
-    scaffold.mock(
-            "builtins.open",
-            returns_func=fake_open,
-            tracker=testcase.mock_tracker)
+    mock_open = mock.mock_open()
+    mock_open.side_effect = fake_open
+
+    func_patcher_builtin_open = mock.patch(
+            "__builtin__.open",
+            new=mock_open)
+    func_patcher_builtin_open.start()
+    testcase.addCleanup(func_patcher_builtin_open.stop)
 
     func_patcher_os_kill = mock.patch.object(os, "kill")
     func_patcher_os_kill.start()
@@ -217,12 +221,6 @@ class DaemonRunner_BaseTestCase(scaffold.TestCase):
         setup_runner_fixtures(self)
         set_runner_scenario(self, 'simple')
 
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(DaemonRunner_BaseTestCase, self).tearDown()
-
 
 class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
     """ Test cases for DaemonRunner class. """
@@ -238,12 +236,6 @@ class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
 
         # Create a new instance now with our custom patches.
         self.test_instance = runner.DaemonRunner(self.test_app)
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        scaffold.mock_restore()
-
-        super(DaemonRunner_TestCase, self).tearDown()
 
     def test_instantiate(self):
         """ New instance of DaemonRunner should be created. """
@@ -287,7 +279,6 @@ class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
         """ Should create a TimeoutPIDLockFile with specified params. """
         pidfile_path = self.scenario['pidfile_path']
         pidfile_timeout = self.scenario['pidfile_timeout']
-        scaffold.mock_restore()
         pidfile.TimeoutPIDLockFile.assert_called_with(
                 pidfile_path, pidfile_timeout)
 
@@ -542,7 +533,6 @@ class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
         else:
             raise self.failureException(
                     "Failed to raise " + expected_error.__name__)
-        scaffold.mock_restore()
         self.failUnlessIn(str(exc), expected_message_content)
 
     def test_breaks_lock_if_pidfile_stale(self):
@@ -580,7 +570,6 @@ class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
         else:
             raise self.failureException(
                     "Failed to raise " + expected_error.__name__)
-        scaffold.mock_restore()
         self.failUnlessIn(unicode(exc), expected_message_content)
 
 
