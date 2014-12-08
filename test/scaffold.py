@@ -27,12 +27,7 @@ import sys
 import operator
 import textwrap
 from copy import deepcopy
-try:
-    # Python 2.6 or greater?
-    from functools import reduce
-except ImportError:
-    # Not available, so try the builtin function.
-    assert reduce
+import functools
 
 import testscenarios
 import testtools.testcase
@@ -221,7 +216,7 @@ class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
         source = ""
         example = doctest.Example(source, want)
         got = textwrap.dedent(got)
-        checker_optionflags = reduce(operator.or_, [
+        checker_optionflags = functools.reduce(operator.or_, [
                 doctest.ELLIPSIS,
                 ])
         if not checker.check_output(want, got, checker_optionflags):
