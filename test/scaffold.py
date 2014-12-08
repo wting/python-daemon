@@ -24,9 +24,6 @@ import doctest
 import logging
 import os
 import sys
-import fnmatch
-import pkgutil
-import imp
 import operator
 import textwrap
 from copy import deepcopy
