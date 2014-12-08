@@ -152,9 +152,7 @@ def setup_runner_fixtures(testcase):
             self.pidfile_path = simple_scenario['pidfile_path']
             self.pidfile_timeout = simple_scenario['pidfile_timeout']
 
-        run = scaffold.Mock(
-                "TestApp.run",
-                tracker=testcase.mock_tracker)
+        run = mock.MagicMock(name="TestApp.run")
 
     testcase.TestApp = TestApp
 
@@ -487,7 +485,6 @@ class DaemonRunner_do_action_start_TestCase(DaemonRunner_BaseTestCase):
                 ...
                 Called os.kill(%(test_pid)r, %(expected_signal)r)
                 Called %(lockfile_class_name)s.break_lock()
-                ...
                 """ % vars()
         instance.do_action()
         scaffold.mock_restore()
@@ -513,12 +510,8 @@ class DaemonRunner_do_action_start_TestCase(DaemonRunner_BaseTestCase):
     def test_requests_app_run(self):
         """ Should request the application to run. """
         instance = self.test_instance
-        expected_mock_output = """\
-                ...
-                Called TestApp.run()
-                """
         instance.do_action()
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        self.test_app.run.assert_called_with()
 
 
 class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
