@@ -388,48 +388,40 @@ class DaemonRunner_parse_args_TestCase(DaemonRunner_BaseTestCase):
         """ Set up test fixtures. """
         super(DaemonRunner_parse_args_TestCase, self).setUp()
 
-        scaffold.mock(
-                "daemon.runner.DaemonRunner._usage_exit",
-                raises=NotImplementedError,
-                tracker=self.mock_tracker)
+        func_patcher_usage_exit = mock.patch.object(
+                daemon.runner.DaemonRunner, "_usage_exit",
+                side_effect=NotImplementedError)
+        func_patcher_usage_exit.start()
+        self.addCleanup(func_patcher_usage_exit.stop)
 
     def test_emits_usage_message_if_insufficient_args(self):
         """ Should emit a usage message and exit if too few arguments. """
         instance = self.test_instance
         argv = [self.test_program_path]
-        expected_mock_output = """\
-                Called daemon.runner.DaemonRunner._usage_exit(%(argv)r)
-                """ % vars()
         try:
             instance.parse_args(argv)
         except NotImplementedError:
             pass
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        daemon.runner.DaemonRunner._usage_exit.assert_called_with(argv)
 
     def test_emits_usage_message_if_unknown_action_arg(self):
         """ Should emit a usage message and exit if unknown action. """
         instance = self.test_instance
         progname = self.test_program_name
         argv = [self.test_program_path, 'bogus']
-        expected_mock_output = """\
-                Called daemon.runner.DaemonRunner._usage_exit(%(argv)r)
-                """ % vars()
         try:
             instance.parse_args(argv)
         except NotImplementedError:
             pass
-        self.failUnlessMockCheckerMatch(expected_mock_output)
+        daemon.runner.DaemonRunner._usage_exit.assert_called_with(argv)
 
     def test_should_parse_system_argv_by_default(self):
         """ Should parse sys.argv by default. """
         instance = self.test_instance
         expected_action = 'start'
         argv = self.valid_argv_params['start']
-        scaffold.mock(
-                "sys.argv",
-                mock_obj=argv,
-                tracker=self.mock_tracker)
-        instance.parse_args()
+        with mock.patch.object(sys, "argv", new=argv):
+            instance.parse_args()
         self.failUnlessEqual(expected_action, instance.action)
 
     def test_sets_action_from_first_argument(self):
