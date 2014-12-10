@@ -17,6 +17,8 @@
 """ Daemon runner library.
     """
 
+from __future__ import (absolute_import, unicode_literals)
+
 import sys
 import os
 import signal
@@ -107,7 +109,7 @@ class DaemonRunner(object):
         if len(argv) < min_args:
             self._usage_exit(argv)
 
-        self.action = argv[1]
+        self.action = unicode(argv[1])
         if self.action not in self.action_funcs:
             self._usage_exit(argv)
 

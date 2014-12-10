@@ -13,6 +13,8 @@
 """ Unit test for daemon module.
     """
 
+from __future__ import unicode_literals
+
 import os
 import sys
 import tempfile
@@ -1484,7 +1486,9 @@ class detach_process_context_TestCase(scaffold.TestCase):
             else:
                 return next
 
-        scaffold.mock("os.fork", returns_func=mock_fork,
+        scaffold.mock(
+            "os.fork",
+            returns_func=mock_fork,
             tracker=self.mock_tracker)
         expect_mock_output = """\
             Called os.fork()
@@ -1507,7 +1511,9 @@ class detach_process_context_TestCase(scaffold.TestCase):
     def test_child_forks_next_parent_exits(self):
         """ Child should fork, then exit if parent. """
         test_pids = [0, 42]
-        scaffold.mock("os.fork", returns_iter=test_pids,
+        scaffold.mock(
+            "os.fork",
+            returns_iter=test_pids,
             tracker=self.mock_tracker)
         expect_mock_output = """\
             Called os.fork()
@@ -1534,7 +1540,9 @@ class detach_process_context_TestCase(scaffold.TestCase):
             else:
                 return next
 
-        scaffold.mock("os.fork", returns_func=mock_fork,
+        scaffold.mock(
+            "os.fork",
+            returns_func=mock_fork,
             tracker=self.mock_tracker)
         expect_mock_output = """\
             Called os.fork()
@@ -1821,7 +1829,7 @@ class make_default_signal_map_TestCase(scaffold.TestCase):
         """ Set up test fixtures. """
         self.mock_tracker = scaffold.MockTracker()
 
-        mock_signal_module = ModuleType('signal')
+        mock_signal_module = ModuleType(b'signal')
         mock_signal_names = [
             'SIGHUP',
             'SIGCLD',

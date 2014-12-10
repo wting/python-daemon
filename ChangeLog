@@ -1,6 +1,16 @@
+2012-05-30  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Use unicode literals by default, specifying bytes where necessary.
+      This is to ease the port to Python 3, where the default string type
+      is unicode.
+
 2010-04-10  Ben Finney  <ben+python@benfinney.id.au>
 
     * FAQ: Add some entries and re-structure the document.
+
+2010-03-09  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Use ‘unicode’ data type for all text values.
 
 2010-03-03  Ben Finney  <ben+python@benfinney.id.au>
 

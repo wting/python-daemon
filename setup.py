@@ -11,20 +11,22 @@
 # later as published by the Python Software Foundation.
 # No warranty expressed or implied. See the file LICENSE.PSF-2 for details.
 
-""" Distribution setup for python-daemon library.
+""" Distribution setup for ‘python-daemon’ library.
     """
+
+from __future__ import unicode_literals
 
 import textwrap
 from setuptools import setup, find_packages
 
 distribution_name = "python-daemon"
 main_module_name = 'daemon'
-main_module = __import__(main_module_name, fromlist=['version'])
+main_module = __import__(main_module_name, fromlist=[b'version'])
 version = main_module.version
 
 short_description, long_description = (
     textwrap.dedent(d).strip()
-    for d in main_module.__doc__.split(u'\n\n', 1)
+    for d in main_module.__doc__.split('\n\n', 1)
     )
 
 
@@ -49,7 +51,7 @@ setup(
     author_email=version.author_email,
     description=short_description,
     license=version.license,
-    keywords=u"daemon fork unix".split(),
+    keywords="daemon fork unix".split(),
     url=main_module._url,
     long_description=long_description,
     classifiers=[

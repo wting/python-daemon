@@ -13,6 +13,8 @@
 """ Unit test for pidlockfile module.
     """
 
+from __future__ import unicode_literals
+
 import __builtin__
 import os
 from StringIO import StringIO
@@ -746,7 +748,7 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
     def test_init_has_expected_signature(self):
         """ Should have expected signature for ‘__init__’. """
         def test_func(self, path, acquire_timeout=None, *args, **kwargs): pass
-        test_func.__name__ = '__init__'
+        test_func.__name__ = b'__init__'
         self.failUnlessFunctionSignatureMatch(
             test_func, 
             pidlockfile.TimeoutPIDLockFile.__init__)

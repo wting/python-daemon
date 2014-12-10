@@ -11,6 +11,8 @@
 """ Scaffolding for unit test modules.
     """
 
+from __future__ import unicode_literals
+
 import unittest
 import doctest
 import logging
@@ -367,7 +369,7 @@ class Exception_TestCase(TestCase):
     """ Test cases for exception classes. """
 
     def __init__(self, *args, **kwargs):
-        """ Set up a new instance """
+        """ Set up a new instance. """
         self.valid_exceptions = NotImplemented
         super(Exception_TestCase, self).__init__(*args, **kwargs)
 

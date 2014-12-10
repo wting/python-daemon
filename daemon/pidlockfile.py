@@ -13,6 +13,8 @@
 """ Lockfile behaviour implemented via Unix PID files.
     """
 
+from __future__ import (absolute_import, unicode_literals)
+
 import os
 import errno
 
@@ -98,7 +100,7 @@ class TimeoutPIDLockFile(PIDLockFile):
         """
 
     def __init__(self, path, acquire_timeout=None, *args, **kwargs):
-        """ Set up the parameters of a DaemonRunnerLock. """
+        """ Set up the parameters of a TimeoutPIDLockFile. """
         self.acquire_timeout = acquire_timeout
         super(TimeoutPIDLockFile, self).__init__(path, *args, **kwargs)
 

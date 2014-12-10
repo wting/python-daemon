@@ -13,6 +13,8 @@
 """ Unit test for runner module.
     """
 
+from __future__ import unicode_literals
+
 import __builtin__
 import os
 import sys
@@ -485,7 +487,7 @@ class DaemonRunner_do_action_start_TestCase(scaffold.TestCase):
         else:
             raise self.failureException(
                 "Failed to raise " + expect_error.__name__)
-        self.failUnlessIn(str(exc), expect_message_content)
+        self.failUnlessIn(unicode(exc.message), expect_message_content)
 
     def test_breaks_lock_if_no_such_process(self):
         """ Should request breaking lock if PID file process is not running. """
@@ -628,7 +630,8 @@ class DaemonRunner_do_action_stop_TestCase(scaffold.TestCase):
         else:
             raise self.failureException(
                 "Failed to raise " + expect_error.__name__)
-        self.failUnlessIn(str(exc), expect_message_content)
+        scaffold.mock_restore()
+        self.failUnlessIn(unicode(exc.message), expect_message_content)
 
 
 class DaemonRunner_do_action_restart_TestCase(scaffold.TestCase):

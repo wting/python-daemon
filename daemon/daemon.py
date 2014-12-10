@@ -18,6 +18,8 @@
 """ Daemon process behaviour.
     """
 
+from __future__ import (absolute_import, unicode_literals)
+
 import os
 import sys
 import resource
@@ -518,7 +520,7 @@ def change_process_owner(uid, gid):
         os.setuid(uid)
     except Exception, exc:
         error = DaemonOSEnvironmentError(
-            "Unable to change file creation mask (%(exc)s)"
+            "Unable to change process owner (%(exc)s)"
             % vars())
         raise error
 
