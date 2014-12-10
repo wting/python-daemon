@@ -3,6 +3,8 @@
     * Use unicode literals by default, specifying bytes where necessary.
       This is to ease the port to Python 3, where the default string type
       is unicode.
+    * Update the GPL license file to version 3, as declared in our
+      copyright notices.
 
 2011-07-02  Ben Finney  <ben+python@benfinney.id.au>
 
