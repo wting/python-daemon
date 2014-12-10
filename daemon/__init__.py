@@ -3,7 +3,7 @@
 # daemon/__init__.py
 # Part of ‘python-daemon’, an implementation of PEP 3143.
 #
-# Copyright © 2009–2012 Ben Finney <ben+python@benfinney.id.au>
+# Copyright © 2009–2014 Ben Finney <ben+python@benfinney.id.au>
 # Copyright © 2006 Robert Niederreiter
 #
 # This is free software: you may copy, modify, and/or distribute this work
@@ -47,3 +47,10 @@ _version = version.version
 _copyright = version.copyright
 _license = version.license
 _url = "http://pypi.python.org/pypi/python-daemon/"
+
+
+# Local variables:
+# coding: utf-8
+# mode: python
+# End:
+# vim: fileencoding=utf-8 filetype=python :
