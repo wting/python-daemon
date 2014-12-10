@@ -87,7 +87,7 @@ version_info_module_path = os.path.join(
 
 update_version_info_module_if_needed(version_info_module_path)
 
-package_module = __import__(package_name, fromlist=['version'])
+package_module = __import__(package_name, fromlist=[b'version'])
 version_module = package_module.version
 version = version_module.version
 
