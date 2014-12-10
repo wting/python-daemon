@@ -580,7 +580,7 @@ class read_pid_from_pidfile_TestCase(scaffold.TestCase):
         set_pidlockfile_scenario(self, 'exist-other-pid')
         pidfile_path = self.scenario['path']
         expect_mock_output = """\
-            Called builtins.open(%(pidfile_path)r, 'r')
+            Called builtins.open(%(pidfile_path)r, u'r')
             """ % vars()
         dummy = pidlockfile.read_pid_from_pidfile(pidfile_path)
         scaffold.mock_restore()
