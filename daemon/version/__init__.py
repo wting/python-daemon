@@ -36,4 +36,4 @@ if copyright_year > copyright_year_begin:
 copyright = (
     "Copyright © %(copyright_year_range)s %(author)s and others"
     ) % vars()
-license = "PSF-2+"
+license = "Apache-2"
