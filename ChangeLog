@@ -4,6 +4,11 @@
       This is to ease the port to Python 3, where the default string type
       is unicode.
 
+2011-07-02  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Change license of library code to Apache License 2.0. Rationale at
+      <URL:http://wiki.python.org/moin/PythonSoftwareFoundationLicenseFaq#Contributing_Code_to_Python>.
+
 2010-04-10  Ben Finney  <ben+python@benfinney.id.au>
 
     * FAQ: Add some entries and re-structure the document.

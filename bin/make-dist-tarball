@@ -2,15 +2,15 @@
 # -*- coding: utf-8 -*-
 #
 # bin/make-dist-tarball
-# Part of python-daemon, an implementation of PEP 3143.
+# Part of ‘python-daemon’, an implementation of PEP 3143.
 #
-# Copyright © 2007–2010 Ben Finney <ben+python@benfinney.id.au>
+# Copyright © 2007–2011 Ben Finney <ben+python@benfinney.id.au>
 #
 # This is free software: you are free to modify and/or redistribute it
 # under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of that license or,
 # at your option, any later version.
-# No warranty expressed or implied. See the file LICENSE for details.
+# No warranty expressed or implied. See the file LICENSE.GPL-2 for details.
 
 """ Create the distribution tarball from VCS. """
 

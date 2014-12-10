@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
 # daemon/runner.py
-# Part of python-daemon, an implementation of PEP 3143.
+# Part of ‘python-daemon’, an implementation of PEP 3143.
 #
-# Copyright © 2009–2010 Ben Finney <ben+python@benfinney.id.au>
+# Copyright © 2009–2011 Ben Finney <ben+python@benfinney.id.au>
 # Copyright © 2007–2008 Robert Niederreiter, Jens Klein
 # Copyright © 2003 Clark Evans
 # Copyright © 2002 Noah Spurrier
 # Copyright © 2001 Jürgen Hermann
 #
 # This is free software: you may copy, modify, and/or distribute this work
-# under the terms of the Python Software Foundation License, version 2 or
-# later as published by the Python Software Foundation.
-# No warranty expressed or implied. See the file LICENSE.PSF-2 for details.
+# under the terms of the Apache License, version 2.0 as published by the
+# Apache Software Foundation.
+# No warranty expressed or implied. See the file LICENSE.ASF-2 for details.
 
 """ Daemon runner library.
     """
