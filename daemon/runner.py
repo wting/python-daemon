@@ -24,7 +24,7 @@ import os
 import signal
 import errno
 
-import pidlockfile
+from . import pidlockfile
 
 from daemon import DaemonContext
 
