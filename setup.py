@@ -16,18 +16,18 @@
 
 from __future__ import unicode_literals
 
-import textwrap
+import pydoc
+
 from setuptools import setup, find_packages
 
+
 distribution_name = "python-daemon"
 main_module_name = 'daemon'
 main_module = __import__(main_module_name, fromlist=[b'version'])
 version = main_module.version
 
-synopsis, long_description = (
-        textwrap.dedent(d).strip()
-        for d in main_module.__doc__.split('\n\n', 1)
-        )
+synopsis, long_description = pydoc.splitdoc(
+        pydoc.getdoc(main_module))
 
 
 setup(
