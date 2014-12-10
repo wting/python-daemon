@@ -31,7 +31,7 @@ Standard library inclusion
 
 * Convert to Python 3.
 
-
+
 ====
 DONE
 ====
@@ -64,6 +64,13 @@ DONE
 * Full docstrings for functions, classes, and modules.
 
 * PEP 3143 for adding this library to the Python standard library.
+
+
+..
+    This is free software: you may copy, modify, and/or distribute this work
+    under the terms of the Apache License version 2.0 as published by the
+    Apache Software Foundation.
+    No warranty expressed or implied. See the file LICENSE.ASF-2 for details.
 
 ..
     Local variables:

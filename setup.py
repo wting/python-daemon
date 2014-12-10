@@ -7,9 +7,9 @@
 # Copyright © 2008 Robert Niederreiter, Jens Klein
 #
 # This is free software: you may copy, modify, and/or distribute this work
-# under the terms of the Apache License, version 2.0 as published by the
-# Apache Software Foundation.
-# No warranty expressed or implied. See the file LICENSE.ASF-2 for details.
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation; version 3 of that license or any later version.
+# No warranty expressed or implied. See the file LICENSE.GPL-2 for details.
 
 """ Distribution setup for ‘python-daemon’ library.
     """
