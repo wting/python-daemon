@@ -24,7 +24,7 @@ main_module_name = 'daemon'
 main_module = __import__(main_module_name, fromlist=[b'version'])
 version = main_module.version
 
-short_description, long_description = (
+synopsis, long_description = (
         textwrap.dedent(d).strip()
         for d in main_module.__doc__.split('\n\n', 1)
         )
@@ -49,7 +49,7 @@ setup(
         # PyPI metadata.
         author=version.author_name,
         author_email=version.author_email,
-        description=short_description,
+        description=synopsis,
         license=version.license,
         keywords="daemon fork unix".split(),
         url=main_module._url,
