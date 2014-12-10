@@ -1,3 +1,7 @@
+2010-04-10  Ben Finney  <ben+python@benfinney.id.au>
+
+    * FAQ: Add some entries and re-structure the document.
+
 2010-03-03  Ben Finney  <ben+python@benfinney.id.au>
 
     * MANIFEST.in: Include the documentation in the distribution.
