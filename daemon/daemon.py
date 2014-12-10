@@ -28,6 +28,14 @@ import signal
 import socket
 import atexit
 
+
+try:
+    # Base type of strings in Python 2.
+    basestring
+except NameError:
+    # Python 3 only has one string type.
+    basestring = str
+
 
 class DaemonError(Exception):
     """ Base exception class for errors from this module. """
