@@ -41,6 +41,12 @@ class FakeFileDescriptorStringIO(StringIO, object):
     def fileno(self):
         return self._fileno
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
 
 class Exception_TestCase(scaffold.Exception_TestCase):
     """ Test cases for module exception classes. """
