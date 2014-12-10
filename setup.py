@@ -26,7 +26,7 @@ version = main_module.version
 
 short_description, long_description = (
     textwrap.dedent(d).strip()
-    for d in main_module.__doc__.split(u'\n\n', 1)
+    for d in main_module.__doc__.split('\n\n', 1)
     )
 
 
