@@ -105,11 +105,15 @@ class DaemonContext_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(DaemonContext_TestCase, self).setUp()
+
         setup_daemon_context_fixtures(self)
 
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(DaemonContext_TestCase, self).tearDown()
 
     def test_instantiate(self):
         """ New instance of DaemonContext should be created. """
@@ -278,11 +282,15 @@ class DaemonContext_is_open_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(DaemonContext_is_open_TestCase, self).setUp()
+
         setup_daemon_context_fixtures(self)
 
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(DaemonContext_is_open_TestCase, self).tearDown()
 
     def test_begin_false(self):
         """ Initial value of is_open should be False. """
@@ -302,6 +310,8 @@ class DaemonContext_open_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(DaemonContext_open_TestCase, self).setUp()
+
         setup_daemon_context_fixtures(self)
         self.mock_tracker.clear()
 
@@ -363,6 +373,8 @@ class DaemonContext_open_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(DaemonContext_open_TestCase, self).tearDown()
 
     def test_performs_steps_in_expected_sequence(self):
         """ Should perform daemonisation steps in expected sequence. """
@@ -587,6 +599,8 @@ class DaemonContext_close_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(DaemonContext_close_TestCase, self).setUp()
+
         setup_daemon_context_fixtures(self)
         self.mock_tracker.clear()
 
@@ -595,6 +609,8 @@ class DaemonContext_close_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(DaemonContext_close_TestCase, self).tearDown()
 
     def test_returns_immediately_if_not_is_open(self):
         """ Should return immediately if is_open property is false. """
@@ -636,6 +652,8 @@ class DaemonContext_context_manager_enter_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(DaemonContext_context_manager_enter_TestCase, self).setUp()
+
         setup_daemon_context_fixtures(self)
         self.mock_tracker.clear()
 
@@ -646,6 +664,8 @@ class DaemonContext_context_manager_enter_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(DaemonContext_context_manager_enter_TestCase, self).tearDown()
 
     def test_opens_daemon_context(self):
         """ Should open the DaemonContext. """
@@ -669,6 +689,8 @@ class DaemonContext_context_manager_exit_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(DaemonContext_context_manager_exit_TestCase, self).setUp()
+
         setup_daemon_context_fixtures(self)
         self.mock_tracker.clear()
 
@@ -685,6 +707,8 @@ class DaemonContext_context_manager_exit_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(DaemonContext_context_manager_exit_TestCase, self).tearDown()
 
     def test_closes_daemon_context(self):
         """ Should close the DaemonContext. """
@@ -710,6 +734,8 @@ class DaemonContext_terminate_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(DaemonContext_terminate_TestCase, self).setUp()
+
         setup_daemon_context_fixtures(self)
 
         self.test_signal = signal.SIGTERM
@@ -719,6 +745,8 @@ class DaemonContext_terminate_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(DaemonContext_terminate_TestCase, self).tearDown()
 
     def test_raises_system_exit(self):
         """ Should raise SystemExit. """
@@ -747,6 +775,10 @@ class DaemonContext_get_exclude_file_descriptors_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(
+                DaemonContext_get_exclude_file_descriptors_TestCase,
+                self).setUp()
+
         setup_daemon_context_fixtures(self)
 
         self.test_files = {
@@ -772,6 +804,10 @@ class DaemonContext_get_exclude_file_descriptors_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(
+                DaemonContext_get_exclude_file_descriptors_TestCase,
+                self).tearDown()
 
     def test_returns_expected_file_descriptors(self):
         """ Should return expected set of file descriptors. """
@@ -820,11 +856,15 @@ class DaemonContext_make_signal_handler_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(DaemonContext_make_signal_handler_TestCase, self).setUp()
+
         setup_daemon_context_fixtures(self)
 
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(DaemonContext_make_signal_handler_TestCase, self).tearDown()
 
     def test_returns_ignore_for_none(self):
         """ Should return SIG_IGN when None handler specified. """
@@ -865,6 +905,8 @@ class DaemonContext_make_signal_handler_map_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(DaemonContext_make_signal_handler_map_TestCase, self).setUp()
+
         setup_daemon_context_fixtures(self)
 
         self.test_instance.signal_map = {
@@ -891,6 +933,8 @@ class DaemonContext_make_signal_handler_map_TestCase(scaffold.TestCase):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
 
+        super(DaemonContext_make_signal_handler_map_TestCase, self).tearDown()
+
     def test_returns_constructed_signal_handler_items(self):
         """ Should return items as constructed via make_signal_handler. """
         instance = self.test_instance
@@ -904,6 +948,8 @@ class change_working_directory_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(change_working_directory_TestCase, self).setUp()
+
         self.mock_tracker = scaffold.MockTracker()
 
         scaffold.mock(
@@ -918,6 +964,8 @@ class change_working_directory_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(change_working_directory_TestCase, self).tearDown()
 
     def test_changes_working_directory_to_specified_directory(self):
         """ Should change working directory to specified directory. """
@@ -957,6 +1005,8 @@ class change_root_directory_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(change_root_directory_TestCase, self).setUp()
+
         self.mock_tracker = scaffold.MockTracker()
 
         scaffold.mock(
@@ -974,6 +1024,8 @@ class change_root_directory_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(change_root_directory_TestCase, self).tearDown()
 
     def test_changes_working_directory_to_specified_directory(self):
         """ Should change working directory to specified directory. """
@@ -1035,6 +1087,8 @@ class change_file_creation_mask_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(change_file_creation_mask_TestCase, self).setUp()
+
         self.mock_tracker = scaffold.MockTracker()
 
         scaffold.mock(
@@ -1049,6 +1103,8 @@ class change_file_creation_mask_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(change_file_creation_mask_TestCase, self).tearDown()
 
     def test_changes_umask_to_specified_mask(self):
         """ Should change working directory to specified directory. """
@@ -1088,6 +1144,8 @@ class change_process_owner_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(change_process_owner_TestCase, self).setUp()
+
         self.mock_tracker = scaffold.MockTracker()
 
         scaffold.mock(
@@ -1107,6 +1165,8 @@ class change_process_owner_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(change_process_owner_TestCase, self).tearDown()
 
     def test_changes_gid_and_uid_in_order(self):
         """ Should change process GID and UID in correct order.
@@ -1184,6 +1244,8 @@ class prevent_core_dump_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(prevent_core_dump_TestCase, self).setUp()
+
         self.mock_tracker = scaffold.MockTracker()
 
         self.RLIMIT_CORE = object()
@@ -1200,6 +1262,8 @@ class prevent_core_dump_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(prevent_core_dump_TestCase, self).tearDown()
 
     def test_sets_core_limit_to_zero(self):
         """ Should set the RLIMIT_CORE resource to zero. """
@@ -1234,6 +1298,8 @@ class close_file_descriptor_if_open_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(close_file_descriptor_if_open_TestCase, self).setUp()
+
         self.mock_tracker = scaffold.MockTracker()
 
         self.test_fd = 274
@@ -1245,6 +1311,8 @@ class close_file_descriptor_if_open_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(close_file_descriptor_if_open_TestCase, self).tearDown()
 
     def test_requests_file_descriptor_close(self):
         """ Should request close of file descriptor. """
@@ -1316,6 +1384,8 @@ class get_maximum_file_descriptors_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(get_maximum_file_descriptors_TestCase, self).setUp()
+
         self.mock_tracker = scaffold.MockTracker()
 
         self.RLIMIT_NOFILE = object()
@@ -1347,6 +1417,8 @@ class get_maximum_file_descriptors_TestCase(scaffold.TestCase):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
 
+        super(get_maximum_file_descriptors_TestCase, self).tearDown()
+
     def test_returns_system_hard_limit(self):
         """ Should return process hard limit on number of files. """
         expect_result = self.test_rlimit_nofile
@@ -1366,6 +1438,8 @@ class close_all_open_files_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(close_all_open_files_TestCase, self).setUp()
+
         self.mock_tracker = scaffold.MockTracker()
 
         self.RLIMIT_NOFILE = object()
@@ -1402,6 +1476,8 @@ class close_all_open_files_TestCase(scaffold.TestCase):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
 
+        super(close_all_open_files_TestCase, self).tearDown()
+
     def test_requests_all_open_files_to_close(self):
         """ Should request close of all open files. """
         expect_file_descriptors = reversed(range(self.test_maxfd))
@@ -1437,6 +1513,8 @@ class detach_process_context_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(detach_process_context_TestCase, self).setUp()
+
         self.mock_tracker = scaffold.MockTracker()
 
         test_pids = [0, 0]
@@ -1457,6 +1535,8 @@ class detach_process_context_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(detach_process_context_TestCase, self).tearDown()
 
     def test_parent_exits(self):
         """ Parent process should exit. """
@@ -1571,6 +1651,8 @@ class is_process_started_by_init_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(is_process_started_by_init_TestCase, self).setUp()
+
         self.mock_tracker = scaffold.MockTracker()
 
         self.test_ppid = 765
@@ -1583,6 +1665,8 @@ class is_process_started_by_init_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(is_process_started_by_init_TestCase, self).tearDown()
 
     def test_returns_false_by_default(self):
         """ Should return False under normal circumstances. """
@@ -1604,6 +1688,8 @@ class is_socket_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(is_socket_TestCase, self).setUp()
+
         self.mock_tracker = scaffold.MockTracker()
 
         def mock_getsockopt(level, optname, buflen=None):
@@ -1634,6 +1720,8 @@ class is_socket_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(is_socket_TestCase, self).tearDown()
 
     def test_returns_false_by_default(self):
         """ Should return False under normal circumstances. """
@@ -1668,6 +1756,8 @@ class is_process_started_by_superserver_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(is_process_started_by_superserver_TestCase, self).setUp()
+
         self.mock_tracker = scaffold.MockTracker()
 
         def mock_is_socket(fd):
@@ -1688,6 +1778,8 @@ class is_process_started_by_superserver_TestCase(scaffold.TestCase):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
 
+        super(is_process_started_by_superserver_TestCase, self).tearDown()
+
     def test_returns_false_by_default(self):
         """ Should return False under normal circumstances. """
         expect_result = False
@@ -1707,6 +1799,8 @@ class is_detach_process_context_required_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(is_detach_process_context_required_TestCase, self).setUp()
+
         self.mock_tracker = scaffold.MockTracker()
 
         scaffold.mock(
@@ -1719,6 +1813,8 @@ class is_detach_process_context_required_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(is_detach_process_context_required_TestCase, self).tearDown()
 
     def test_returns_true_by_default(self):
         """ Should return False under normal circumstances. """
@@ -1772,6 +1868,8 @@ class redirect_stream_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(redirect_stream_TestCase, self).setUp()
+
         setup_streams_fixtures(self)
 
         self.test_system_stream = FakeFileDescriptorStringIO()
@@ -1793,6 +1891,8 @@ class redirect_stream_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(redirect_stream_TestCase, self).tearDown()
 
     def test_duplicates_target_file_descriptor(self):
         """ Should duplicate file descriptor from target to system stream. """
@@ -1828,6 +1928,8 @@ class make_default_signal_map_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(make_default_signal_map_TestCase, self).setUp()
+
         self.mock_tracker = scaffold.MockTracker()
 
         mock_signal_module = ModuleType(b'signal')
@@ -1867,6 +1969,8 @@ class make_default_signal_map_TestCase(scaffold.TestCase):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
 
+        super(make_default_signal_map_TestCase, self).tearDown()
+
     def test_returns_constructed_signal_map(self):
         """ Should return map per default. """
         expect_result = self.default_signal_map
@@ -1894,6 +1998,8 @@ class set_signal_handlers_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(set_signal_handlers_TestCase, self).setUp()
+
         self.mock_tracker = scaffold.MockTracker()
 
         scaffold.mock(
@@ -1909,6 +2015,8 @@ class set_signal_handlers_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(set_signal_handlers_TestCase, self).tearDown()
 
     def test_sets_signal_handler_for_each_item(self):
         """ Should set signal handler for each item in map. """
@@ -1926,6 +2034,8 @@ class register_atexit_function_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(register_atexit_function_TestCase, self).setUp()
+
         self.mock_tracker = scaffold.MockTracker()
 
         scaffold.mock(
@@ -1935,6 +2045,8 @@ class register_atexit_function_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(register_atexit_function_TestCase, self).tearDown()
 
     def test_registers_function_for_atexit_processing(self):
         """ Should register specified function for atexit processing. """

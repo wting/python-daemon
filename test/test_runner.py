@@ -205,6 +205,8 @@ class DaemonRunner_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(DaemonRunner_TestCase, self).setUp()
+
         setup_runner_fixtures(self)
         set_runner_scenario(self, 'simple')
 
@@ -217,6 +219,8 @@ class DaemonRunner_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(DaemonRunner_TestCase, self).tearDown()
 
     def test_instantiate(self):
         """ New instance of DaemonRunner should be created. """
@@ -340,12 +344,16 @@ class DaemonRunner_usage_exit_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(DaemonRunner_usage_exit_TestCase, self).setUp()
+
         setup_runner_fixtures(self)
         set_runner_scenario(self, 'simple')
 
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(DaemonRunner_usage_exit_TestCase, self).tearDown()
 
     def test_raises_system_exit(self):
         """ Should raise SystemExit exception. """
@@ -375,6 +383,8 @@ class DaemonRunner_parse_args_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(DaemonRunner_parse_args_TestCase, self).setUp()
+
         setup_runner_fixtures(self)
         set_runner_scenario(self, 'simple')
 
@@ -386,6 +396,8 @@ class DaemonRunner_parse_args_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(DaemonRunner_parse_args_TestCase, self).tearDown()
 
     def test_emits_usage_message_if_insufficient_args(self):
         """ Should emit a usage message and exit if too few arguments. """
@@ -440,12 +452,16 @@ class DaemonRunner_do_action_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(DaemonRunner_do_action_TestCase, self).setUp()
+
         setup_runner_fixtures(self)
         set_runner_scenario(self, 'simple')
 
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(DaemonRunner_do_action_TestCase, self).tearDown()
 
     def test_raises_error_if_unknown_action(self):
         """ Should emit a usage message and exit if action is unknown. """
@@ -462,6 +478,8 @@ class DaemonRunner_do_action_start_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(DaemonRunner_do_action_start_TestCase, self).setUp()
+
         setup_runner_fixtures(self)
         set_runner_scenario(self, 'simple')
 
@@ -470,6 +488,8 @@ class DaemonRunner_do_action_start_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(DaemonRunner_do_action_start_TestCase, self).tearDown()
 
     def test_raises_error_if_pidfile_locked(self):
         """ Should raise error if PID file is locked. """
@@ -549,6 +569,8 @@ class DaemonRunner_do_action_stop_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(DaemonRunner_do_action_stop_TestCase, self).setUp()
+
         setup_runner_fixtures(self)
         set_runner_scenario(self, 'pidfile-locked')
 
@@ -562,6 +584,8 @@ class DaemonRunner_do_action_stop_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(DaemonRunner_do_action_stop_TestCase, self).tearDown()
 
     def test_raises_error_if_pidfile_not_locked(self):
         """ Should raise error if PID file is not locked. """
@@ -639,6 +663,8 @@ class DaemonRunner_do_action_restart_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(DaemonRunner_do_action_restart_TestCase, self).setUp()
+
         setup_runner_fixtures(self)
         set_runner_scenario(self, 'pidfile-locked')
 
@@ -647,6 +673,8 @@ class DaemonRunner_do_action_restart_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(DaemonRunner_do_action_restart_TestCase, self).tearDown()
 
     def test_requests_stop_then_start(self):
         """ Should request stop, then start. """

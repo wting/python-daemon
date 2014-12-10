@@ -341,11 +341,15 @@ class PIDLockFile_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(PIDLockFile_TestCase, self).setUp()
+
         setup_pidlockfile_fixtures(self, 'exist-other-pid')
 
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(PIDLockFile_TestCase, self).tearDown()
 
     def test_instantiate(self):
         """ New instance of PIDLockFile should be created. """
@@ -369,11 +373,15 @@ class PIDLockFile_read_pid_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(PIDLockFile_read_pid_TestCase, self).setUp()
+
         setup_pidlockfile_fixtures(self, 'exist-other-pid')
 
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(PIDLockFile_read_pid_TestCase, self).tearDown()
 
     def test_gets_pid_via_read_pid_from_pidfile(self):
         """ Should get PID via read_pid_from_pidfile. """
@@ -389,12 +397,16 @@ class PIDLockFile_acquire_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(PIDLockFile_acquire_TestCase, self).setUp()
+
         setup_pidlockfile_fixtures(self)
         set_pidlockfile_scenario(self, 'not-exist')
 
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(PIDLockFile_acquire_TestCase, self).tearDown()
 
     def test_calls_linkfilelock_acquire(self):
         """ Should first call LinkFileLock.acquire method. """
@@ -447,11 +459,15 @@ class PIDLockFile_release_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(PIDLockFile_release_TestCase, self).setUp()
+
         setup_pidlockfile_fixtures(self)
 
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(PIDLockFile_release_TestCase, self).tearDown()
 
     def test_does_not_remove_existing_pidfile_if_not_locking(self):
         """ Should not request removal of PID file if not locking. """
@@ -511,12 +527,16 @@ class PIDLockFile_break_lock_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(PIDLockFile_break_lock_TestCase, self).setUp()
+
         setup_pidlockfile_fixtures(self)
         set_pidlockfile_scenario(self, 'exist-other-pid-locked')
 
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(PIDLockFile_break_lock_TestCase, self).tearDown()
 
     def test_calls_linkfilelock_break_lock(self):
         """ Should first call LinkFileLock.break_lock method. """
@@ -545,11 +565,15 @@ class read_pid_from_pidfile_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(read_pid_from_pidfile_TestCase, self).setUp()
+
         setup_pidfile_fixtures(self)
 
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(read_pid_from_pidfile_TestCase, self).tearDown()
 
     def test_opens_specified_filename(self):
         """ Should attempt to open specified pidfile filename. """
@@ -612,6 +636,8 @@ class remove_existing_pidfile_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(remove_existing_pidfile_TestCase, self).setUp()
+
         setup_pidfile_fixtures(self)
 
         scaffold.mock(
@@ -621,6 +647,8 @@ class remove_existing_pidfile_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(remove_existing_pidfile_TestCase, self).tearDown()
 
     def test_removes_specified_filename(self):
         """ Should attempt to remove specified PID file filename. """
@@ -663,12 +691,16 @@ class write_pid_to_pidfile_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(write_pid_to_pidfile_TestCase, self).setUp()
+
         setup_pidfile_fixtures(self)
         set_pidlockfile_scenario(self, 'not-exist')
 
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(write_pid_to_pidfile_TestCase, self).tearDown()
 
     def test_opens_specified_filename(self):
         """ Should attempt to open specified PID file filename. """
@@ -718,6 +750,8 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
 
     def setUp(self):
         """ Set up test fixtures. """
+        super(TimeoutPIDLockFile_TestCase, self).setUp()
+
         self.mock_tracker = scaffold.MockTracker()
 
         pidlockfile_scenarios = make_pidlockfile_scenarios()
@@ -746,6 +780,8 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
     def tearDown(self):
         """ Tear down test fixtures. """
         scaffold.mock_restore()
+
+        super(TimeoutPIDLockFile_TestCase, self).tearDown()
 
     def test_inherits_from_pidlockfile(self):
         """ Should inherit from PIDLockFile. """
