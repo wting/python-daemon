@@ -1,5 +1,7 @@
 2014-12-10  Ben Finney  <ben+python@benfinney.id.au>
 
+    Version 1.5.6 released.
+
     * Declare a maximum compatible version of ‘lockfile’ library.
 
 2014-11-27  Ben Finney  <ben+python@benfinney.id.au
