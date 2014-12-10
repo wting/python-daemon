@@ -1,3 +1,7 @@
+2014-12-10  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Declare a maximum compatible version of ‘lockfile’ library.
+
 2014-11-27  Ben Finney  <ben+python@benfinney.id.au
 
     * Use ‘pydoc.splitdoc’ to get package description text.
