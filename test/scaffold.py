@@ -29,6 +29,8 @@ except ImportError:
     # Not available, so try the builtin function.
     assert reduce
 
+import testscenarios
+import testtools.testcase
 from minimock import (
         Mock,
         TraceTracker as MockTracker,
@@ -128,7 +130,7 @@ def format_function_signature(func):
     return signature_text
 
 
-class TestCase(unittest.TestCase):
+class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
     """ Test case behaviour. """
 
     def failUnlessRaises(self, exc_class, func, *args, **kwargs):

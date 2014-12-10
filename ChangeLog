@@ -1,6 +1,10 @@
 2014-11-27  Ben Finney  <ben+python@benfinney.id.au
 
     * Use ‘pydoc.splitdoc’ to get package description text.
+    * Move package metadata to ‘daemon/_metadata.py’.
+    * Move version string to a plain-text data file, ‘VERSION’.
+    * Get version string at run-time from installed distribution.
+    * Add unit tests for metadata.
 
 2014-08-05  Ben Finney  <ben+python@benfinney.id.au>
 

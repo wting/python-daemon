@@ -39,14 +39,7 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-import version
-from daemon import DaemonContext
-
-
-_version = version.version
-_copyright = version.copyright
-_license = version.license
-_url = "https://alioth.debian.org/projects/python-daemon/"
+from .daemon import DaemonContext
 
 
 # Local variables:
