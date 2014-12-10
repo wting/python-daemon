@@ -81,12 +81,12 @@ class DaemonRunner(object):
         self.daemon_context.stdin = open(app.stdin_path, 'r')
         self.daemon_context.stdout = open(app.stdout_path, 'w+')
         self.daemon_context.stderr = open(
-            app.stderr_path, 'w+', buffering=0)
+                app.stderr_path, 'w+', buffering=0)
 
         self.pidfile = None
         if app.pidfile_path is not None:
             self.pidfile = make_pidlockfile(
-                app.pidfile_path, app.pidfile_timeout)
+                    app.pidfile_path, app.pidfile_timeout)
         self.daemon_context.pidfile = self.pidfile
 
     def _usage_exit(self, argv):
@@ -124,7 +124,7 @@ class DaemonRunner(object):
         except pidlockfile.AlreadyLocked:
             pidfile_path = self.pidfile.path
             raise DaemonRunnerStartFailureError(
-                "PID file %(pidfile_path)r already locked" % vars())
+                    "PID file %(pidfile_path)r already locked" % vars())
 
         pid = os.getpid()
         message = self.start_message % vars()
@@ -140,7 +140,7 @@ class DaemonRunner(object):
             os.kill(pid, signal.SIGTERM)
         except OSError, exc:
             raise DaemonRunnerStopFailureError(
-                "Failed to terminate %(pid)d: %(exc)s" % vars())
+                    "Failed to terminate %(pid)d: %(exc)s" % vars())
 
     def _stop(self):
         """ Exit the daemon process specified in the current PID file.
@@ -148,7 +148,7 @@ class DaemonRunner(object):
         if not self.pidfile.is_locked():
             pidfile_path = self.pidfile.path
             raise DaemonRunnerStopFailureError(
-                "PID file %(pidfile_path)r not locked" % vars())
+                    "PID file %(pidfile_path)r not locked" % vars())
 
         if is_pidfile_stale(self.pidfile):
             self.pidfile.break_lock()
@@ -162,10 +162,10 @@ class DaemonRunner(object):
         self._start()
 
     action_funcs = {
-        'start': _start,
-        'stop': _stop,
-        'restart': _restart,
-        }
+            'start': _start,
+            'stop': _stop,
+            'restart': _restart,
+            }
 
     def _get_action_func(self):
         """ Return the function for the specified action.
@@ -178,7 +178,7 @@ class DaemonRunner(object):
             func = self.action_funcs[self.action]
         except KeyError:
             raise DaemonRunnerInvalidActionError(
-                "Unknown action: %(action)r" % vars(self))
+                    "Unknown action: %(action)r" % vars(self))
         return func
 
     def do_action(self):

@@ -30,11 +30,11 @@ except ImportError:
     assert reduce
 
 from minimock import (
-    Mock,
-    TraceTracker as MockTracker,
-    mock,
-    restore as mock_restore,
-    )
+        Mock,
+        TraceTracker as MockTracker,
+        mock,
+        restore as mock_restore,
+        )
 
 test_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(test_dir)
@@ -49,15 +49,17 @@ logging.disable(logging.CRITICAL)
 
 def get_python_module_names(file_list, file_suffix='.py'):
     """ Return a list of module names from a filename list. """
-    module_names = [m[:m.rfind(file_suffix)] for m in file_list
-        if m.endswith(file_suffix)]
+    module_names = [
+            m[:m.rfind(file_suffix)] for m in file_list
+            if m.endswith(file_suffix)]
     return module_names
 
 
 def get_test_module_names(module_list, module_prefix='test_'):
     """ Return the list of module names that qualify as test modules. """
-    module_names = [m for m in module_list
-        if m.startswith(module_prefix)]
+    module_names = [
+            m for m in module_list
+            if m.startswith(module_prefix)]
     return module_names
 
 
@@ -84,11 +86,11 @@ def get_function_signature(func):
         arg_defaults[name] = value
 
     signature = {
-        'name': func.__name__,
-        'arg_count': arg_count,
-        'arg_names': arg_names,
-        'arg_defaults': arg_defaults,
-        }
+            'name': func.__name__,
+            'arg_count': arg_count,
+            'arg_names': arg_names,
+            'arg_defaults': arg_defaults,
+            }
 
     non_pos_names = list(func.func_code.co_varnames[arg_count:])
     COLLECTS_ARBITRARY_POSITIONAL_ARGS = 0x04
@@ -121,7 +123,7 @@ def format_function_signature(func):
 
     func_name = signature['name']
     signature_text = (
-        "%(func_name)s(%(signature_args_text)s)" % vars())
+            "%(func_name)s(%(signature_args_text)s)" % vars())
 
     return signature_text
 
@@ -139,14 +141,14 @@ class TestCase(unittest.TestCase):
             """
         try:
             super(TestCase, self).failUnlessRaises(
-                exc_class, func, *args, **kwargs)
+                    exc_class, func, *args, **kwargs)
         except self.failureException:
             exc_class_name = exc_class.__name__
             msg = (
-                "Exception %(exc_class_name)s not raised"
-                " for function call:"
-                " func=%(func)r args=%(args)r kwargs=%(kwargs)r"
-                ) % vars()
+                    "Exception %(exc_class_name)s not raised"
+                    " for function call:"
+                    " func=%(func)r args=%(args)r kwargs=%(kwargs)r"
+                    ) % vars()
             raise self.failureException(msg)
 
     def failIfIs(self, first, second, msg=None):
@@ -218,16 +220,16 @@ class TestCase(unittest.TestCase):
         example = doctest.Example(source, want)
         got = textwrap.dedent(got)
         checker_optionflags = reduce(operator.or_, [
-            doctest.ELLIPSIS,
-            ])
+                doctest.ELLIPSIS,
+                ])
         if not checker.check_output(want, got, checker_optionflags):
             if msg is None:
                 diff = checker.output_difference(
-                    example, got, checker_optionflags)
+                        example, got, checker_optionflags)
                 msg = "\n".join([
-                    "Output received did not match expected output",
-                    "%(diff)s",
-                    ]) % vars()
+                        "Output received did not match expected output",
+                        "%(diff)s",
+                        ]) % vars()
             raise self.failureException(msg)
 
     assertOutputCheckerMatch = failUnlessOutputCheckerMatch
@@ -247,9 +249,9 @@ class TestCase(unittest.TestCase):
             if msg is None:
                 diff = tracker.diff(want)
                 msg = "\n".join([
-                    "Output received did not match expected output",
-                    "%(diff)s",
-                    ]) % vars()
+                        "Output received did not match expected output",
+                        "%(diff)s",
+                        ]) % vars()
             raise self.failureException(msg)
 
     def failIfMockCheckerMatch(self, want, tracker=None, msg=None):
@@ -267,9 +269,9 @@ class TestCase(unittest.TestCase):
             if msg is None:
                 diff = tracker.diff(want)
                 msg = "\n".join([
-                    "Output received matched specified undesired output",
-                    "%(diff)s",
-                    ]) % vars()
+                        "Output received matched specified undesired output",
+                        "%(diff)s",
+                        ]) % vars()
             raise self.failureException(msg)
 
     assertMockCheckerMatch = failUnlessMockCheckerMatch
@@ -285,8 +287,8 @@ class TestCase(unittest.TestCase):
         if isinstance(obj, classes):
             if msg is None:
                 msg = (
-                    "%(obj)r is an instance of one of %(classes)r"
-                    ) % vars()
+                        "%(obj)r is an instance of one of %(classes)r"
+                        ) % vars()
             raise self.failureException(msg)
 
     def failUnlessIsInstance(self, obj, classes, msg=None):
@@ -299,8 +301,8 @@ class TestCase(unittest.TestCase):
         if not isinstance(obj, classes):
             if msg is None:
                 msg = (
-                    "%(obj)r is not an instance of any of %(classes)r"
-                    ) % vars()
+                        "%(obj)r is not an instance of any of %(classes)r"
+                        ) % vars()
             raise self.failureException(msg)
 
     assertIsInstance = failUnlessIsInstance
@@ -325,9 +327,9 @@ class TestCase(unittest.TestCase):
         if not func_in_traceback:
             if msg is None:
                 msg = (
-                    "Traceback did not lead to original function"
-                    " %(function)s"
-                    ) % vars()
+                        "Traceback did not lead to original function"
+                        " %(function)s"
+                        ) % vars()
             raise self.failureException(msg)
 
     assertFunctionInTraceback = failUnlessFunctionInTraceback
@@ -362,13 +364,13 @@ class TestCase(unittest.TestCase):
                 first_signature_text = format_function_signature(first)
                 second_signature_text = format_function_signature(second)
                 msg = (textwrap.dedent("""\
-                    Function signatures do not match:
-                        %(first_signature)r != %(second_signature)r
-                    Expected:
-                        %(first_signature_text)s
-                    Got:
-                        %(second_signature_text)s""")
-                    ) % vars()
+                        Function signatures do not match:
+                            %(first_signature)r != %(second_signature)r
+                        Expected:
+                            %(first_signature_text)s
+                        Got:
+                            %(second_signature_text)s""")
+                        ) % vars()
             raise self.failureException(msg)
 
     assertFunctionSignatureMatch = failUnlessFunctionSignatureMatch
@@ -405,12 +407,12 @@ class Exception_TestCase(TestCase):
             for match_type in params['types']:
                 match_type_name = match_type.__name__
                 fail_msg = (
-                    "%(instance)r is not an instance of"
-                    " %(match_type_name)s"
-                    ) % vars()
+                        "%(instance)r is not an instance of"
+                        " %(match_type_name)s"
+                        ) % vars()
                 self.failUnless(
-                    isinstance(instance, match_type),
-                    msg=fail_msg)
+                        isinstance(instance, match_type),
+                        msg=fail_msg)
 
 
 # Local variables:
