@@ -57,7 +57,7 @@ setup(
     classifiers=[
         # Reference: http://pypi.python.org/pypi?%3Aaction=list_classifiers
         "Development Status :: 4 - Beta",
-        "License :: OSI Approved :: Python Software Foundation License",
+        "License :: OSI Approved :: Apache Software License",
         "Operating System :: POSIX",
         "Programming Language :: Python",
         "Intended Audience :: Developers",
