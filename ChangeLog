@@ -1,3 +1,7 @@
+2014-12-12  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Document the security impact of the default umask.
+
 2014-12-11  Ben Finney  <ben+debian@benfinney.id.au>
 
     * Include test suite with source distribution.
