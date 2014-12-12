@@ -2,7 +2,7 @@
 ##########################################
 
 :Author: Ben Finney <ben+python@benfinney.id.au>
-:Updated: 2014-12-11
+:Updated: 2014-12-12
 
 ..  contents::
 ..
@@ -52,6 +52,28 @@ A possible starting point for such a “service” model of execution is
 in a `message from 2009-01-30`_ to the ``python-ideas`` forum.
 
 ..  _`message from 2009-01-30`: http://mail.python.org/pipermail/python-ideas/2009-January/002606.html
+
+
+Security
+========
+
+Why is the umask set to 0 by default?
+-------------------------------------
+
+A process on Unix inherits the umask of its parent process. That value
+is not under the control of the daemon code, and could be more
+restrictive than expected.
+
+To allow the daemon code to choose access modes for new files and get
+the values specified, the umask is reset to the specified value; if no
+value is specified, the default is 0.
+
+*Security Note*: The default of 0 for the ‘umask’ parameter is the
+Unix conventional default value for the umask of a newly-started
+daemon process. This allows the daemon code to create files with any
+access mode it specifies. If this conventional default is too open,
+set a specific umask value, either with this parameter, or later in
+the program with an explicit ‘os.umask’ call.
 
 
 File descriptors
