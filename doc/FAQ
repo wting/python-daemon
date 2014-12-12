@@ -60,20 +60,15 @@ Security
 Why is the umask set to 0 by default?
 -------------------------------------
 
-A process on Unix inherits the umask of its parent process. That value
-is not under the control of the daemon code, and could be more
-restrictive than expected.
+A daemon should not rely on the parent process's umask value, which is
+beyond its control and may prevent creating a file with the required
+access mode. So when the daemon context opens, the umask is set to an
+explicit known value.
 
-To allow the daemon code to choose access modes for new files and get
-the values specified, the umask is reset to the specified value; if no
-value is specified, the default is 0.
-
-*Security Note*: The default of 0 for the ‘umask’ parameter is the
-Unix conventional default value for the umask of a newly-started
-daemon process. This allows the daemon code to create files with any
-access mode it specifies. If this conventional default is too open,
-set a specific umask value, either with this parameter, or later in
-the program with an explicit ‘os.umask’ call.
+If the conventional value of 0 is too open, consider setting a value
+such as 022, 027, 077, or another specific value. Otherwise, ensure
+the daemon creates every file with an explicit access mode for the
+purpose.
 
 
 File descriptors
