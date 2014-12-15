@@ -1,3 +1,8 @@
+2014-12-15  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Wrap the ‘fromlist’ parameter of ‘__import__’ for Python 3
+      compatibility.
+
 2014-12-08  Ben Finney  <ben+python@benfinney.id.au>
 
     * Migrate to ‘mock’ library for mock objects in tests.
