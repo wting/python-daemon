@@ -3,13 +3,13 @@
 # daemon/__init__.py
 # Part of ‘python-daemon’, an implementation of PEP 3143.
 #
-# Copyright © 2009–2012 Ben Finney <ben+python@benfinney.id.au>
+# Copyright © 2009–2014 Ben Finney <ben+python@benfinney.id.au>
 # Copyright © 2006 Robert Niederreiter
 #
 # This is free software: you may copy, modify, and/or distribute this work
 # under the terms of the Apache License, version 2.0 as published by the
 # Apache Software Foundation.
-# No warranty expressed or implied. See the file LICENSE.ASF-2 for details.
+# No warranty expressed or implied. See the file ‘LICENSE.ASF-2’ for details.
 
 """ Library to implement a well-behaved Unix daemon process.
 
@@ -39,11 +39,11 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-from . import version
 from .daemon import DaemonContext
 
 
-_version = version.version
-_copyright = version.copyright
-_license = version.license
-_url = "http://pypi.python.org/pypi/python-daemon/"
+# Local variables:
+# coding: utf-8
+# mode: python
+# End:
+# vim: fileencoding=utf-8 filetype=python :

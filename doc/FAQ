@@ -2,13 +2,7 @@
 ##########################################
 
 :Author: Ben Finney <ben+python@benfinney.id.au>
-:Updated: 2011-07-02
-
-..
-    This is free software: you may copy, modify, and/or distribute this work
-    under the terms of the Apache License version 2.0 as published by the
-    Apache Software Foundation.
-    No warranty expressed or implied. See the file LICENSE.ASF-2 for details.
+:Updated: 2014-11-28
 
 ..  contents::
 ..
@@ -108,9 +102,9 @@ from closure::
 
     # any subclass of StreamHandler should provide the ‘stream’ attribute.
     lh = logging.handlers.TimedRotatingFileHandler(
-        "/var/log/foo.log",
-        # …
-        )
+            "/var/log/foo.log",
+            # …
+            )
 
     # … do some logging and other activity …
 
@@ -125,12 +119,19 @@ from closure::
 
 
 ..
+    This is free software: you may copy, modify, and/or distribute this work
+    under the terms of the Apache License version 2.0 as published by the
+    Apache Software Foundation.
+    No warranty expressed or implied. See the file ‘LICENSE.ASF-2’ for details.
+
+..
     Local variables:
-    mode: rst
     coding: utf-8
+    mode: text
+    mode: rst
     time-stamp-format: "%:y-%02m-%02d"
     time-stamp-start: "^:Updated:[         ]+"
     time-stamp-end: "$"
     time-stamp-line-limit: 20
     End:
-    vim: filetype=rst fileencoding=utf-8 :
+    vim: fileencoding=utf-8 filetype=rst :

@@ -1,8 +1,51 @@
+2014-12-08  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Migrate to ‘mock’ library for mock objects in tests.
+      This will ease the port to Python 3, which has ‘mock’ in the
+      standard library.
+
+2014-11-28  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Add a hacking guide for developers.
+
+2014-11-27  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Use ‘pydoc.splitdoc’ to get package description text.
+    * Remove ASCII translation of package description, not needed now the
+      docstring is a proper Unicode text value.
+    * Move package metadata to ‘daemon/_metadata.py’.
+    * Move version string to a plain-text data file, ‘VERSION’.
+    * Get version string at run-time from installed distribution.
+    * Add unit tests for metadata.
+
+2014-08-05  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Update package homepage to Alioth hosted project page.
+
+2014-08-04  Ben Finney  <ben+python@benfinney.id.au>
+
+    Version 1.6.1 released.
+
+2014-08-01  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Use unambiguous “except FooType as foo” syntax.
+      This is to ease the port to Python 3, where the ambiguous comma
+      usage is an error.
+    * Ensure a ‘basestring’ name bound to the base type for strings.
+      This is to allow checks to work on Python 2 and 3.
+    * Specify versions of Python supported, as trove classifiers.
+
+2014-05-20  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Update copyright notices.
+    * Add editor hints for most files.
+    * Distinguish continuation-line indentation versus block indentation.
+
 2012-05-30  Ben Finney  <ben+python@benfinney.id.au>
 
     * Use unicode literals by default, specifying bytes where necessary.
-      This is to ease the port to Python 3, where the string type is
-      unicode.
+      This is to ease the port to Python 3, where the default string type
+      is unicode.
     * Update copyright notices.
     * Update the GPL license file to version 3, as declared in our
       copyright notices.
@@ -24,6 +67,10 @@
       Change references elsewhere to use this new name.
     * daemon/pidfile.py: Remove functionality now migrated to ‘lockfile’
       library.
+
+2010-04-10  Ben Finney  <ben+python@benfinney.id.au>
+
+    * FAQ: Add some entries and re-structure the document.
 
 2010-03-09  Ben Finney  <ben+python@benfinney.id.au>
 
@@ -218,7 +265,7 @@
 This is free software: you may copy, modify, and/or distribute this work
 under the terms of the Apache License version 2.0 as published by the
 Apache Software Foundation.
-No warranty expressed or implied. See the file LICENSE.ASF-2 for details.
+No warranty expressed or implied. See the file ‘LICENSE.ASF-2’ for details.
 
 Local variables:
 mode: change-log
@@ -226,3 +273,4 @@ coding: utf-8
 left-margin: 4
 indent-tabs-mode: nil
 End:
+vim: fileencoding=utf-8 filetype=changelog :
