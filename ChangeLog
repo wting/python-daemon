@@ -1,3 +1,7 @@
+2014-12-16  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Declare support explicitly for Python 2 only.
+
 2014-12-12  Ben Finney  <ben+python@benfinney.id.au>
 
     * Document the security impact of the default umask.
