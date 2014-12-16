@@ -1,3 +1,8 @@
+2014-12-17  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Discriminate between different ‘fileno’ method behaviours.
+      In Python 3, ‘StringIO.fileno’ is callable but raises an exception.
+
 2014-12-16  Ben Finney  <ben+python@benfinney.id.au>
 
     * Declare support explicitly for Python 2 only.
