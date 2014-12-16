@@ -2,7 +2,7 @@
 ##########################################
 
 :Author: Ben Finney <ben+python@benfinney.id.au>
-:Updated: 2014-11-28
+:Updated: 2014-12-16
 
 ..  contents::
 ..
@@ -52,6 +52,23 @@ A possible starting point for such a “service” model of execution is
 in a `message from 2009-01-30`_ to the ``python-ideas`` forum.
 
 ..  _`message from 2009-01-30`: http://mail.python.org/pipermail/python-ideas/2009-January/002606.html
+
+
+Security
+========
+
+Why is the umask set to 0 by default?
+-------------------------------------
+
+A daemon should not rely on the parent process's umask value, which is
+beyond its control and may prevent creating a file with the required
+access mode. So when the daemon context opens, the umask is set to an
+explicit known value.
+
+If the conventional value of 0 is too open, consider setting a value
+such as 022, 027, 077, or another specific value. Otherwise, ensure
+the daemon creates every file with an explicit access mode for the
+purpose.
 
 
 File descriptors
