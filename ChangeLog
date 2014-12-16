@@ -6,6 +6,7 @@
 2014-12-16  Ben Finney  <ben+python@benfinney.id.au>
 
     * Declare support explicitly for Python 2 only.
+    * Migrate to JSON (instead of Python) for serialised version info.
 
 2014-12-12  Ben Finney  <ben+python@benfinney.id.au>
 

@@ -20,10 +20,12 @@ import sys
 import tempfile
 import shutil
 import tarfile
+import json
 
 import bzrlib
 import bzrlib.workingtree
 import bzrlib.export
+import bzrlib.revision
 from bzrlib import version_info_formats
 import bzrlib.plugin
 bzrlib.plugin.load_plugins()
@@ -38,54 +40,105 @@ branch = workingtree.branch
 revision_tree = branch.basis_tree()
 
 
+class JsonVersionInfoBuilder(version_info_formats.VersionInfoBuilder):
+    """ Create a version file which is JSON data. """
+
+    def _make_info_mapping(self):
+        """ Make the version info mapping object. """
+        info = {
+                'build_date': version_info_formats.create_date_str(),
+                'revno': None,
+                'revision_id': None,
+                'branch_nick': self._branch.nick,
+                'clean': None,
+                'date': None,
+                }
+
+        revision_id = self._get_revision_id()
+        if revision_id == bzrlib.revision.NULL_REVISION:
+            info['revno'] = "0"
+        else:
+            info['revno'] = self._get_revno_str(revision_id)
+            info['revision_id'] = revision_id
+            rev = self._branch.repository.get_revision(revision_id)
+            info['date'] = version_info_formats.create_date_str(
+                    rev.timestamp, rev.timezone)
+
+        if self._check or self._include_file_revs:
+            self._extract_file_revisions()
+
+        if self._check:
+            if self._clean:
+                info['clean'] = True
+            else:
+                info['clean'] = False
+
+        revisions = {}
+        if self._include_history:
+            revisions = list(self._iter_revision_history())
+        info['revisions'] = revisions
+
+        file_revisions = {}
+        if self._include_file_revs:
+            file_revisions = self._file_revisions
+        info['file_revisions'] = file_revisions
+
+        return info
+
+    def generate(self, to_file):
+        """ Generate the output file with the version info. """
+        info = self._make_info_mapping()
+        json.dump(info, to_file)
+
+
 def get_generated_version_info_content():
-    """ Return the generated version-info module, or None. """
+    """ Return the generated version-info file, or None. """
 
     content = None
 
-    module_temp = tempfile.NamedTemporaryFile()
-    info_format = version_info_formats.format_registry.get("python")
+    outfile_temp = tempfile.NamedTemporaryFile()
+    info_format = JsonVersionInfoBuilder
     info_builder = info_format(workingtree.branch)
-    info_builder.generate(module_temp)
+    info_builder.generate(outfile_temp)
 
-    module_temp.seek(0)
-    content = module_temp.read()
-    module_temp.close()
+    outfile_temp.seek(0)
+    content = outfile_temp.read()
+    outfile_temp.close()
 
     return content
 
-def get_existing_version_info_content(module_path):
-    """ Return the content of the existing version-info module, or None. """
+def get_existing_version_info_content(infile_path):
+    """ Return the content of the existing version-info file, or None. """
 
     content = None
 
     try:
-        module_file = open(module_path, 'r')
-        content = module_file.read()
+        infile = open(infile_path, 'r')
+        content = infile.read()
     except IOError:
         pass
 
     return content
 
-def update_version_info_module_if_needed(module_path):
-    """ Update the version-info module iff it is out of date. """
+def update_version_info_file_if_needed(infile_path):
+    """ Update the version-info file iff it is out of date. """
 
     generated_content = get_generated_version_info_content()
-    existing_content = get_existing_version_info_content(module_path)
+    existing_content = get_existing_version_info_content(infile_path)
 
     if generated_content is not None:
         if generated_content != existing_content:
-            module_file = open(module_path, 'w+')
-            module_file.write(generated_content)
-            module_file.close()
+            version_info_file = open(infile_path, 'w+')
+            version_info_file.write(generated_content)
+            version_info_file.close()
 
 package_name = "daemon"
-version_info_module_relpath = os.path.join(
-        package_name, "_version_info.py")
-version_info_module_path = os.path.join(
-        workingtree.basedir, version_info_module_relpath)
+version_info_file_relpath = os.path.join(
+        package_name, "version_info.json")
+version_info_file_path = os.path.join(
+        workingtree.basedir, version_info_file_relpath)
 
-update_version_info_module_if_needed(version_info_module_path)
+update_version_info_file_if_needed(version_info_file_path)
 
 package_module = __import__(package_name, fromlist=[b'_metadata'])
 metadata = package_module._metadata
@@ -101,9 +154,9 @@ export_root_dir = tempfile.mkdtemp()
 export_dir_path = os.path.join(export_root_dir, export_dir_name)
 bzrlib.export.export(revision_tree, export_dir_path, format="dir")
 
-version_info_module_export = os.path.join(
-        export_dir_path, version_info_module_relpath)
-shutil.copy(version_info_module_path, version_info_module_export)
+version_info_file_export = os.path.join(
+        export_dir_path, version_info_file_relpath)
+shutil.copy(version_info_file_path, version_info_file_export)
 
 # This program won't work outside the VCS branch; exclude it from the export.
 this_program_export = os.path.join(
