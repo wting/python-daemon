@@ -116,7 +116,7 @@ def make_pidlockfile_scenarios():
                 },
             }
 
-    for scenario in scenarios.values():
+    for scenario in scenarios.itervalues():
         scenario['pid'] = fake_current_pid
         scenario['pidfile_path'] = fake_pidfile_path
         if 'pidfile' not in scenario:
@@ -201,7 +201,7 @@ def setup_pidfile_fixtures(testcase):
             return result
 
         funcs = dict(
-                (name, obj) for (name, obj) in vars().items()
+                (name, obj) for (name, obj) in vars().iteritems()
                 if hasattr(obj, '__call__'))
 
         return funcs
@@ -296,18 +296,6 @@ def make_lockfile_method_fakes(scenario):
     return fake_methods
 
 
-def setup_lockfile_method_mocks(testcase, scenario, class_name):
-    """ Set up common mock methods for lockfile class. """
-    fake_methods = make_lockfile_method_fakes(scenario)
-
-    for (func_name, fake_func) in fake_methods.iteritems():
-        lockfile_func_name = ".".join([class_name, func_name])
-        lockfile_func_patcher = mock.patch(
-                lockfile_func_name, autospec=True,
-                side_effect=fake_func)
-        lockfile_func_patcher.start()
-
-
 def apply_lockfile_method_mocks(mock_lockfile, scenario):
     """ Apply common fake methods to mock lockfile. """
     fake_methods = make_lockfile_method_fakes(scenario)
@@ -328,21 +316,6 @@ def setup_pidlockfile_fixtures(testcase, scenario_name=None):
         patcher = mock.patch.object(pidlockfile, func_name)
         patcher.start()
         testcase.addCleanup(patcher.stop)
-
-    if scenario_name is not None:
-        set_pidlockfile_scenario(testcase, scenario_name)
-
-
-def set_pidlockfile_scenario(testcase, scenario_name):
-    """ Set up the test case to the specified scenario. """
-    testcase.scenario = testcase.pidlockfile_scenarios[scenario_name]
-    setup_lockfile_method_mocks(
-            testcase, testcase.scenario, "lockfile.PIDLockFile")
-    testcase.pidlockfile_args = dict(
-            path=testcase.scenario['pidfile_path'],
-            )
-    testcase.test_instance = pidlockfile.PIDLockFile(
-            **testcase.pidlockfile_args)
 
 
 class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
@@ -375,13 +348,13 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
     def test_inherits_from_pidlockfile(self):
         """ Should inherit from PIDLockFile. """
         instance = self.test_instance
-        self.failUnlessIsInstance(instance, pidlockfile.PIDLockFile)
+        self.assertIsInstance(instance, pidlockfile.PIDLockFile)
 
     def test_init_has_expected_signature(self):
         """ Should have expected signature for ‘__init__’. """
         def test_func(self, path, acquire_timeout=None, *args, **kwargs): pass
         test_func.__name__ = b'__init__'
-        self.failUnlessFunctionSignatureMatch(
+        self.assertFunctionSignatureMatch(
                 test_func,
                 pidfile.TimeoutPIDLockFile.__init__)
 
@@ -389,7 +362,7 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
         """ Should have specified ‘acquire_timeout’ value. """
         instance = self.test_instance
         expected_timeout = self.test_kwargs['acquire_timeout']
-        self.failUnlessEqual(expected_timeout, instance.acquire_timeout)
+        self.assertEqual(expected_timeout, instance.acquire_timeout)
 
     @mock.patch.object(
             pidlockfile.PIDLockFile, "__init__",

@@ -108,13 +108,13 @@ class DaemonContext_TestCase(DaemonContext_BaseTestCase):
 
     def test_instantiate(self):
         """ New instance of DaemonContext should be created. """
-        self.failUnlessIsInstance(
+        self.assertIsInstance(
                 self.test_instance, daemon.daemon.DaemonContext)
 
     def test_minimum_zero_arguments(self):
         """ Initialiser should not require any arguments. """
         instance = daemon.daemon.DaemonContext()
-        self.failIfIs(None, instance)
+        self.assertIsNot(instance, None)
 
     def test_has_specified_chroot_directory(self):
         """ Should have specified chroot_directory option. """
@@ -123,7 +123,7 @@ class DaemonContext_TestCase(DaemonContext_BaseTestCase):
                 )
         expected_directory = args['chroot_directory']
         instance = daemon.daemon.DaemonContext(**args)
-        self.failUnlessEqual(expected_directory, instance.chroot_directory)
+        self.assertEqual(expected_directory, instance.chroot_directory)
 
     def test_has_specified_working_directory(self):
         """ Should have specified working_directory option. """
@@ -132,14 +132,14 @@ class DaemonContext_TestCase(DaemonContext_BaseTestCase):
                 )
         expected_directory = args['working_directory']
         instance = daemon.daemon.DaemonContext(**args)
-        self.failUnlessEqual(expected_directory, instance.working_directory)
+        self.assertEqual(expected_directory, instance.working_directory)
 
     def test_has_default_working_directory(self):
         """ Should have default working_directory option. """
         args = dict()
         expected_directory = '/'
         instance = daemon.daemon.DaemonContext(**args)
-        self.failUnlessEqual(expected_directory, instance.working_directory)
+        self.assertEqual(expected_directory, instance.working_directory)
 
     def test_has_specified_creation_mask(self):
         """ Should have specified umask option. """
@@ -148,14 +148,14 @@ class DaemonContext_TestCase(DaemonContext_BaseTestCase):
                 )
         expected_mask = args['umask']
         instance = daemon.daemon.DaemonContext(**args)
-        self.failUnlessEqual(expected_mask, instance.umask)
+        self.assertEqual(expected_mask, instance.umask)
 
     def test_has_default_creation_mask(self):
         """ Should have default umask option. """
         args = dict()
         expected_mask = 0
         instance = daemon.daemon.DaemonContext(**args)
-        self.failUnlessEqual(expected_mask, instance.umask)
+        self.assertEqual(expected_mask, instance.umask)
 
     def test_has_specified_uid(self):
         """ Should have specified uid option. """
@@ -164,14 +164,14 @@ class DaemonContext_TestCase(DaemonContext_BaseTestCase):
                 )
         expected_id = args['uid']
         instance = daemon.daemon.DaemonContext(**args)
-        self.failUnlessEqual(expected_id, instance.uid)
+        self.assertEqual(expected_id, instance.uid)
 
     def test_has_derived_uid(self):
         """ Should have uid option derived from process. """
         args = dict()
         expected_id = os.getuid()
         instance = daemon.daemon.DaemonContext(**args)
-        self.failUnlessEqual(expected_id, instance.uid)
+        self.assertEqual(expected_id, instance.uid)
 
     def test_has_specified_gid(self):
         """ Should have specified gid option. """
@@ -180,14 +180,14 @@ class DaemonContext_TestCase(DaemonContext_BaseTestCase):
                 )
         expected_id = args['gid']
         instance = daemon.daemon.DaemonContext(**args)
-        self.failUnlessEqual(expected_id, instance.gid)
+        self.assertEqual(expected_id, instance.gid)
 
     def test_has_derived_gid(self):
         """ Should have gid option derived from process. """
         args = dict()
         expected_id = os.getgid()
         instance = daemon.daemon.DaemonContext(**args)
-        self.failUnlessEqual(expected_id, instance.gid)
+        self.assertEqual(expected_id, instance.gid)
 
     def test_has_specified_detach_process(self):
         """ Should have specified detach_process option. """
@@ -196,7 +196,7 @@ class DaemonContext_TestCase(DaemonContext_BaseTestCase):
                 )
         expected_value = args['detach_process']
         instance = daemon.daemon.DaemonContext(**args)
-        self.failUnlessEqual(expected_value, instance.detach_process)
+        self.assertEqual(expected_value, instance.detach_process)
 
     def test_has_derived_detach_process(self):
         """ Should have detach_process option derived from environment. """
@@ -204,7 +204,7 @@ class DaemonContext_TestCase(DaemonContext_BaseTestCase):
         func = daemon.daemon.is_detach_process_context_required
         expected_value = func()
         instance = daemon.daemon.DaemonContext(**args)
-        self.failUnlessEqual(expected_value, instance.detach_process)
+        self.assertEqual(expected_value, instance.detach_process)
 
     def test_has_specified_files_preserve(self):
         """ Should have specified files_preserve option. """
@@ -213,7 +213,7 @@ class DaemonContext_TestCase(DaemonContext_BaseTestCase):
                 )
         expected_files_preserve = args['files_preserve']
         instance = daemon.daemon.DaemonContext(**args)
-        self.failUnlessEqual(expected_files_preserve, instance.files_preserve)
+        self.assertEqual(expected_files_preserve, instance.files_preserve)
 
     def test_has_specified_pidfile(self):
         """ Should have the specified pidfile. """
@@ -222,7 +222,7 @@ class DaemonContext_TestCase(DaemonContext_BaseTestCase):
                 )
         expected_pidfile = args['pidfile']
         instance = daemon.daemon.DaemonContext(**args)
-        self.failUnlessEqual(expected_pidfile, instance.pidfile)
+        self.assertEqual(expected_pidfile, instance.pidfile)
 
     def test_has_specified_stdin(self):
         """ Should have specified stdin option. """
@@ -231,7 +231,7 @@ class DaemonContext_TestCase(DaemonContext_BaseTestCase):
                 )
         expected_file = args['stdin']
         instance = daemon.daemon.DaemonContext(**args)
-        self.failUnlessEqual(expected_file, instance.stdin)
+        self.assertEqual(expected_file, instance.stdin)
 
     def test_has_specified_stdout(self):
         """ Should have specified stdout option. """
@@ -240,7 +240,7 @@ class DaemonContext_TestCase(DaemonContext_BaseTestCase):
                 )
         expected_file = args['stdout']
         instance = daemon.daemon.DaemonContext(**args)
-        self.failUnlessEqual(expected_file, instance.stdout)
+        self.assertEqual(expected_file, instance.stdout)
 
     def test_has_specified_stderr(self):
         """ Should have specified stderr option. """
@@ -249,7 +249,7 @@ class DaemonContext_TestCase(DaemonContext_BaseTestCase):
                 )
         expected_file = args['stderr']
         instance = daemon.daemon.DaemonContext(**args)
-        self.failUnlessEqual(expected_file, instance.stderr)
+        self.assertEqual(expected_file, instance.stderr)
 
     def test_has_specified_signal_map(self):
         """ Should have specified signal_map option. """
@@ -258,14 +258,14 @@ class DaemonContext_TestCase(DaemonContext_BaseTestCase):
                 )
         expected_signal_map = args['signal_map']
         instance = daemon.daemon.DaemonContext(**args)
-        self.failUnlessEqual(expected_signal_map, instance.signal_map)
+        self.assertEqual(expected_signal_map, instance.signal_map)
 
     def test_has_derived_signal_map(self):
         """ Should have signal_map option derived from system. """
         args = dict()
         expected_signal_map = daemon.daemon.make_default_signal_map()
         instance = daemon.daemon.DaemonContext(**args)
-        self.failUnlessEqual(expected_signal_map, instance.signal_map)
+        self.assertEqual(expected_signal_map, instance.signal_map)
 
 
 class DaemonContext_is_open_TestCase(DaemonContext_BaseTestCase):
@@ -274,12 +274,12 @@ class DaemonContext_is_open_TestCase(DaemonContext_BaseTestCase):
     def test_begin_false(self):
         """ Initial value of is_open should be False. """
         instance = self.test_instance
-        self.failUnlessEqual(False, instance.is_open)
+        self.assertEqual(False, instance.is_open)
 
     def test_write_fails(self):
         """ Writing to is_open should fail. """
         instance = self.test_instance
-        self.failUnlessRaises(
+        self.assertRaises(
                 AttributeError,
                 setattr, instance, 'is_open', object())
 
@@ -370,7 +370,7 @@ class DaemonContext_open_TestCase(DaemonContext_BaseTestCase):
         instance = self.test_instance
         instance._is_open = True
         instance.open()
-        self.failUnlessEqual(0, len(self.mock_module_daemon.mock_calls))
+        self.assertEqual(0, len(self.mock_module_daemon.mock_calls))
 
     def test_changes_root_directory_to_chroot_directory(self):
         """ Should change root directory to `chroot_directory` option. """
@@ -386,7 +386,7 @@ class DaemonContext_open_TestCase(DaemonContext_BaseTestCase):
         instance = self.test_instance
         instance.chroot_directory = None
         instance.open()
-        self.failIf(self.mock_module_daemon.change_root_directory.called)
+        self.assertFalse(self.mock_module_daemon.change_root_directory.called)
 
     def test_prevents_core_dump(self):
         """ Should request prevention of core dumps. """
@@ -399,7 +399,7 @@ class DaemonContext_open_TestCase(DaemonContext_BaseTestCase):
         instance = self.test_instance
         instance.prevent_core = False
         instance.open()
-        self.failIf(self.mock_module_daemon.prevent_core_dump.called)
+        self.assertFalse(self.mock_module_daemon.prevent_core_dump.called)
 
     def test_closes_open_files(self):
         """ Should close all open files, excluding `files_preserve`. """
@@ -449,7 +449,7 @@ class DaemonContext_open_TestCase(DaemonContext_BaseTestCase):
         instance = self.test_instance
         instance.detach_process = False
         instance.open()
-        self.failIf(self.mock_module_daemon.detach_process_context.called)
+        self.assertFalse(self.mock_module_daemon.detach_process_context.called)
 
     def test_sets_signal_handlers_from_signal_map(self):
         """ Should set signal handlers according to `signal_map`. """
@@ -488,7 +488,7 @@ class DaemonContext_open_TestCase(DaemonContext_BaseTestCase):
         """ Should set the `is_open` property to True. """
         instance = self.test_instance
         instance.open()
-        self.failUnlessEqual(True, instance.is_open)
+        self.assertEqual(True, instance.is_open)
 
     def test_registers_close_method_for_atexit(self):
         """ Should register the `close` method for atexit processing. """
@@ -514,7 +514,7 @@ class DaemonContext_close_TestCase(DaemonContext_BaseTestCase):
         instance._is_open = False
         instance.pidfile = object()
         instance.close()
-        self.failIf(self.mock_pidlockfile.__exit__.called)
+        self.assertFalse(self.mock_pidlockfile.__exit__.called)
 
     def test_exits_pidfile_context(self):
         """ Should exit the PID file context manager. """
@@ -528,13 +528,13 @@ class DaemonContext_close_TestCase(DaemonContext_BaseTestCase):
         instance = self.test_instance
         expected_result = None
         result = instance.close()
-        self.failUnlessIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
     def test_sets_is_open_false(self):
         """ Should set the `is_open` property to False. """
         instance = self.test_instance
         instance.close()
-        self.failUnlessEqual(False, instance.is_open)
+        self.assertEqual(False, instance.is_open)
 
 
 @mock.patch.object(daemon.daemon.DaemonContext, "open")
@@ -552,7 +552,7 @@ class DaemonContext_context_manager_enter_TestCase(DaemonContext_BaseTestCase):
         instance = self.test_instance
         expected_result = instance
         result = instance.__enter__()
-        self.failUnlessIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
 
 @mock.patch.object(daemon.daemon.DaemonContext, "close")
@@ -582,7 +582,7 @@ class DaemonContext_context_manager_exit_TestCase(DaemonContext_BaseTestCase):
         args = self.test_args
         expected_result = None
         result = instance.__exit__(**args)
-        self.failUnlessIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
 
 class DaemonContext_terminate_TestCase(DaemonContext_BaseTestCase):
@@ -601,7 +601,7 @@ class DaemonContext_terminate_TestCase(DaemonContext_BaseTestCase):
         instance = self.test_instance
         args = self.test_args
         expected_exception = SystemExit
-        self.failUnlessRaises(
+        self.assertRaises(
                 expected_exception,
                 instance.terminate, *args)
 
@@ -615,7 +615,7 @@ class DaemonContext_terminate_TestCase(DaemonContext_BaseTestCase):
             instance.terminate(*args)
         except expected_exception as exc:
             pass
-        self.failUnlessIn(str(exc), str(signal_number))
+        self.assertIn(unicode(signal_number), unicode(exc))
 
 
 class DaemonContext_get_exclude_file_descriptors_TestCase(
@@ -637,11 +637,11 @@ class DaemonContext_get_exclude_file_descriptors_TestCase(
                 37: 37,
                 42: FakeFileDescriptorStringIO(),
                 }
-        for (fileno, item) in self.test_files.items():
+        for (fileno, item) in self.test_files.iteritems():
             if hasattr(item, '_fileno'):
                 item._fileno = fileno
         self.test_file_descriptors = set(
-                fd for (fd, item) in self.test_files.items()
+                fd for (fd, item) in self.test_files.iteritems()
                 if item is not None)
         self.test_file_descriptors.update(
                 self.stream_files_by_name[name].fileno()
@@ -654,7 +654,7 @@ class DaemonContext_get_exclude_file_descriptors_TestCase(
         instance.files_preserve = self.test_files.values()
         expected_result = self.test_file_descriptors
         result = instance._get_exclude_file_descriptors()
-        self.failUnlessEqual(expected_result, result)
+        self.assertEqual(expected_result, result)
 
     def test_returns_stream_redirects_if_no_files_preserve(self):
         """ Should return only stream redirects if no files_preserve. """
@@ -662,9 +662,9 @@ class DaemonContext_get_exclude_file_descriptors_TestCase(
         instance.files_preserve = None
         expected_result = set(
                 stream.fileno()
-                for stream in self.stream_files_by_name.values())
+                for stream in self.stream_files_by_name.itervalues())
         result = instance._get_exclude_file_descriptors()
-        self.failUnlessEqual(expected_result, result)
+        self.assertEqual(expected_result, result)
 
     def test_returns_empty_set_if_no_files(self):
         """ Should return empty set if no file options. """
@@ -673,21 +673,20 @@ class DaemonContext_get_exclude_file_descriptors_TestCase(
             setattr(instance, name, None)
         expected_result = set()
         result = instance._get_exclude_file_descriptors()
-        self.failUnlessEqual(expected_result, result)
+        self.assertEqual(expected_result, result)
 
     def test_return_set_omits_streams_without_file_descriptors(self):
         """ Should omit any stream without a file descriptor. """
         instance = self.test_instance
         instance.files_preserve = self.test_files.values()
         stream_files = self.stream_files_by_name
-        stream_names = stream_files.keys()
         expected_result = self.test_file_descriptors.copy()
-        for (pseudo_stream_name, pseudo_stream) in stream_files.items():
+        for (pseudo_stream_name, pseudo_stream) in stream_files.iteritems():
             setattr(instance, pseudo_stream_name, StringIO())
             stream_fd = pseudo_stream.fileno()
             expected_result.discard(stream_fd)
         result = instance._get_exclude_file_descriptors()
-        self.failUnlessEqual(expected_result, result)
+        self.assertEqual(expected_result, result)
 
 
 class DaemonContext_make_signal_handler_TestCase(DaemonContext_BaseTestCase):
@@ -699,7 +698,7 @@ class DaemonContext_make_signal_handler_TestCase(DaemonContext_BaseTestCase):
         target = None
         expected_result = signal.SIG_IGN
         result = instance._make_signal_handler(target)
-        self.failUnlessEqual(expected_result, result)
+        self.assertEqual(expected_result, result)
 
     def test_returns_method_for_name(self):
         """ Should return method of DaemonContext when name specified. """
@@ -707,14 +706,14 @@ class DaemonContext_make_signal_handler_TestCase(DaemonContext_BaseTestCase):
         target = 'terminate'
         expected_result = instance.terminate
         result = instance._make_signal_handler(target)
-        self.failUnlessEqual(expected_result, result)
+        self.assertEqual(expected_result, result)
 
     def test_raises_error_for_unknown_name(self):
         """ Should raise AttributeError for unknown method name. """
         instance = self.test_instance
         target = 'b0gUs'
         expected_error = AttributeError
-        self.failUnlessRaises(
+        self.assertRaises(
                 expected_error,
                 instance._make_signal_handler, target)
 
@@ -724,7 +723,7 @@ class DaemonContext_make_signal_handler_TestCase(DaemonContext_BaseTestCase):
         target = object()
         expected_result = target
         result = instance._make_signal_handler(target)
-        self.failUnlessEqual(expected_result, result)
+        self.assertEqual(expected_result, result)
 
 
 class DaemonContext_make_signal_handler_map_TestCase(
@@ -743,10 +742,10 @@ class DaemonContext_make_signal_handler_map_TestCase(
 
         self.test_signal_handlers = dict(
                 (key, object())
-                for key in self.test_instance.signal_map.values())
+                for key in self.test_instance.signal_map.itervalues())
         self.test_signal_handler_map = dict(
                 (key, self.test_signal_handlers[target])
-                for (key, target) in self.test_instance.signal_map.items())
+                for (key, target) in self.test_instance.signal_map.iteritems())
 
         def fake_make_signal_handler(target):
             return self.test_signal_handlers[target]
@@ -763,7 +762,7 @@ class DaemonContext_make_signal_handler_map_TestCase(
         instance = self.test_instance
         expected_result = self.test_signal_handler_map
         result = instance._make_signal_handler_map()
-        self.failUnlessEqual(expected_result, result)
+        self.assertEqual(expected_result, result)
 
 
 @mock.patch.object(os, "chdir")
@@ -796,7 +795,7 @@ class change_working_directory_TestCase(scaffold.TestCase):
         test_error = OSError(errno.ENOENT, "No such directory")
         mock_func_os_chdir.side_effect = test_error
         expected_error = daemon.daemon.DaemonOSEnvironmentError
-        self.failUnlessRaises(
+        self.assertRaises(
                 expected_error,
                 daemon.daemon.change_working_directory, **args)
 
@@ -812,7 +811,7 @@ class change_working_directory_TestCase(scaffold.TestCase):
             daemon.daemon.change_working_directory(**args)
         except expected_error as exc:
             pass
-        self.failUnlessIn(str(exc), str(test_error))
+        self.assertIn(unicode(test_error), unicode(exc))
 
 
 @mock.patch.object(os, "chroot")
@@ -855,7 +854,7 @@ class change_root_directory_TestCase(scaffold.TestCase):
         test_error = OSError(errno.ENOENT, "No such directory")
         mock_func_os_chdir.side_effect = test_error
         expected_error = daemon.daemon.DaemonOSEnvironmentError
-        self.failUnlessRaises(
+        self.assertRaises(
                 expected_error,
                 daemon.daemon.change_root_directory, **args)
 
@@ -867,7 +866,7 @@ class change_root_directory_TestCase(scaffold.TestCase):
         test_error = OSError(errno.EPERM, "No chroot for you!")
         mock_func_os_chroot.side_effect = test_error
         expected_error = daemon.daemon.DaemonOSEnvironmentError
-        self.failUnlessRaises(
+        self.assertRaises(
                 expected_error,
                 daemon.daemon.change_root_directory, **args)
 
@@ -883,7 +882,7 @@ class change_root_directory_TestCase(scaffold.TestCase):
             daemon.daemon.change_root_directory(**args)
         except expected_error as exc:
             pass
-        self.failUnlessIn(str(exc), str(test_error))
+        self.assertIn(unicode(test_error), unicode(exc))
 
 
 @mock.patch.object(os, "umask")
@@ -914,7 +913,7 @@ class change_file_creation_mask_TestCase(scaffold.TestCase):
         test_error = OSError(errno.EINVAL, "Whatchoo talkin' 'bout?")
         mock_func_os_umask.side_effect = test_error
         expected_error = daemon.daemon.DaemonOSEnvironmentError
-        self.failUnlessRaises(
+        self.assertRaises(
                 expected_error,
                 daemon.daemon.change_file_creation_mask, **args)
 
@@ -930,7 +929,7 @@ class change_file_creation_mask_TestCase(scaffold.TestCase):
             daemon.daemon.change_file_creation_mask(**args)
         except expected_error as exc:
             pass
-        self.failUnlessIn(str(exc), str(test_error))
+        self.assertIn(unicode(test_error), unicode(exc))
 
 
 @mock.patch.object(os, "setgid")
@@ -990,7 +989,7 @@ class change_process_owner_TestCase(scaffold.TestCase):
         test_error = OSError(errno.EPERM, "No switching for you!")
         mock_func_os_setgid.side_effect = test_error
         expected_error = daemon.daemon.DaemonOSEnvironmentError
-        self.failUnlessRaises(
+        self.assertRaises(
                 expected_error,
                 daemon.daemon.change_process_owner, **args)
 
@@ -1002,7 +1001,7 @@ class change_process_owner_TestCase(scaffold.TestCase):
         test_error = OSError(errno.EPERM, "No switching for you!")
         mock_func_os_setuid.side_effect = test_error
         expected_error = daemon.daemon.DaemonOSEnvironmentError
-        self.failUnlessRaises(
+        self.assertRaises(
                 expected_error,
                 daemon.daemon.change_process_owner, **args)
 
@@ -1018,7 +1017,7 @@ class change_process_owner_TestCase(scaffold.TestCase):
             daemon.daemon.change_process_owner(**args)
         except expected_error as exc:
             pass
-        self.failUnlessIn(str(exc), str(test_error))
+        self.assertIn(unicode(test_error), unicode(exc))
 
 
 RLimitResult = collections.namedtuple('RLimitResult', ['soft', 'hard'])
@@ -1057,7 +1056,7 @@ class prevent_core_dump_TestCase(scaffold.TestCase):
                 return None
         mock_func_resource_getrlimit.side_effect = fake_getrlimit
         expected_error = daemon.daemon.DaemonOSEnvironmentError
-        self.failUnlessRaises(
+        self.assertRaises(
                 expected_error,
                 daemon.daemon.prevent_core_dump)
 
@@ -1096,7 +1095,7 @@ class close_file_descriptor_if_open_TestCase(scaffold.TestCase):
             raise test_error
         mock_func_os_close.side_effect = fake_os_close
         expected_error = daemon.daemon.DaemonOSEnvironmentError
-        self.failUnlessRaises(
+        self.assertRaises(
                 expected_error,
                 daemon.daemon.close_file_descriptor_if_open, fd)
 
@@ -1107,12 +1106,12 @@ class maxfd_TestCase(scaffold.TestCase):
     def test_positive(self):
         """ Should be a positive number. """
         maxfd = daemon.daemon.MAXFD
-        self.failUnless(maxfd > 0)
+        self.assertTrue(maxfd > 0)
 
     def test_integer(self):
         """ Should be an integer. """
         maxfd = daemon.daemon.MAXFD
-        self.failUnlessEqual(int(maxfd), maxfd)
+        self.assertEqual(int(maxfd), maxfd)
 
     def test_reasonably_high(self):
         """ Should be reasonably high for default open files limit.
@@ -1125,7 +1124,7 @@ class maxfd_TestCase(scaffold.TestCase):
             """
         expected_minimum = 2048
         maxfd = daemon.daemon.MAXFD
-        self.failUnless(
+        self.assertTrue(
                 expected_minimum <= maxfd,
                 msg="MAXFD should be at least %(expected_minimum)r (got %(maxfd)r)"
                     % vars())
@@ -1167,7 +1166,7 @@ class get_maximum_file_descriptors_TestCase(scaffold.TestCase):
         """ Should return process hard limit on number of files. """
         expected_result = fake_rlimit_nofile_large
         result = daemon.daemon.get_maximum_file_descriptors()
-        self.failUnlessEqual(expected_result, result)
+        self.assertEqual(expected_result, result)
 
     def test_returns_module_default_if_hard_limit_infinity(
             self, mock_func_resource_getrlimit):
@@ -1176,7 +1175,7 @@ class get_maximum_file_descriptors_TestCase(scaffold.TestCase):
                 fake_getrlimit_nofile_hard_infinity)
         expected_result = fake_default_maxfd
         result = daemon.daemon.get_maximum_file_descriptors()
-        self.failUnlessEqual(expected_result, result)
+        self.assertEqual(expected_result, result)
 
 
 def fake_get_maximum_file_descriptors():
@@ -1260,7 +1259,7 @@ class detach_process_context_TestCase(scaffold.TestCase):
         """ Parent process should exit. """
         parent_pid = 23
         self.mock_func_os_fork.side_effect = iter([parent_pid])
-        self.failUnlessRaises(
+        self.assertRaises(
                 self.FakeOSExit,
                 daemon.daemon.detach_process_context)
         self.mock_module_os.assert_has_calls([
@@ -1283,7 +1282,7 @@ class detach_process_context_TestCase(scaffold.TestCase):
                 return next_item
 
         self.mock_func_os_fork.side_effect = fake_fork
-        self.failUnlessRaises(
+        self.assertRaises(
                 daemon.daemon.DaemonProcessDetachError,
                 daemon.daemon.detach_process_context)
         self.mock_module_os.assert_has_calls([
@@ -1302,7 +1301,7 @@ class detach_process_context_TestCase(scaffold.TestCase):
         """ Child should fork, then exit if parent. """
         fake_pids = [0, 42]
         self.mock_func_os_fork.side_effect = iter(fake_pids)
-        self.failUnlessRaises(
+        self.assertRaises(
                 self.FakeOSExit,
                 daemon.daemon.detach_process_context)
         self.mock_module_os.assert_has_calls([
@@ -1327,7 +1326,7 @@ class detach_process_context_TestCase(scaffold.TestCase):
                 return next_item
 
         self.mock_func_os_fork.side_effect = fake_fork
-        self.failUnlessRaises(
+        self.assertRaises(
                 daemon.daemon.DaemonProcessDetachError,
                 daemon.daemon.detach_process_context)
         self.mock_module_os.assert_has_calls([
@@ -1354,7 +1353,7 @@ class is_process_started_by_init_TestCase(scaffold.TestCase):
         """ Should return False under normal circumstances. """
         expected_result = False
         result = daemon.daemon.is_process_started_by_init()
-        self.failUnlessIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
     def test_returns_true_if_parent_process_is_init(
             self, mock_func_os_getppid):
@@ -1363,7 +1362,7 @@ class is_process_started_by_init_TestCase(scaffold.TestCase):
         mock_func_os_getppid.return_value = init_pid
         expected_result = True
         result = daemon.daemon.is_process_started_by_init()
-        self.failUnlessIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
 
 class is_socket_TestCase(scaffold.TestCase):
@@ -1402,7 +1401,7 @@ class is_socket_TestCase(scaffold.TestCase):
         test_fd = 23
         expected_result = False
         result = daemon.daemon.is_socket(test_fd)
-        self.failUnlessIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
     def test_returns_true_if_stdin_is_socket(self):
         """ Should return True if `stdin` is a socket. """
@@ -1411,7 +1410,7 @@ class is_socket_TestCase(scaffold.TestCase):
         getsockopt.side_effect = self.fake_socket_getsockopt_func
         expected_result = True
         result = daemon.daemon.is_socket(test_fd)
-        self.failUnlessIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
     def test_returns_false_if_stdin_socket_raises_error(self):
         """ Should return True if `stdin` is a socket and raises error. """
@@ -1421,7 +1420,7 @@ class is_socket_TestCase(scaffold.TestCase):
                 object(), "Weird socket stuff")
         expected_result = True
         result = daemon.daemon.is_socket(test_fd)
-        self.failUnlessIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
 
 class is_process_started_by_superserver_TestCase(scaffold.TestCase):
@@ -1450,14 +1449,14 @@ class is_process_started_by_superserver_TestCase(scaffold.TestCase):
         """ Should return False under normal circumstances. """
         expected_result = False
         result = daemon.daemon.is_process_started_by_superserver()
-        self.failUnlessIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
     def test_returns_true_if_stdin_is_socket(self):
         """ Should return True if `stdin` is a socket. """
         self.fake_stdin_is_socket_func = (lambda: True)
         expected_result = True
         result = daemon.daemon.is_process_started_by_superserver()
-        self.failUnlessIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
 
 @mock.patch.object(
@@ -1476,7 +1475,7 @@ class is_detach_process_context_required_TestCase(scaffold.TestCase):
         """ Should return True under normal circumstances. """
         expected_result = True
         result = daemon.daemon.is_detach_process_context_required()
-        self.failUnlessIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
     def test_returns_false_if_started_by_init(
             self,
@@ -1486,7 +1485,7 @@ class is_detach_process_context_required_TestCase(scaffold.TestCase):
         mock_func_is_process_started_by_init.return_value = True
         expected_result = False
         result = daemon.daemon.is_detach_process_context_required()
-        self.failUnlessIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
     def test_returns_true_if_started_by_superserver(
             self,
@@ -1496,7 +1495,7 @@ class is_detach_process_context_required_TestCase(scaffold.TestCase):
         mock_func_is_process_started_by_superserver.return_value = True
         expected_result = False
         result = daemon.daemon.is_detach_process_context_required()
-        self.failUnlessIs(expected_result, result)
+        self.assertIs(result, expected_result)
 
 
 def setup_streams_fixtures(testcase):
@@ -1611,7 +1610,7 @@ class make_default_signal_map_TestCase(scaffold.TestCase):
         """ Should return map per default. """
         expected_result = self.default_signal_map
         result = daemon.daemon.make_default_signal_map()
-        self.failUnlessEqual(expected_result, result)
+        self.assertEqual(expected_result, result)
 
     def test_returns_signal_map_with_only_ids_in_signal_module(self):
         """ Should return map with only signals in the `signal` module.
@@ -1626,7 +1625,7 @@ class make_default_signal_map_TestCase(scaffold.TestCase):
         del(self.fake_signal_module.SIGTTOU)
         expected_result = self.default_signal_map
         result = daemon.daemon.make_default_signal_map()
-        self.failUnlessEqual(expected_result, result)
+        self.assertEqual(expected_result, result)
 
 
 @mock.patch.object(daemon.daemon.signal, "signal")
