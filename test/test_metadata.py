@@ -16,7 +16,12 @@
 from __future__ import unicode_literals
 
 import re
-import urlparse
+try:
+    # Python 3 standard library.
+    import urllib.parse as urlparse
+except ImportError:
+    # Python 2 standard library.
+    import urlparse
 
 import scaffold
 import testtools.helpers

@@ -15,7 +15,12 @@
 
 from __future__ import unicode_literals
 
-import __builtin__ as builtins
+try:
+    # Python 3 standard library.
+    import builtins
+except ImportError:
+    # Python 2 standard library.
+    import __builtin__ as builtins
 import os
 import os.path
 import sys

@@ -23,8 +23,13 @@ import errno
 import signal
 import socket
 from types import ModuleType
-from StringIO import StringIO
 import collections
+try:
+    # Python 3 standard library.
+    from io import StringIO
+except ImportError:
+    # Python 2 standard library.
+    from StringIO import StringIO
 
 import mock
 

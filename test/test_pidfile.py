@@ -16,10 +16,15 @@
 from __future__ import unicode_literals
 
 import os
-from StringIO import StringIO
 import itertools
 import tempfile
 import errno
+try:
+    # Python 3 standard library.
+    from io import StringIO
+except ImportError:
+    # Python 2 standard library.
+    from StringIO import StringIO
 
 import mock
 import lockfile

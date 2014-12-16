@@ -1,5 +1,9 @@
 2014-12-16  Ben Finney  <ben+python@benfinney.id.au>
 
+    * Wrap standard library imports where names changed in Python 3.
+
+2014-12-16  Ben Finney  <ben+python@benfinney.id.au>
+
     * Declare support explicitly for Python 2 only.
 
 2014-12-15  Ben Finney  <ben+python@benfinney.id.au>
