@@ -1385,8 +1385,8 @@ class is_socket_TestCase(scaffold.TestCase):
         def fake_socket_fromfd(fd, family, type, proto=None):
             return self.mock_socket
 
-        func_patcher_socket_fromfd = mock.patch(
-                "socket.fromfd",
+        func_patcher_socket_fromfd = mock.patch.object(
+                socket, "fromfd",
                 side_effect=fake_socket_fromfd)
         func_patcher_socket_fromfd.start()
         self.addCleanup(func_patcher_socket_fromfd.stop)
