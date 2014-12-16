@@ -3,3 +3,4 @@ include VERSION
 include LICENSE.*
 include ChangeLog
 recursive-include doc *
+recursive-include test *.py

@@ -1,8 +1,20 @@
+2014-12-16  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Declare support explicitly for Python 2 only.
+
 2014-12-15  Ben Finney  <ben+python@benfinney.id.au>
 
     * Wrap the ‘fromlist’ parameter of ‘__import__’ for Python 3
       compatibility.
     * Migrate to JSON (instead of Python) for serialised version info.
+
+2014-12-12  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Document the security impact of the default umask.
+
+2014-12-11  Ben Finney  <ben+debian@benfinney.id.au>
+
+    * Include test suite with source distribution.
 
 2014-12-08  Ben Finney  <ben+python@benfinney.id.au>
 
