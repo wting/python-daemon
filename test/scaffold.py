@@ -24,18 +24,11 @@ import doctest
 import logging
 import os
 import sys
-import fnmatch
-import pkgutil
-import imp
 import operator
 import textwrap
 from copy import deepcopy
-try:
-    # Python 2.6 or greater?
-    from functools import reduce
-except ImportError:
-    # Not available, so try the builtin function.
-    assert reduce
+import itertools
+import functools
 
 import testscenarios
 import testtools.testcase
@@ -87,7 +80,7 @@ def get_function_signature(func):
     func_defaults = ()
     if func.func_defaults is not None:
         func_defaults = func.func_defaults
-    for (name, value) in zip(arg_names[::-1], func_defaults[::-1]):
+    for (name, value) in itertools.izip(arg_names[::-1], func_defaults[::-1]):
         arg_defaults[name] = value
 
     signature = {
@@ -133,82 +126,8 @@ def format_function_signature(func):
     return signature_text
 
 
-class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
+class TestCase(testtools.testcase.TestCase):
     """ Test case behaviour. """
-
-    def failUnlessRaises(self, exc_class, func, *args, **kwargs):
-        """ Fail unless the function call raises the expected exception.
-
-            Fail the test if an instance of the exception class
-            ``exc_class`` is not raised when calling ``func`` with the
-            arguments ``*args`` and ``**kwargs``.
-
-            """
-        try:
-            super(TestCase, self).failUnlessRaises(
-                    exc_class, func, *args, **kwargs)
-        except self.failureException:
-            exc_class_name = exc_class.__name__
-            msg = (
-                    "Exception %(exc_class_name)s not raised"
-                    " for function call:"
-                    " func=%(func)r args=%(args)r kwargs=%(kwargs)r"
-                    ) % vars()
-            raise self.failureException(msg)
-
-    def failIfIs(self, first, second, msg=None):
-        """ Fail if the two objects are identical.
-
-            Fail the test if ``first`` and ``second`` are identical,
-            as determined by the ``is`` operator.
-
-            """
-        if first is second:
-            if msg is None:
-                msg = "%(first)r is %(second)r" % vars()
-            raise self.failureException(msg)
-
-    def failUnlessIs(self, first, second, msg=None):
-        """ Fail unless the two objects are identical.
-
-            Fail the test unless ``first`` and ``second`` are
-            identical, as determined by the ``is`` operator.
-
-            """
-        if first is not second:
-            if msg is None:
-                msg = "%(first)r is not %(second)r" % vars()
-            raise self.failureException(msg)
-
-    assertIs = failUnlessIs
-    assertNotIs = failIfIs
-
-    def failIfIn(self, first, second, msg=None):
-        """ Fail if the second object is in the first.
-
-            Fail the test if ``first`` contains ``second``, as
-            determined by the ``in`` operator.
-
-            """
-        if second in first:
-            if msg is None:
-                msg = "%(second)r is in %(first)r" % vars()
-            raise self.failureException(msg)
-
-    def failUnlessIn(self, first, second, msg=None):
-        """ Fail unless the second object is in the first.
-
-            Fail the test unless ``first`` contains ``second``, as
-            determined by the ``in`` operator.
-
-            """
-        if second not in first:
-            if msg is None:
-                msg = "%(second)r is not in %(first)r" % vars()
-            raise self.failureException(msg)
-
-    assertIn = failUnlessIn
-    assertNotIn = failIfIn
 
     def failUnlessOutputCheckerMatch(self, want, got, msg=None):
         """ Fail unless the specified string matches the expected.
@@ -224,7 +143,7 @@ class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
         source = ""
         example = doctest.Example(source, want)
         got = textwrap.dedent(got)
-        checker_optionflags = reduce(operator.or_, [
+        checker_optionflags = functools.reduce(operator.or_, [
                 doctest.ELLIPSIS,
                 ])
         if not checker.check_output(want, got, checker_optionflags):
@@ -238,37 +157,6 @@ class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
             raise self.failureException(msg)
 
     assertOutputCheckerMatch = failUnlessOutputCheckerMatch
-
-    def failIfIsInstance(self, obj, classes, msg=None):
-        """ Fail if the object is an instance of the specified classes.
-
-            Fail the test if the object ``obj`` is an instance of any
-            of ``classes``.
-
-            """
-        if isinstance(obj, classes):
-            if msg is None:
-                msg = (
-                        "%(obj)r is an instance of one of %(classes)r"
-                        ) % vars()
-            raise self.failureException(msg)
-
-    def failUnlessIsInstance(self, obj, classes, msg=None):
-        """ Fail unless the object is an instance of the specified classes.
-
-            Fail the test unless the object ``obj`` is an instance of
-            any of ``classes``.
-
-            """
-        if not isinstance(obj, classes):
-            if msg is None:
-                msg = (
-                        "%(obj)r is not an instance of any of %(classes)r"
-                        ) % vars()
-            raise self.failureException(msg)
-
-    assertIsInstance = failUnlessIsInstance
-    assertNotIsInstance = failIfIsInstance
 
     def failUnlessFunctionInTraceback(self, traceback, function, msg=None):
         """ Fail if the function is not in the traceback.
@@ -337,18 +225,22 @@ class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
 
     assertFunctionSignatureMatch = failUnlessFunctionSignatureMatch
 
+
+class TestCaseWithScenarios(testscenarios.WithScenarios, TestCase):
+    """ Test cases run per scenario. """
+
 
-class Exception_TestCase(TestCase):
+class Exception_TestCase(TestCaseWithScenarios):
     """ Test cases for exception classes. """
 
     def test_exception_instance(self):
         """ Exception instance should be created. """
-        self.failIfIs(None, self.instance)
+        self.assertIsNot(self.instance, None)
 
     def test_exception_types(self):
         """ Exception instance should match expected types. """
         for match_type in self.types:
-            self.failUnlessIsInstance(self.instance, match_type)
+            self.assertIsInstance(self.instance, match_type)
 
 
 def make_exception_scenarios(scenarios):
@@ -383,33 +275,6 @@ def make_exception_scenarios(scenarios):
         scenario['instance'] = instance
 
     return updated_scenarios
-
-
-# This monkey-patch is needed only until ‘testscenarios’ incorporates
-# this behaviour for scenario short descriptions.
-
-def apply_scenario((name, parameters), test):
-    """Apply scenario to test.
-
-    :param scenario: A tuple (name, parameters) to apply to the test. The test
-        is cloned, its id adjusted to have (name) after it, and the parameters
-        dict is used to update the new test.
-    :param test: The test to apply the scenario to. This test is unaltered.
-    :return: A new test cloned from test, with the scenario applied.
-    """
-    scenario_suffix = '(' + name + ')'
-    newtest = testscenarios.scenarios.clone_test_with_new_id(test,
-        test.id() + scenario_suffix)
-    test_desc = test.shortDescription()
-    if test_desc is not None:
-        newtest_desc = "%(test_desc)s %(scenario_suffix)s" % vars()
-        newtest.shortDescription = (lambda: newtest_desc)
-    for key, value in parameters.iteritems():
-        setattr(newtest, key, value)
-    return newtest
-
-testscenarios.scenarios.apply_scenario = apply_scenario
-testscenarios.apply_scenario = apply_scenario
 
 
 # Local variables:

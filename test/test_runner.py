@@ -83,7 +83,7 @@ def make_runner_scenarios():
                 },
             }
 
-    for scenario in scenarios.values():
+    for scenario in scenarios.itervalues():
         if 'pidlockfile_scenario_name' in scenario:
             pidlockfile_scenario = pidlockfile_scenarios.pop(
                     scenario['pidlockfile_scenario_name'])
@@ -99,20 +99,9 @@ def set_runner_scenario(testcase, scenario_name):
     """ Set the DaemonRunner test scenario for the test case. """
     scenarios = testcase.runner_scenarios
     testcase.scenario = scenarios[scenario_name]
-    set_pidlockfile_scenario(
-            testcase, testcase.scenario['pidlockfile_scenario_name'])
     apply_lockfile_method_mocks(
             testcase.mock_runner_lockfile,
             testcase.scenario['pidlockfile_scenario'])
-
-
-def set_pidlockfile_scenario(testcase, scenario_name):
-    """ Set the PIDLockFile test scenario for the test case. """
-    scenarios = testcase.pidlockfile_scenarios
-    testcase.pidlockfile_scenario = scenarios[scenario_name]
-    apply_lockfile_method_mocks(
-            testcase.pidlockfile_scenario['test_instance'],
-            testcase.pidlockfile_scenario)
 
 
 def setup_runner_fixtures(testcase):
@@ -235,7 +224,7 @@ class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
 
     def test_instantiate(self):
         """ New instance of DaemonRunner should be created. """
-        self.failUnlessIsInstance(self.test_instance, runner.DaemonRunner)
+        self.assertIsInstance(self.test_instance, runner.DaemonRunner)
 
     def test_parses_commandline_args(self):
         """ Should parse commandline arguments. """
@@ -243,7 +232,7 @@ class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
 
     def test_has_specified_app(self):
         """ Should have specified application object. """
-        self.failUnlessIs(self.test_app, self.test_instance.app)
+        self.assertIs(self.test_app, self.test_instance.app)
 
     def test_sets_pidfile_none_when_pidfile_path_is_none(self):
         """ Should set ‘pidfile’ to ‘None’ when ‘pidfile_path’ is ‘None’. """
@@ -251,14 +240,14 @@ class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
         self.test_app.pidfile_path = pidfile_path
         expected_pidfile = None
         instance = runner.DaemonRunner(self.test_app)
-        self.failUnlessIs(expected_pidfile, instance.pidfile)
+        self.assertIs(expected_pidfile, instance.pidfile)
 
     def test_error_when_pidfile_path_not_string(self):
         """ Should raise ValueError when PID file path not a string. """
         pidfile_path = object()
         self.test_app.pidfile_path = pidfile_path
         expected_error = ValueError
-        self.failUnlessRaises(
+        self.assertRaises(
                 expected_error,
                 runner.DaemonRunner, self.test_app)
 
@@ -267,7 +256,7 @@ class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
         pidfile_path = "foo/bar.pid"
         self.test_app.pidfile_path = pidfile_path
         expected_error = ValueError
-        self.failUnlessRaises(
+        self.assertRaises(
                 expected_error,
                 runner.DaemonRunner, self.test_app)
 
@@ -282,14 +271,14 @@ class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
         """ Should have new PID lock file as `pidfile` attribute. """
         expected_pidfile = self.mock_runner_lockfile
         instance = self.test_instance
-        self.failUnlessIs(
+        self.assertIs(
                 expected_pidfile, instance.pidfile)
 
     def test_daemon_context_has_created_pidfile(self):
         """ DaemonContext component should have new PID lock file. """
         expected_pidfile = self.mock_runner_lockfile
         daemon_context = self.test_instance.daemon_context
-        self.failUnlessIs(
+        self.assertIs(
                 expected_pidfile, daemon_context.pidfile)
 
     def test_daemon_context_has_specified_stdin_stream(self):
@@ -297,45 +286,45 @@ class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
         test_app = self.test_app
         expected_file = self.stream_files_by_name['stdin']
         daemon_context = self.test_instance.daemon_context
-        self.failUnlessEqual(expected_file, daemon_context.stdin)
+        self.assertEqual(expected_file, daemon_context.stdin)
 
     def test_daemon_context_has_stdin_in_read_mode(self):
         """ DaemonContext component should open stdin file for read. """
         expected_mode = 'r'
         daemon_context = self.test_instance.daemon_context
-        self.failUnlessIn(daemon_context.stdin.mode, expected_mode)
+        self.assertIn(expected_mode, daemon_context.stdin.mode)
 
     def test_daemon_context_has_specified_stdout_stream(self):
         """ DaemonContext component should have specified stdout file. """
         test_app = self.test_app
         expected_file = self.stream_files_by_name['stdout']
         daemon_context = self.test_instance.daemon_context
-        self.failUnlessEqual(expected_file, daemon_context.stdout)
+        self.assertEqual(expected_file, daemon_context.stdout)
 
     def test_daemon_context_has_stdout_in_append_mode(self):
         """ DaemonContext component should open stdout file for append. """
         expected_mode = 'w+'
         daemon_context = self.test_instance.daemon_context
-        self.failUnlessIn(daemon_context.stdout.mode, expected_mode)
+        self.assertIn(expected_mode, daemon_context.stdout.mode)
 
     def test_daemon_context_has_specified_stderr_stream(self):
         """ DaemonContext component should have specified stderr file. """
         test_app = self.test_app
         expected_file = self.stream_files_by_name['stderr']
         daemon_context = self.test_instance.daemon_context
-        self.failUnlessEqual(expected_file, daemon_context.stderr)
+        self.assertEqual(expected_file, daemon_context.stderr)
 
     def test_daemon_context_has_stderr_in_append_mode(self):
         """ DaemonContext component should open stderr file for append. """
         expected_mode = 'w+'
         daemon_context = self.test_instance.daemon_context
-        self.failUnlessIn(daemon_context.stderr.mode, expected_mode)
+        self.assertIn(expected_mode, daemon_context.stderr.mode)
 
     def test_daemon_context_has_stderr_with_no_buffering(self):
         """ DaemonContext component should open stderr file unbuffered. """
         expected_buffering = 0
         daemon_context = self.test_instance.daemon_context
-        self.failUnlessEqual(
+        self.assertEqual(
                 expected_buffering, daemon_context.stderr.buffering)
 
 
@@ -346,7 +335,7 @@ class DaemonRunner_usage_exit_TestCase(DaemonRunner_BaseTestCase):
         """ Should raise SystemExit exception. """
         instance = self.test_instance
         argv = [self.test_program_path]
-        self.failUnlessRaises(
+        self.assertRaises(
                 SystemExit,
                 instance._usage_exit, argv)
 
@@ -358,10 +347,10 @@ class DaemonRunner_usage_exit_TestCase(DaemonRunner_BaseTestCase):
         expected_stderr_output = """\
                 usage: %(progname)s ...
                 """ % vars()
-        self.failUnlessRaises(
+        self.assertRaises(
                 SystemExit,
                 instance._usage_exit, argv)
-        self.failUnlessOutputCheckerMatch(
+        self.assertOutputCheckerMatch(
                 expected_stderr_output, self.fake_stderr.getvalue())
 
 
@@ -406,15 +395,15 @@ class DaemonRunner_parse_args_TestCase(DaemonRunner_BaseTestCase):
         argv = self.valid_argv_params['start']
         with mock.patch.object(sys, "argv", new=argv):
             instance.parse_args()
-        self.failUnlessEqual(expected_action, instance.action)
+        self.assertEqual(expected_action, instance.action)
 
     def test_sets_action_from_first_argument(self):
         """ Should set action from first commandline argument. """
         instance = self.test_instance
-        for name, argv in self.valid_argv_params.items():
+        for name, argv in self.valid_argv_params.iteritems():
             expected_action = name
             instance.parse_args(argv)
-            self.failUnlessEqual(expected_action, instance.action)
+            self.assertEqual(expected_action, instance.action)
 
 
 class DaemonRunner_do_action_TestCase(DaemonRunner_BaseTestCase):
@@ -425,7 +414,7 @@ class DaemonRunner_do_action_TestCase(DaemonRunner_BaseTestCase):
         instance = self.test_instance
         instance.action = 'bogus'
         expected_error = runner.DaemonRunnerInvalidActionError
-        self.failUnlessRaises(
+        self.assertRaises(
                 expected_error,
                 instance.do_action)
 
@@ -441,7 +430,7 @@ class DaemonRunner_do_action_start_TestCase(DaemonRunner_BaseTestCase):
 
     def test_raises_error_if_pidfile_locked(self):
         """ Should raise error if PID file is locked. """
-        set_pidlockfile_scenario(self, 'exist-other-pid-locked')
+
         instance = self.test_instance
         instance.daemon_context.open.side_effect = lockfile.AlreadyLocked
         pidfile_path = self.scenario['pidfile_path']
@@ -454,7 +443,7 @@ class DaemonRunner_do_action_start_TestCase(DaemonRunner_BaseTestCase):
         else:
             raise self.failureException(
                     "Failed to raise " + expected_error.__name__)
-        self.failUnlessIn(unicode(exc.message), expected_message_content)
+        self.assertIn(expected_message_content, unicode(exc.message))
 
     def test_breaks_lock_if_no_such_process(self):
         """ Should request breaking lock if PID file process is not running. """
@@ -485,7 +474,7 @@ class DaemonRunner_do_action_start_TestCase(DaemonRunner_BaseTestCase):
                 started with pid %(current_pid)d
                 """ % vars()
         instance.do_action()
-        self.failUnlessOutputCheckerMatch(
+        self.assertOutputCheckerMatch(
                 expected_stderr, self.fake_stderr.getvalue())
 
     def test_requests_app_run(self):
@@ -529,7 +518,7 @@ class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
         else:
             raise self.failureException(
                     "Failed to raise " + expected_error.__name__)
-        self.failUnlessIn(str(exc), expected_message_content)
+        self.assertIn(expected_message_content, unicode(exc))
 
     def test_breaks_lock_if_pidfile_stale(self):
         """ Should break lock if PID file is stale. """
@@ -558,7 +547,7 @@ class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
         error = OSError(errno.EPERM, "Nice try")
         os.kill.side_effect = error
         expected_error = runner.DaemonRunnerStopFailureError
-        expected_message_content = str(test_pid)
+        expected_message_content = unicode(test_pid)
         try:
             instance.do_action()
         except expected_error as exc:
@@ -566,7 +555,7 @@ class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
         else:
             raise self.failureException(
                     "Failed to raise " + expected_error.__name__)
-        self.failUnlessIn(unicode(exc), expected_message_content)
+        self.assertIn(expected_message_content, unicode(exc))
 
 
 @mock.patch.object(daemon.runner.DaemonRunner, "_start")

@@ -15,8 +15,13 @@
 
 from __future__ import unicode_literals
 
+import sys
 import re
 import urlparse
+import functools
+
+import mock
+import pkg_resources
 
 import scaffold
 import testtools.helpers
@@ -54,7 +59,7 @@ class AttributeNotFoundMismatch(testtools.matchers.Mismatch):
         return text
 
 
-class metadata_value_TestCase(scaffold.TestCase):
+class metadata_value_TestCase(scaffold.TestCaseWithScenarios):
     """ Test cases for metadata module values. """
 
     expected_str_attributes = set([
@@ -121,6 +126,56 @@ class metadata_content_TestCase(scaffold.TestCase):
         self.assertIsInstance(
                 result, urlparse.ParseResult,
                 "URL value %(url)r did not parse correctly" % vars(metadata))
+
+
+def fake_func_get_distribution(testcase, distribution_name):
+    """ Fake the behaviour of ‘pkg_resources.get_distribution’. """
+    if distribution_name != metadata.distribution_name:
+        raise pkg_resources.DistributionNotFound
+    if hasattr(testcase, 'get_distribution_error'):
+        raise testcase.get_distribution_error
+    mock_distribution = mock.MagicMock()
+    if hasattr(testcase, 'test_version'):
+        mock_distribution.version = testcase.test_version
+    return mock_distribution
+
+@mock.patch.object(pkg_resources, 'get_distribution')
+@mock.patch.object(metadata, 'distribution_name', new="mock-dist")
+class get_distribution_version_TestCase(scaffold.TestCaseWithScenarios):
+    """ Test cases for ‘get_distribution_version’ function. """
+
+    scenarios = [
+            ('version 0.0', {
+                'test_version': "0.0",
+                'expected_version': "0.0",
+                }),
+            ('version 1.0', {
+                'test_version': "1.0",
+                'expected_version': "1.0",
+                }),
+            ('not installed', {
+                'get_distribution_error': pkg_resources.DistributionNotFound(),
+                'expected_version': None,
+                }),
+            ]
+
+    def test_requests_installed_distribution(
+            self, mock_func_get_distribution):
+        """ The package distribution should be retrieved. """
+        mock_func_get_distribution.side_effect = functools.partial(
+                fake_func_get_distribution, self)
+        expected_distribution_name = metadata.distribution_name
+        version = metadata.get_distribution_version()
+        mock_func_get_distribution.assert_called_with(
+                expected_distribution_name)
+
+    def test_version_installed_matches_distribution(
+            self, mock_func_get_distribution):
+        """ The ‘version_installed’ value should match the distribution. """
+        mock_func_get_distribution.side_effect = functools.partial(
+                fake_func_get_distribution, self)
+        version = metadata.get_distribution_version()
+        self.assertEqual(version, self.expected_version)
 
 
 # Local variables:
