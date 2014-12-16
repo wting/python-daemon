@@ -70,6 +70,7 @@ setup(
             "Development Status :: 4 - Beta",
             "License :: OSI Approved :: Apache Software License",
             "Operating System :: POSIX",
+            "Programming Language :: Python :: 2 :: Only",
             "Programming Language :: Python :: 2.6",
             "Programming Language :: Python :: 2.7",
             "Intended Audience :: Developers",

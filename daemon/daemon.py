@@ -108,9 +108,15 @@ class DaemonContext(object):
             File access creation mask (“umask”) to set for the process on
             daemon start.
 
-            Since a process inherits its umask from its parent process,
-            starting the daemon will reset the umask to this value so that
-            files are created by the daemon with access modes as it expects.
+            A daemon should not rely on the parent process's umask value,
+            which is beyond its control and may prevent creating a file with
+            the required access mode. So when the daemon context opens, the
+            umask is set to an explicit known value.
+
+            If the conventional value of 0 is too open, consider setting a
+            value such as 022, 027, 077, or another specific value.
+            Otherwise, ensure the daemon creates every file with an
+            explicit access mode for the purpose.
 
         `pidfile`
             :Default: ``None``
