@@ -73,7 +73,7 @@ class DaemonRunner(object):
 
             * `run`: Callable that will be invoked when the daemon is
               started.
-            
+
             """
         self.parse_args()
         self.app = app
@@ -225,7 +225,7 @@ def is_pidfile_stale(pidfile):
             os.kill(pidfile_pid, signal.SIG_DFL)
         except OSError, exc:
             if exc.errno == errno.ESRCH:
-                # The specified PID does not exist
+                # The specified PID does not exist.
                 result = True
 
     return result

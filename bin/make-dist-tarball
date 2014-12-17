@@ -54,6 +54,7 @@ def get_generated_version_info_content():
 
     return content
 
+
 def get_existing_version_info_content(module_path):
     """ Return the content of the existing version-info module, or None. """
 
@@ -66,6 +67,7 @@ def get_existing_version_info_content(module_path):
         pass
 
     return content
+
 
 def update_version_info_module_if_needed(module_path):
     """ Update the version-info module iff it is out of date. """

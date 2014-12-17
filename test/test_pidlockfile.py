@@ -793,7 +793,7 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
         def test_func(self, path, acquire_timeout=None, *args, **kwargs): pass
         test_func.__name__ = b'__init__'
         self.failUnlessFunctionSignatureMatch(
-                test_func, 
+                test_func,
                 pidlockfile.TimeoutPIDLockFile.__init__)
 
     def test_has_specified_acquire_timeout(self):
