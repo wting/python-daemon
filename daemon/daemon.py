@@ -33,7 +33,7 @@ try:
     # Base type of strings in Python 2.
     basestring
 except NameError:
-    # Python 3 only has one string type.
+    # Python 3 promotes Unicode to the primary string type.
     basestring = str
 
 
@@ -424,8 +424,8 @@ class DaemonContext(object):
             * If the item is ``None``, it is omitted from the return
               set.
 
-            * If the item has a ``fileno()`` method, that method's
-              return value is in the return set.
+            * If the item's ``fileno()`` method returns a value, that
+              value is in the return set.
 
             * Otherwise, the item is in the return set verbatim.
 
@@ -436,14 +436,17 @@ class DaemonContext(object):
         files_preserve.extend(
                 item for item in [self.stdin, self.stdout, self.stderr]
                 if hasattr(item, 'fileno'))
+
         exclude_descriptors = set()
         for item in files_preserve:
             if item is None:
                 continue
-            if hasattr(item, 'fileno'):
-                exclude_descriptors.add(item.fileno())
+            file_descriptor = _get_file_descriptor(item)
+            if file_descriptor is not None:
+                exclude_descriptors.add(file_descriptor)
             else:
                 exclude_descriptors.add(item)
+
         return exclude_descriptors
 
     def _make_signal_handler(self, target):
@@ -477,6 +480,29 @@ class DaemonContext(object):
                 (signal_number, self._make_signal_handler(target))
                 for (signal_number, target) in self.signal_map.items())
         return signal_handler_map
+
+
+def _get_file_descriptor(obj):
+    """ Get the file descriptor, if the object has one.
+
+        :param obj: The object expected to be a file-like object.
+        :return: The file descriptor iff the file supports it;
+            otherwise None.
+
+        The object may be a non-file object. It may also be a
+        file-like object with no support for a file descriptor. In
+        either case, return None.
+
+        """
+    file_descriptor = None
+    if hasattr(obj, 'fileno'):
+        try:
+            file_descriptor = obj.fileno()
+        except ValueError:
+            # The item doesn't support a file descriptor.
+            pass
+
+    return file_descriptor
 
 
 def change_working_directory(directory):
@@ -573,7 +599,7 @@ def detach_process_context():
         Reference: “Advanced Programming in the Unix Environment”,
         section 13.3, by W. Richard Stevens, published 1993 by
         Addison-Wesley.
-    
+
         """
 
     def fork_then_exit_parent(error_message):
@@ -605,7 +631,7 @@ def is_process_started_by_init():
 
         The `init` process has the process ID of 1; if that is our
         parent process ID, return ``True``, otherwise ``False``.
-    
+
         """
     result = False
 
@@ -652,7 +678,7 @@ def is_process_started_by_superserver():
         attaches it to the standard streams of the child process. If
         that is the case for this process, return ``True``, otherwise
         ``False``.
-    
+
         """
     result = False
 

@@ -675,14 +675,50 @@ class DaemonContext_get_exclude_file_descriptors_TestCase(
         result = instance._get_exclude_file_descriptors()
         self.assertEqual(expected_result, result)
 
-    def test_return_set_omits_streams_without_file_descriptors(self):
-        """ Should omit any stream without a file descriptor. """
+    def test_omits_non_file_streams(self):
+        """ Should omit non-file stream attributes. """
         instance = self.test_instance
         instance.files_preserve = self.test_files.values()
         stream_files = self.stream_files_by_name
         expected_result = self.test_file_descriptors.copy()
         for (pseudo_stream_name, pseudo_stream) in stream_files.iteritems():
-            setattr(instance, pseudo_stream_name, StringIO())
+            test_non_file_object = object()
+            setattr(instance, pseudo_stream_name, test_non_file_object)
+            stream_fd = pseudo_stream.fileno()
+            expected_result.discard(stream_fd)
+        result = instance._get_exclude_file_descriptors()
+        self.assertEqual(expected_result, result)
+
+    def test_includes_verbatim_streams_without_file_descriptor(self):
+        """ Should include verbatim any stream without a file descriptor. """
+        instance = self.test_instance
+        instance.files_preserve = self.test_files.values()
+        stream_files = self.stream_files_by_name
+        mock_fileno_method = mock.MagicMock(
+                spec=file.fileno,
+                side_effect=ValueError)
+        expected_result = self.test_file_descriptors.copy()
+        for (pseudo_stream_name, pseudo_stream) in stream_files.iteritems():
+            test_non_fd_stream = StringIO()
+            if not hasattr(test_non_fd_stream, 'fileno'):
+                # Python < 3 StringIO doesn't have ‘fileno’ at all.
+                # Add a method which raises an exception.
+                test_non_fd_stream.fileno = mock_fileno_method
+            setattr(instance, pseudo_stream_name, test_non_fd_stream)
+            stream_fd = pseudo_stream.fileno()
+            expected_result.discard(stream_fd)
+            expected_result.add(test_non_fd_stream)
+        result = instance._get_exclude_file_descriptors()
+        self.assertEqual(expected_result, result)
+
+    def test_omits_none_streams(self):
+        """ Should omit any stream attribute which is None. """
+        instance = self.test_instance
+        instance.files_preserve = self.test_files.values()
+        stream_files = self.stream_files_by_name
+        expected_result = self.test_file_descriptors.copy()
+        for (pseudo_stream_name, pseudo_stream) in stream_files.iteritems():
+            setattr(instance, pseudo_stream_name, None)
             stream_fd = pseudo_stream.fileno()
             expected_result.discard(stream_fd)
         result = instance._get_exclude_file_descriptors()
@@ -1390,8 +1426,8 @@ class is_socket_TestCase(scaffold.TestCase):
         def fake_socket_fromfd(fd, family, type, proto=None):
             return self.mock_socket
 
-        func_patcher_socket_fromfd = mock.patch(
-                "socket.fromfd",
+        func_patcher_socket_fromfd = mock.patch.object(
+                socket, "fromfd",
                 side_effect=fake_socket_fromfd)
         func_patcher_socket_fromfd.start()
         self.addCleanup(func_patcher_socket_fromfd.stop)
