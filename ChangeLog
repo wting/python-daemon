@@ -16,9 +16,23 @@
 
     * Declare a maximum compatible version of ‘lockfile’ library.
 
-2014-11-27  Ben Finney  <ben+python@benfinney.id.au
+2014-12-08  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Migrate to ‘mock’ library for mock objects in tests.
+      This will ease the port to Python 3, which has ‘mock’ in the
+      standard library.
+    * Migrate to ‘testscenarios’ library for unit test scenarios.
+    * Migrate to ‘unittest2’ library for back-ported improvements.
+
+2014-11-28  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Add a hacking guide for developers.
+
+2014-11-27  Ben Finney  <ben+python@benfinney.id.au>
 
     * Use ‘pydoc.splitdoc’ to get package description text.
+    * Remove ASCII translation of package description, not needed now the
+      docstring is a proper Unicode text value.
     * Move package metadata to ‘daemon/_metadata.py’.
     * Move version string to a plain-text data file, ‘VERSION’.
     * Get version string at run-time from installed distribution.

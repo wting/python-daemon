@@ -54,7 +54,7 @@ class AttributeNotFoundMismatch(testtools.matchers.Mismatch):
         return text
 
 
-class metadata_value_TestCase(scaffold.TestCase):
+class metadata_value_TestCase(scaffold.TestCaseWithScenarios):
     """ Test cases for metadata module values. """
 
     expected_str_attributes = set([

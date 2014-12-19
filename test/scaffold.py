@@ -16,12 +16,18 @@
 from __future__ import unicode_literals
 
 import unittest
+from unittest import (
+        TestSuite,
+        TestLoader,
+        )
 import doctest
 import logging
 import os
 import sys
 import operator
 import textwrap
+from copy import deepcopy
+import itertools
 try:
     # Python 2.6 or greater?
     from functools import reduce
@@ -31,13 +37,8 @@ except ImportError:
 
 import testscenarios
 import testtools.testcase
-from minimock import (
-        Mock,
-        TraceTracker as MockTracker,
-        mock,
-        restore as mock_restore,
-        )
 
+
 test_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(test_dir)
 if not test_dir in sys.path:
@@ -45,7 +46,7 @@ if not test_dir in sys.path:
 if not parent_dir in sys.path:
     sys.path.insert(1, parent_dir)
 
-# Disable all but the most critical logging messages
+# Disable all but the most critical logging messages.
 logging.disable(logging.CRITICAL)
 
 
@@ -84,7 +85,7 @@ def get_function_signature(func):
     func_defaults = ()
     if func.func_defaults is not None:
         func_defaults = func.func_defaults
-    for (name, value) in zip(arg_names[::-1], func_defaults[::-1]):
+    for (name, value) in itertools.izip(arg_names[::-1], func_defaults[::-1]):
         arg_defaults[name] = value
 
     signature = {
@@ -130,82 +131,8 @@ def format_function_signature(func):
     return signature_text
 
 
-class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
+class TestCase(testtools.testcase.TestCase):
     """ Test case behaviour. """
-
-    def failUnlessRaises(self, exc_class, func, *args, **kwargs):
-        """ Fail unless the function call raises the expected exception.
-
-            Fail the test if an instance of the exception class
-            ``exc_class`` is not raised when calling ``func`` with the
-            arguments ``*args`` and ``**kwargs``.
-
-            """
-        try:
-            super(TestCase, self).failUnlessRaises(
-                    exc_class, func, *args, **kwargs)
-        except self.failureException:
-            exc_class_name = exc_class.__name__
-            msg = (
-                    "Exception %(exc_class_name)s not raised"
-                    " for function call:"
-                    " func=%(func)r args=%(args)r kwargs=%(kwargs)r"
-                    ) % vars()
-            raise self.failureException(msg)
-
-    def failIfIs(self, first, second, msg=None):
-        """ Fail if the two objects are identical.
-
-            Fail the test if ``first`` and ``second`` are identical,
-            as determined by the ``is`` operator.
-
-            """
-        if first is second:
-            if msg is None:
-                msg = "%(first)r is %(second)r" % vars()
-            raise self.failureException(msg)
-
-    def failUnlessIs(self, first, second, msg=None):
-        """ Fail unless the two objects are identical.
-
-            Fail the test unless ``first`` and ``second`` are
-            identical, as determined by the ``is`` operator.
-
-            """
-        if first is not second:
-            if msg is None:
-                msg = "%(first)r is not %(second)r" % vars()
-            raise self.failureException(msg)
-
-    assertIs = failUnlessIs
-    assertNotIs = failIfIs
-
-    def failIfIn(self, first, second, msg=None):
-        """ Fail if the second object is in the first.
-
-            Fail the test if ``first`` contains ``second``, as
-            determined by the ``in`` operator.
-
-            """
-        if second in first:
-            if msg is None:
-                msg = "%(second)r is in %(first)r" % vars()
-            raise self.failureException(msg)
-
-    def failUnlessIn(self, first, second, msg=None):
-        """ Fail unless the second object is in the first.
-
-            Fail the test unless ``first`` contains ``second``, as
-            determined by the ``in`` operator.
-
-            """
-        if second not in first:
-            if msg is None:
-                msg = "%(second)r is not in %(first)r" % vars()
-            raise self.failureException(msg)
-
-    assertIn = failUnlessIn
-    assertNotIn = failIfIn
 
     def failUnlessOutputCheckerMatch(self, want, got, msg=None):
         """ Fail unless the specified string matches the expected.
@@ -236,80 +163,6 @@ class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
 
     assertOutputCheckerMatch = failUnlessOutputCheckerMatch
 
-    def failUnlessMockCheckerMatch(self, want, tracker=None, msg=None):
-        """ Fail unless the mock tracker matches the wanted output.
-
-            Fail the test unless `want` matches the output tracked by
-            `tracker` (defaults to ``self.mock_tracker``. This is not
-            an equality check, but a pattern match according to the
-            ``minimock.MinimockOutputChecker`` rules.
-
-            """
-        if tracker is None:
-            tracker = self.mock_tracker
-        if not tracker.check(want):
-            if msg is None:
-                diff = tracker.diff(want)
-                msg = "\n".join([
-                        "Output received did not match expected output",
-                        "%(diff)s",
-                        ]) % vars()
-            raise self.failureException(msg)
-
-    def failIfMockCheckerMatch(self, want, tracker=None, msg=None):
-        """ Fail if the mock tracker matches the specified output.
-
-            Fail the test if `want` matches the output tracked by
-            `tracker` (defaults to ``self.mock_tracker``. This is not
-            an equality check, but a pattern match according to the
-            ``minimock.MinimockOutputChecker`` rules.
-
-            """
-        if tracker is None:
-            tracker = self.mock_tracker
-        if tracker.check(want):
-            if msg is None:
-                diff = tracker.diff(want)
-                msg = "\n".join([
-                        "Output received matched specified undesired output",
-                        "%(diff)s",
-                        ]) % vars()
-            raise self.failureException(msg)
-
-    assertMockCheckerMatch = failUnlessMockCheckerMatch
-    assertNotMockCheckerMatch = failIfMockCheckerMatch
-
-    def failIfIsInstance(self, obj, classes, msg=None):
-        """ Fail if the object is an instance of the specified classes.
-
-            Fail the test if the object ``obj`` is an instance of any
-            of ``classes``.
-
-            """
-        if isinstance(obj, classes):
-            if msg is None:
-                msg = (
-                        "%(obj)r is an instance of one of %(classes)r"
-                        ) % vars()
-            raise self.failureException(msg)
-
-    def failUnlessIsInstance(self, obj, classes, msg=None):
-        """ Fail unless the object is an instance of the specified classes.
-
-            Fail the test unless the object ``obj`` is an instance of
-            any of ``classes``.
-
-            """
-        if not isinstance(obj, classes):
-            if msg is None:
-                msg = (
-                        "%(obj)r is not an instance of any of %(classes)r"
-                        ) % vars()
-            raise self.failureException(msg)
-
-    assertIsInstance = failUnlessIsInstance
-    assertNotIsInstance = failIfIsInstance
-
     def failUnlessFunctionInTraceback(self, traceback, function, msg=None):
         """ Fail if the function is not in the traceback.
 
@@ -318,10 +171,10 @@ class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
 
             """
         func_in_traceback = False
-        expect_code = function.func_code
+        expected_code = function.func_code
         current_traceback = traceback
         while current_traceback is not None:
-            if expect_code is current_traceback.tb_frame.f_code:
+            if expected_code is current_traceback.tb_frame.f_code:
                 func_in_traceback = True
                 break
             current_traceback = current_traceback.tb_next
@@ -377,44 +230,56 @@ class TestCase(testscenarios.TestWithScenarios, testtools.testcase.TestCase):
 
     assertFunctionSignatureMatch = failUnlessFunctionSignatureMatch
 
+
+class TestCaseWithScenarios(testscenarios.WithScenarios, TestCase):
+    """ Test cases run per scenario. """
+
 
-class Exception_TestCase(TestCase):
+class Exception_TestCase(TestCaseWithScenarios):
     """ Test cases for exception classes. """
-
-    def __init__(self, *args, **kwargs):
-        """ Set up a new instance. """
-        self.valid_exceptions = NotImplemented
-        super(Exception_TestCase, self).__init__(*args, **kwargs)
-
-    def setUp(self):
-        """ Set up test fixtures. """
-        for exc_type, params in self.valid_exceptions.items():
-            args = (None, ) * params['min_args']
-            params['args'] = args
-            instance = exc_type(*args)
-            params['instance'] = instance
-
-        super(Exception_TestCase, self).setUp()
 
     def test_exception_instance(self):
         """ Exception instance should be created. """
-        for params in self.valid_exceptions.values():
-            instance = params['instance']
-            self.failIfIs(None, instance)
+        self.assertIsNot(self.instance, None)
 
     def test_exception_types(self):
-        """ Exception instances should match expected types. """
-        for params in self.valid_exceptions.values():
-            instance = params['instance']
-            for match_type in params['types']:
-                match_type_name = match_type.__name__
-                fail_msg = (
-                        "%(instance)r is not an instance of"
-                        " %(match_type_name)s"
-                        ) % vars()
-                self.failUnless(
-                        isinstance(instance, match_type),
-                        msg=fail_msg)
+        """ Exception instance should match expected types. """
+        for match_type in self.types:
+            self.assertIsInstance(self.instance, match_type)
+
+
+def make_exception_scenarios(scenarios):
+    """ Make test scenarios for exception classes.
+
+        Use this with `testscenarios` to adapt `Exception_TestCase`_
+        for any exceptions that need testing.
+
+        :param scenarios:
+            List of scenarios Each scenario is a tuple (`name`, `map`)
+            where `map` is a mapping of attributes to be applied to
+            each test case. Attributes map must contain items for:
+
+            :key exc_type:
+                The exception type to be tested.
+            :key min_args:
+                The minimum argument count for the exception instance
+                initialiser.
+            :key types:
+                Sequence of types that should be superclasses of each
+                instance of the exception type.
+
+        :return:
+            List of scenarios with additional mapping entries.
+
+        """
+    updated_scenarios = deepcopy(scenarios)
+    for (name, scenario) in updated_scenarios:
+        args = (None,) * scenario['min_args']
+        scenario['args'] = args
+        instance = scenario['exc_type'](*args)
+        scenario['instance'] = instance
+
+    return updated_scenarios
 
 
 # Local variables:

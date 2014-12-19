@@ -11,6 +11,14 @@ Tests
 * Write full unit tests for every new or changed behaviour at time of
   commit.
 
+Libraries
+=========
+
+* Work correctly with current ‘lockfile’ library (0.9 or later).
+
+* Evaluate switching to ‘flufl.lock’ library for PID lockfile behaviour
+  <http://pypi.python.org/pypi/flufl.lock>_.
+
 Features
 ========
 

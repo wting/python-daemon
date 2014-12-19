@@ -25,8 +25,7 @@ import signal
 import errno
 
 from . import pidlockfile
-
-from daemon import DaemonContext
+from .daemon import DaemonContext
 
 
 class DaemonRunnerError(Exception):
