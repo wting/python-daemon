@@ -72,25 +72,25 @@ def make_pidlockfile_scenarios():
     scenarios = {
             'simple': {},
             'not-exist': {
-                'open_func_name': 'mock_open_nonexist',
-                'os_open_func_name': 'mock_os_open_nonexist',
+                'open_func_name': 'fake_open_nonexist',
+                'os_open_func_name': 'fake_os_open_nonexist',
                 },
             'not-exist-write-denied': {
-                'open_func_name': 'mock_open_nonexist',
-                'os_open_func_name': 'mock_os_open_nonexist',
+                'open_func_name': 'fake_open_nonexist',
+                'os_open_func_name': 'fake_os_open_nonexist',
                 },
             'not-exist-write-busy': {
-                'open_func_name': 'mock_open_nonexist',
-                'os_open_func_name': 'mock_os_open_nonexist',
+                'open_func_name': 'fake_open_nonexist',
+                'os_open_func_name': 'fake_os_open_nonexist',
                 },
             'exist-read-denied': {
-                'open_func_name': 'mock_open_read_denied',
-                'os_open_func_name': 'mock_os_open_read_denied',
+                'open_func_name': 'fake_open_read_denied',
+                'os_open_func_name': 'fake_os_open_read_denied',
                 },
             'exist-locked-read-denied': {
                 'locking_pid': fake_other_pid,
-                'open_func_name': 'mock_open_read_denied',
-                'os_open_func_name': 'mock_os_open_read_denied',
+                'open_func_name': 'fake_open_read_denied',
+                'os_open_func_name': 'fake_os_open_read_denied',
                 },
             'exist-empty': {},
             'exist-invalid': {
@@ -126,15 +126,9 @@ def make_pidlockfile_scenarios():
         if 'locking_pid' not in scenario:
             scenario['locking_pid'] = None
         if 'open_func_name' not in scenario:
-            scenario['open_func_name'] = 'mock_open_okay'
+            scenario['open_func_name'] = 'fake_open_okay'
         if 'os_open_func_name' not in scenario:
-            scenario['os_open_func_name'] = 'mock_os_open_okay'
-
-        scenario['pidlockfile_args'] = dict(
-                path=scenario['pidfile_path'],
-                )
-        scenario['test_instance'] = pidlockfile.PIDLockFile(
-                **scenario['pidlockfile_args'])
+            scenario['os_open_func_name'] = 'fake_os_open_okay'
 
     return scenarios
 
@@ -296,12 +290,20 @@ def make_lockfile_method_fakes(scenario):
     return fake_methods
 
 
-def apply_lockfile_method_mocks(mock_lockfile, scenario):
-    """ Apply common fake methods to mock lockfile. """
-    fake_methods = make_lockfile_method_fakes(scenario)
+def apply_lockfile_method_mocks(mock_lockfile, testcase, scenario):
+    """ Apply common fake methods to mock lockfile class. """
+    fake_methods = dict(
+            (func_name, fake_func)
+            for (func_name, fake_func) in
+                make_lockfile_method_fakes(scenario).iteritems()
+            if func_name not in ['read_pid'])
 
     for (func_name, fake_func) in fake_methods.iteritems():
-        setattr(mock_lockfile, func_name, fake_func)
+        func_patcher = mock.patch.object(
+                mock_lockfile, func_name,
+                new=fake_func)
+        func_patcher.start()
+        testcase.addCleanup(func_patcher.stop)
 
 
 def setup_pidlockfile_fixtures(testcase, scenario_name=None):
@@ -311,11 +313,11 @@ def setup_pidlockfile_fixtures(testcase, scenario_name=None):
 
     for func_name in [
             'write_pid_to_pidfile',
-            'pidlockfile.remove_existing_pidfile',
+            'remove_existing_pidfile',
             ]:
-        patcher = mock.patch.object(pidlockfile, func_name)
-        patcher.start()
-        testcase.addCleanup(patcher.stop)
+        func_patcher = mock.patch.object(pidlockfile, func_name)
+        func_patcher.start()
+        testcase.addCleanup(func_patcher.stop)
 
 
 class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
@@ -329,6 +331,12 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
         self.pidlockfile_scenario = pidlockfile_scenarios['simple']
         pidfile_path = self.pidlockfile_scenario['pidfile_path']
 
+        for func_name in ['__init__', 'acquire']:
+            func_patcher = mock.patch.object(
+                    pidlockfile.PIDLockFile, func_name)
+            func_patcher.start()
+            self.addCleanup(func_patcher.stop)
+
         self.scenario = {
                 'pidfile_path': self.pidlockfile_scenario['pidfile_path'],
                 'acquire_timeout': self.getUniqueInteger(),
@@ -340,10 +348,6 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
                 )
         self.test_instance = pidfile.TimeoutPIDLockFile(
                 **self.test_kwargs)
-
-    def tearDown(self):
-        """ Tear down test fixtures. """
-        super(TimeoutPIDLockFile_TestCase, self).tearDown()
 
     def test_inherits_from_pidlockfile(self):
         """ Should inherit from PIDLockFile. """
@@ -370,31 +374,30 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
     def test_calls_superclass_init(self, mock_init):
         """ Should call the superclass ‘__init__’. """
         expected_path = self.test_kwargs['path']
-        instance = pidfile.TimeoutPIDLockFile(
-                **self.test_kwargs)
+        instance = pidfile.TimeoutPIDLockFile(**self.test_kwargs)
         mock_init.assert_called_with(instance, expected_path)
 
     @mock.patch.object(
             pidlockfile.PIDLockFile, "acquire",
             autospec=True)
-    def test_acquire_uses_specified_timeout(self, mock_acquire):
+    def test_acquire_uses_specified_timeout(self, mock_func_acquire):
         """ Should call the superclass ‘acquire’ with specified timeout. """
         instance = self.test_instance
         test_timeout = self.getUniqueInteger()
         expected_timeout = test_timeout
         instance.acquire(test_timeout)
-        mock_acquire.assert_called_with(instance, expected_timeout)
+        mock_func_acquire.assert_called_with(instance, expected_timeout)
 
     @mock.patch.object(
             pidlockfile.PIDLockFile, "acquire",
             autospec=True)
-    def test_acquire_uses_stored_timeout_by_default(self, mock_acquire):
+    def test_acquire_uses_stored_timeout_by_default(self, mock_func_acquire):
         """ Should call superclass ‘acquire’ with stored timeout by default. """
         instance = self.test_instance
         test_timeout = self.test_kwargs['acquire_timeout']
         expected_timeout = test_timeout
         instance.acquire()
-        mock_acquire.assert_called_with(instance, expected_timeout)
+        mock_func_acquire.assert_called_with(instance, expected_timeout)
 
 
 # Local variables:

@@ -137,7 +137,7 @@ class DaemonContext_TestCase(DaemonContext_BaseTestCase):
     def test_has_default_working_directory(self):
         """ Should have default working_directory option. """
         args = dict()
-        expected_directory = '/'
+        expected_directory = "/"
         instance = daemon.daemon.DaemonContext(**args)
         self.assertEqual(expected_directory, instance.working_directory)
 
@@ -1575,8 +1575,8 @@ class redirect_stream_TestCase(scaffold.TestCase):
                 raise OSError(errno.NOENT, "No such file", path)
             return result
 
-        func_patcher_os_open = mock.patch(
-                "os.open",
+        func_patcher_os_open = mock.patch.object(
+                os, "open",
                 side_effect=fake_os_open)
         self.mock_func_os_open = func_patcher_os_open.start()
         self.addCleanup(func_patcher_os_open.stop)

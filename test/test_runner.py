@@ -106,6 +106,7 @@ def set_runner_scenario(testcase, scenario_name):
     testcase.scenario = scenarios[scenario_name]
     apply_lockfile_method_mocks(
             testcase.mock_runner_lockfile,
+            testcase,
             testcase.scenario['pidlockfile_scenario'])
 
 
@@ -124,12 +125,11 @@ def setup_runner_fixtures(testcase):
 
     simple_scenario = testcase.runner_scenarios['simple']
 
-    testcase.lockfile_class_name = "daemon.pidfile.TimeoutPIDLockFile"
-
     testcase.mock_runner_lockfile = mock.MagicMock(
             spec=pidfile.TimeoutPIDLockFile)
     apply_lockfile_method_mocks(
             testcase.mock_runner_lockfile,
+            testcase,
             simple_scenario['pidlockfile_scenario'])
     testcase.mock_runner_lockfile.path = simple_scenario['pidfile_path']
 
@@ -459,8 +459,8 @@ class DaemonRunner_do_action_start_TestCase(DaemonRunner_BaseTestCase):
         pidfile_path = self.scenario['pidfile_path']
         test_pid = self.scenario['pidlockfile_scenario']['pidfile_pid']
         expected_signal = signal.SIG_DFL
-        error = OSError(errno.ESRCH, "Not running")
-        os.kill.side_effect = error
+        test_error = OSError(errno.ESRCH, "Not running")
+        os.kill.side_effect = test_error
         instance.do_action()
         os.kill.assert_called_with(test_pid, expected_signal)
         self.mock_runner_lockfile.break_lock.assert_called_with()
@@ -531,8 +531,8 @@ class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
         pidfile_path = self.scenario['pidfile_path']
         test_pid = self.scenario['pidlockfile_scenario']['pidfile_pid']
         expected_signal = signal.SIG_DFL
-        error = OSError(errno.ESRCH, "Not running")
-        os.kill.side_effect = error
+        test_error = OSError(errno.ESRCH, "Not running")
+        os.kill.side_effect = test_error
         instance.do_action()
         self.mock_runner_lockfile.break_lock.assert_called_with()
 
@@ -549,8 +549,8 @@ class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
         instance = self.test_instance
         test_pid = self.scenario['pidlockfile_scenario']['pidfile_pid']
         pidfile_path = self.scenario['pidfile_path']
-        error = OSError(errno.EPERM, "Nice try")
-        os.kill.side_effect = error
+        test_error = OSError(errno.EPERM, "Nice try")
+        os.kill.side_effect = test_error
         expected_error = runner.DaemonRunnerStopFailureError
         expected_message_content = unicode(test_pid)
         try:
