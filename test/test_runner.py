@@ -547,7 +547,7 @@ class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
         test_error = OSError(errno.EPERM, "Nice try")
         os.kill.side_effect = test_error
         expected_error = runner.DaemonRunnerStopFailureError
-        expected_message_content = str(test_pid)
+        expected_message_content = unicode(test_pid)
         try:
             instance.do_action()
         except expected_error, exc:
