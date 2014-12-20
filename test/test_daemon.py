@@ -1564,8 +1564,6 @@ class redirect_stream_TestCase(scaffold.TestCase):
         """ Set up test fixtures. """
         super(redirect_stream_TestCase, self).setUp()
 
-        setup_streams_fixtures(self)
-
         self.test_system_stream = FakeFileDescriptorStringIO()
         self.test_target_stream = FakeFileDescriptorStringIO()
         self.test_null_file = FakeFileDescriptorStringIO()
