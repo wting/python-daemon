@@ -449,7 +449,7 @@ class DaemonRunner_do_action_start_TestCase(DaemonRunner_BaseTestCase):
         exc = self.assertRaises(
                 expected_error,
                 instance.do_action)
-        self.assertIn(expected_message_content, unicode(exc.message))
+        self.assertIn(expected_message_content, unicode(exc))
 
     def test_breaks_lock_if_no_such_process(self):
         """ Should request breaking lock if PID file process is not running. """

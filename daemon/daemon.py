@@ -28,7 +28,6 @@ import signal
 import socket
 import atexit
 
-
 try:
     # Python 2 has both ‘str’ (bytes) and ‘unicode’.
     unicode

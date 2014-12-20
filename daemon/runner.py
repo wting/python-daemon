@@ -29,6 +29,13 @@ import lockfile
 from . import pidfile
 from .daemon import DaemonContext
 
+try:
+    # Python 2 has both ‘str’ (bytes) and ‘unicode’.
+    unicode
+except NameError:
+    # Python 3 names the Unicode data type ‘str’.
+    unicode = str
+
 
 class DaemonRunnerError(Exception):
     """ Abstract base class for errors from DaemonRunner. """
@@ -199,7 +206,7 @@ def emit_message(message, stream=None):
 
 def make_pidlockfile(path, acquire_timeout):
     """ Make a PIDLockFile instance with the given filesystem path. """
-    if not isinstance(path, basestring):
+    if not isinstance(path, unicode):
         error = ValueError("Not a filesystem path: %(path)r" % vars())
         raise error
     if not os.path.isabs(path):
