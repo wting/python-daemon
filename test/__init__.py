@@ -15,11 +15,6 @@
 
 from __future__ import unicode_literals
 
-import scaffold
-
-
-suite = scaffold.make_suite()
-
 
 # Local variables:
 # coding: utf-8
