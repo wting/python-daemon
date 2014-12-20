@@ -23,7 +23,6 @@ import sys
 import operator
 import textwrap
 from copy import deepcopy
-import itertools
 import functools
 
 import testscenarios
@@ -43,15 +42,24 @@ logging.disable(logging.CRITICAL)
 
 def get_function_signature(func):
     """ Get the function signature as a mapping of attributes. """
-    arg_count = func.func_code.co_argcount
-    arg_names = func.func_code.co_varnames[:arg_count]
+    try:
+        # Python 3 function attributes.
+        func_code = func.__code__
+        func_defaults = func.__defaults__
+    except AttributeError:
+        # Python 2 function attributes.
+        func_code = func.func_code
+        func_defaults = func.func_defaults
+
+    arg_count = func_code.co_argcount
+    arg_names = func_code.co_varnames[:arg_count]
 
     arg_defaults = {}
-    func_defaults = ()
-    if func.func_defaults is not None:
-        func_defaults = func.func_defaults
-    for (name, value) in itertools.izip(arg_names[::-1], func_defaults[::-1]):
-        arg_defaults[name] = value
+    if func_defaults is not None:
+        arg_defaults = dict(
+                (name, value)
+                for (name, value) in
+                    zip(arg_names[::-1], func_defaults[::-1]))
 
     signature = {
             'name': func.__name__,
@@ -60,12 +68,12 @@ def get_function_signature(func):
             'arg_defaults': arg_defaults,
             }
 
-    non_pos_names = list(func.func_code.co_varnames[arg_count:])
+    non_pos_names = list(func_code.co_varnames[arg_count:])
     COLLECTS_ARBITRARY_POSITIONAL_ARGS = 0x04
-    if func.func_code.co_flags & COLLECTS_ARBITRARY_POSITIONAL_ARGS:
+    if func_code.co_flags & COLLECTS_ARBITRARY_POSITIONAL_ARGS:
         signature['var_args'] = non_pos_names.pop(0)
     COLLECTS_ARBITRARY_KEYWORD_ARGS = 0x08
-    if func.func_code.co_flags & COLLECTS_ARBITRARY_KEYWORD_ARGS:
+    if func_code.co_flags & COLLECTS_ARBITRARY_KEYWORD_ARGS:
         signature['var_kw_args'] = non_pos_names.pop(0)
 
     return signature
