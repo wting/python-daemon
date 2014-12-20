@@ -14,7 +14,7 @@ Tests
 Libraries
 =========
 
-* Work correctly with current ‘lockfile’ library (0.9 or later).
+* Work correctly with current ‘lockfile’ library (0.10 or later).
 
 * Evaluate switching to ‘flufl.lock’ library for PID lockfile behaviour
   <http://pypi.python.org/pypi/flufl.lock>_.
@@ -37,7 +37,7 @@ Documentation
 Standard library inclusion
 ==========================
 
-* Convert to Python 3.
+* Convert to Python 2 and Python 3 compatible code base.
 
 
 ====
@@ -51,7 +51,7 @@ DONE
 
 * Allow specification of working directory (default: '/').
 
-* Allow specification of umask (default: 0000).
+* Allow specification of umask (default: 0o000).
 
 * Drop ‘suid’ and ‘sgid’ privileges if set.
 
