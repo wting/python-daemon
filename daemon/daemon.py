@@ -30,11 +30,11 @@ import atexit
 
 
 try:
-    # Base type of strings in Python 2.
-    basestring
+    # Python 2 has both ‘str’ (bytes) and ‘unicode’.
+    unicode
 except NameError:
-    # Python 3 promotes Unicode to the primary string type.
-    basestring = str
+    # Python 3 names the Unicode data type ‘str’.
+    unicode = str
 
 
 class DaemonError(Exception):
@@ -453,14 +453,14 @@ class DaemonContext(object):
         """ Make the signal handler for a specified target object.
 
             If `target` is ``None``, returns ``signal.SIG_IGN``. If
-            `target` is a string, returns the attribute of this
+            `target` is a test string, returns the attribute of this
             instance named by that string. Otherwise, returns `target`
             itself.
 
             """
         if target is None:
             result = signal.SIG_IGN
-        elif isinstance(target, basestring):
+        elif isinstance(target, unicode):
             name = target
             result = getattr(self, name)
         else:

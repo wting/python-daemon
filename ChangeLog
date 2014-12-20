@@ -2,6 +2,7 @@
 
     * Remove custom test suite creation, we now use ‘unittest2’.
     * Discriminate Python 2-and-3 compatible usage of dict methods.
+    * Discriminate Python 2-and-3 compatible bytes versus text.
     * Declare explicit absolute and relative imports.
 
 2014-12-17  Ben Finney  <ben+python@benfinney.id.au>

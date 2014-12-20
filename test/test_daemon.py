@@ -42,6 +42,13 @@ from .test_pidfile import (
 
 import daemon
 
+try:
+    # Python 2 has both ‘str’ (bytes) and ‘unicode’.
+    unicode
+except NameError:
+    # Python 3 names the Unicode data type ‘str’.
+    unicode = str
+
 
 class ModuleExceptions_TestCase(scaffold.Exception_TestCase):
     """ Test cases for module exception classes. """
@@ -1613,7 +1620,9 @@ class make_default_signal_map_TestCase(scaffold.TestCase):
         """ Set up test fixtures. """
         super(make_default_signal_map_TestCase, self).setUp()
 
-        self.fake_signal_module = ModuleType(b'signal')
+        # Use whatever default string type this Python version needs.
+        signal_module_name = str('signal')
+        self.fake_signal_module = ModuleType(signal_module_name)
 
         fake_signal_names = [
                 'SIGHUP',

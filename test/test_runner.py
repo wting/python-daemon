@@ -46,6 +46,13 @@ import daemon
 from daemon import pidfile
 from daemon import runner
 
+try:
+    # Python 2 has both ‘str’ (bytes) and ‘unicode’.
+    unicode
+except NameError:
+    # Python 3 names the Unicode data type ‘str’.
+    unicode = str
+
 
 class ModuleExceptions_TestCase(scaffold.Exception_TestCase):
     """ Test cases for module exception classes. """
