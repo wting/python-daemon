@@ -13,9 +13,14 @@
 """ Unit test for ‘runner’ module.
     """
 
-from __future__ import unicode_literals
+from __future__ import (absolute_import, unicode_literals)
 
-import __builtin__ as builtins
+try:
+    # Python 3 standard library.
+    import builtins
+except ImportError:
+    # Python 2 standard library.
+    import __builtin__ as builtins
 import os
 import os.path
 import sys
@@ -26,20 +31,27 @@ import signal
 import lockfile
 import mock
 
-import scaffold
-from test_pidfile import (
+from . import scaffold
+from .test_pidfile import (
         FakeFileDescriptorStringIO,
         setup_pidfile_fixtures,
         make_pidlockfile_scenarios,
         apply_lockfile_method_mocks,
         )
-from test_daemon import (
+from .test_daemon import (
         setup_streams_fixtures,
         )
-import daemon.daemon
 
+import daemon
 from daemon import pidfile
 from daemon import runner
+
+try:
+    # Python 2 has both ‘str’ (bytes) and ‘unicode’.
+    unicode
+except NameError:
+    # Python 3 names the Unicode data type ‘str’.
+    unicode = str
 
 
 class ModuleExceptions_TestCase(scaffold.Exception_TestCase):
@@ -83,7 +95,7 @@ def make_runner_scenarios():
                 },
             }
 
-    for scenario in scenarios.itervalues():
+    for scenario in scenarios.values():
         if 'pidlockfile_scenario_name' in scenario:
             pidlockfile_scenario = pidlockfile_scenarios.pop(
                     scenario['pidlockfile_scenario_name'])
@@ -175,8 +187,8 @@ def setup_runner_fixtures(testcase):
     mock_open = mock.mock_open()
     mock_open.side_effect = fake_open
 
-    func_patcher_builtin_open = mock.patch(
-            "__builtin__.open",
+    func_patcher_builtin_open = mock.patch.object(
+            builtins, "open",
             new=mock_open)
     func_patcher_builtin_open.start()
     testcase.addCleanup(func_patcher_builtin_open.stop)
@@ -371,10 +383,9 @@ class DaemonRunner_parse_args_TestCase(DaemonRunner_BaseTestCase):
         """ Should emit a usage message and exit if too few arguments. """
         instance = self.test_instance
         argv = [self.test_program_path]
-        try:
-            instance.parse_args(argv)
-        except NotImplementedError:
-            pass
+        exc = self.assertRaises(
+                NotImplementedError,
+                instance.parse_args, argv)
         daemon.runner.DaemonRunner._usage_exit.assert_called_with(argv)
 
     def test_emits_usage_message_if_unknown_action_arg(self):
@@ -382,10 +393,9 @@ class DaemonRunner_parse_args_TestCase(DaemonRunner_BaseTestCase):
         instance = self.test_instance
         progname = self.test_program_name
         argv = [self.test_program_path, 'bogus']
-        try:
-            instance.parse_args(argv)
-        except NotImplementedError:
-            pass
+        exc = self.assertRaises(
+                NotImplementedError,
+                instance.parse_args, argv)
         daemon.runner.DaemonRunner._usage_exit.assert_called_with(argv)
 
     def test_should_parse_system_argv_by_default(self):
@@ -400,7 +410,7 @@ class DaemonRunner_parse_args_TestCase(DaemonRunner_BaseTestCase):
     def test_sets_action_from_first_argument(self):
         """ Should set action from first commandline argument. """
         instance = self.test_instance
-        for name, argv in self.valid_argv_params.iteritems():
+        for name, argv in self.valid_argv_params.items():
             expected_action = name
             instance.parse_args(argv)
             self.assertEqual(expected_action, instance.action)
@@ -436,13 +446,9 @@ class DaemonRunner_do_action_start_TestCase(DaemonRunner_BaseTestCase):
         pidfile_path = self.scenario['pidfile_path']
         expected_error = runner.DaemonRunnerStartFailureError
         expected_message_content = pidfile_path
-        try:
-            instance.do_action()
-        except expected_error as exc:
-            pass
-        else:
-            raise self.failureException(
-                    "Failed to raise " + expected_error.__name__)
+        exc = self.assertRaises(
+                expected_error,
+                instance.do_action)
         self.assertIn(expected_message_content, unicode(exc.message))
 
     def test_breaks_lock_if_no_such_process(self):
@@ -511,13 +517,9 @@ class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
         pidfile_path = self.scenario['pidfile_path']
         expected_error = runner.DaemonRunnerStopFailureError
         expected_message_content = pidfile_path
-        try:
-            instance.do_action()
-        except expected_error as exc:
-            pass
-        else:
-            raise self.failureException(
-                    "Failed to raise " + expected_error.__name__)
+        exc = self.assertRaises(
+                expected_error,
+                instance.do_action)
         self.assertIn(expected_message_content, unicode(exc))
 
     def test_breaks_lock_if_pidfile_stale(self):
@@ -548,13 +550,9 @@ class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
         os.kill.side_effect = test_error
         expected_error = runner.DaemonRunnerStopFailureError
         expected_message_content = unicode(test_pid)
-        try:
-            instance.do_action()
-        except expected_error as exc:
-            pass
-        else:
-            raise self.failureException(
-                    "Failed to raise " + expected_error.__name__)
+        exc = self.assertRaises(
+                expected_error,
+                instance.do_action)
         self.assertIn(expected_message_content, unicode(exc))
 
 

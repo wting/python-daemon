@@ -1,3 +1,10 @@
+2014-12-20  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Remove custom test suite creation, we now use ‘unittest2’.
+    * Discriminate Python 2-and-3 compatible usage of dict methods.
+    * Discriminate Python 2-and-3 compatible bytes versus text.
+    * Declare explicit absolute and relative imports.
+
 2014-12-17  Ben Finney  <ben+python@benfinney.id.au>
 
     * Discriminate between different ‘fileno’ method behaviours.
@@ -6,6 +13,13 @@
 2014-12-16  Ben Finney  <ben+python@benfinney.id.au>
 
     * Declare support explicitly for Python 2 only.
+    * Migrate to JSON (instead of Python) for serialised version info.
+    * Wrap standard library imports where names changed in Python 3.
+
+2014-12-15  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Wrap the ‘fromlist’ parameter of ‘__import__’ for Python 3
+      compatibility.
     * Migrate to JSON (instead of Python) for serialised version info.
 
 2014-12-12  Ben Finney  <ben+python@benfinney.id.au>

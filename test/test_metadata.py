@@ -13,19 +13,24 @@
 """ Unit test for ‘_metadata’ private module.
     """
 
-from __future__ import unicode_literals
+from __future__ import (absolute_import, unicode_literals)
 
 import sys
 import re
-import urlparse
+try:
+    # Python 3 standard library.
+    import urllib.parse as urlparse
+except ImportError:
+    # Python 2 standard library.
+    import urlparse
 import functools
 
-import mock
 import pkg_resources
-
-import scaffold
+import mock
 import testtools.helpers
 import testtools.matchers
+
+from . import scaffold
 
 import daemon._metadata as metadata
 

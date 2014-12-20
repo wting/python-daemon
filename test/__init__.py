@@ -13,12 +13,7 @@
 """ Unit test suite for ‘daemon’ package.
     """
 
-from __future__ import unicode_literals
-
-import scaffold
-
-
-suite = scaffold.make_suite()
+from __future__ import (absolute_import, unicode_literals)
 
 
 # Local variables:

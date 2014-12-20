@@ -16,6 +16,7 @@
 
 from __future__ import unicode_literals
 
+import sys
 import os
 import os.path
 import pydoc
@@ -23,9 +24,16 @@ import pydoc
 from setuptools import setup, find_packages
 
 
+fromlist_expects_type = str
+if sys.version_info < (3, 0):
+    fromlist_expects_type = bytes
+
+
 distribution_name = "python-daemon"
 main_module_name = 'daemon'
-main_module = __import__(main_module_name, fromlist=[b'_metadata'])
+main_module_fromlist = list(map(fromlist_expects_type, [
+        '_metadata']))
+main_module = __import__(main_module_name, fromlist=main_module_fromlist)
 metadata = main_module._metadata
 
 synopsis, long_description = pydoc.splitdoc(

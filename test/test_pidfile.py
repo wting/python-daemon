@@ -13,19 +13,30 @@
 """ Unit test for ‘pidfile’ module.
     """
 
-from __future__ import unicode_literals
+from __future__ import (absolute_import, unicode_literals)
 
+try:
+    # Python 3 standard library.
+    import builtins
+except ImportError:
+    # Python 2 standard library.
+    import __builtin__ as builtins
 import os
-from StringIO import StringIO
 import itertools
 import tempfile
 import errno
+try:
+    # Python 3 standard library.
+    from io import StringIO
+except ImportError:
+    # Python 2 standard library.
+    from StringIO import StringIO
 
 import mock
 import lockfile
 from lockfile import pidlockfile
 
-import scaffold
+from . import scaffold
 
 from daemon import pidfile
 
@@ -111,7 +122,7 @@ def make_pidlockfile_scenarios():
                 },
             }
 
-    for scenario in scenarios.itervalues():
+    for scenario in scenarios.values():
         scenario['pid'] = fake_current_pid
         scenario['pidfile_path'] = fake_pidfile_path
         if 'pidfile' not in scenario:
@@ -190,7 +201,7 @@ def setup_pidfile_fixtures(testcase):
             return result
 
         funcs = dict(
-                (name, obj) for (name, obj) in vars().iteritems()
+                (name, obj) for (name, obj) in vars().items()
                 if hasattr(obj, '__call__'))
 
         return funcs
@@ -210,8 +221,8 @@ def setup_pidfile_fixtures(testcase):
     mock_open = mock.mock_open()
     mock_open.side_effect = fake_open
 
-    func_patcher_builtin_open = mock.patch(
-            "__builtin__.open",
+    func_patcher_builtin_open = mock.patch.object(
+            builtins, "open",
             new=mock_open)
     func_patcher_builtin_open.start()
     testcase.addCleanup(func_patcher_builtin_open.stop)
@@ -279,7 +290,7 @@ def make_lockfile_method_fakes(scenario):
             (
                 func_name.replace('fake_func_', ''),
                 mock.MagicMock(side_effect=fake_func))
-            for (func_name, fake_func) in vars().iteritems()
+            for (func_name, fake_func) in vars().items()
                 if func_name.startswith('fake_func_'))
 
     return fake_methods
@@ -290,10 +301,10 @@ def apply_lockfile_method_mocks(mock_lockfile, testcase, scenario):
     fake_methods = dict(
             (func_name, fake_func)
             for (func_name, fake_func) in
-                make_lockfile_method_fakes(scenario).iteritems()
+                make_lockfile_method_fakes(scenario).items()
             if func_name not in ['read_pid'])
 
-    for (func_name, fake_func) in fake_methods.iteritems():
+    for (func_name, fake_func) in fake_methods.items():
         func_patcher = mock.patch.object(
                 mock_lockfile, func_name,
                 new=fake_func)
