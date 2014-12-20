@@ -32,7 +32,6 @@ except ImportError:
     from StringIO import StringIO
 
 import mock
-from lockfile import pidlockfile
 
 from . import scaffold
 from .test_pidfile import (

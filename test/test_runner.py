@@ -42,9 +42,9 @@ from .test_daemon import (
         setup_streams_fixtures,
         )
 
-import daemon
-from daemon import pidfile
-from daemon import runner
+import daemon.daemon
+import daemon.runner
+import daemon.pidfile
 
 try:
     # Python 2 has both ‘str’ (bytes) and ‘unicode’.
@@ -58,25 +58,25 @@ class ModuleExceptions_TestCase(scaffold.Exception_TestCase):
     """ Test cases for module exception classes. """
 
     scenarios = scaffold.make_exception_scenarios([
-            ('runner.DaemonRunnerError', dict(
-                exc_type = runner.DaemonRunnerError,
+            ('daemon.runner.DaemonRunnerError', dict(
+                exc_type = daemon.runner.DaemonRunnerError,
                 min_args = 1,
                 types = [Exception],
                 )),
-            ('runner.DaemonRunnerInvalidActionError', dict(
-                exc_type = runner.DaemonRunnerInvalidActionError,
+            ('daemon.runner.DaemonRunnerInvalidActionError', dict(
+                exc_type = daemon.runner.DaemonRunnerInvalidActionError,
                 min_args = 1,
-                types = [runner.DaemonRunnerError, ValueError],
+                types = [daemon.runner.DaemonRunnerError, ValueError],
                 )),
-            ('runner.DaemonRunnerStartFailureError', dict(
-                exc_type = runner.DaemonRunnerStartFailureError,
+            ('daemon.runner.DaemonRunnerStartFailureError', dict(
+                exc_type = daemon.runner.DaemonRunnerStartFailureError,
                 min_args = 1,
-                types = [runner.DaemonRunnerError, RuntimeError],
+                types = [daemon.runner.DaemonRunnerError, RuntimeError],
                 )),
-            ('runner.DaemonRunnerStopFailureError', dict(
-                exc_type = runner.DaemonRunnerStopFailureError,
+            ('daemon.runner.DaemonRunnerStopFailureError', dict(
+                exc_type = daemon.runner.DaemonRunnerStopFailureError,
                 min_args = 1,
-                types = [runner.DaemonRunnerError, RuntimeError],
+                types = [daemon.runner.DaemonRunnerError, RuntimeError],
                 )),
             ])
 
@@ -133,7 +133,7 @@ def setup_runner_fixtures(testcase):
     simple_scenario = testcase.runner_scenarios['simple']
 
     testcase.mock_runner_lockfile = mock.MagicMock(
-            spec=pidfile.TimeoutPIDLockFile)
+            spec=daemon.pidfile.TimeoutPIDLockFile)
     apply_lockfile_method_mocks(
             testcase.mock_runner_lockfile,
             testcase,
@@ -141,7 +141,7 @@ def setup_runner_fixtures(testcase):
     testcase.mock_runner_lockfile.path = simple_scenario['pidfile_path']
 
     patcher_lockfile_class = mock.patch.object(
-            pidfile, "TimeoutPIDLockFile",
+            daemon.pidfile, "TimeoutPIDLockFile",
             return_value=testcase.mock_runner_lockfile)
     patcher_lockfile_class.start()
     testcase.addCleanup(patcher_lockfile_class.stop)
@@ -159,10 +159,10 @@ def setup_runner_fixtures(testcase):
 
     testcase.TestApp = TestApp
 
-    patcher_daemoncontext = mock.patch.object(
+    patcher_runner_daemoncontext = mock.patch.object(
             daemon.runner, "DaemonContext", autospec=True)
-    patcher_daemoncontext.start()
-    testcase.addCleanup(patcher_daemoncontext.stop)
+    patcher_runner_daemoncontext.start()
+    testcase.addCleanup(patcher_runner_daemoncontext.stop)
 
     testcase.test_app = testcase.TestApp()
 
@@ -203,7 +203,7 @@ def setup_runner_fixtures(testcase):
     patcher_sys_argv.start()
     testcase.addCleanup(patcher_sys_argv.stop)
 
-    testcase.test_instance = runner.DaemonRunner(testcase.test_app)
+    testcase.test_instance = daemon.runner.DaemonRunner(testcase.test_app)
 
     testcase.scenario = NotImplemented
 
@@ -227,16 +227,16 @@ class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
         super(DaemonRunner_TestCase, self).setUp()
 
         func_patcher_parse_args = mock.patch.object(
-                runner.DaemonRunner, "parse_args")
+                daemon.runner.DaemonRunner, "parse_args")
         func_patcher_parse_args.start()
         self.addCleanup(func_patcher_parse_args.stop)
 
         # Create a new instance now with our custom patches.
-        self.test_instance = runner.DaemonRunner(self.test_app)
+        self.test_instance = daemon.runner.DaemonRunner(self.test_app)
 
     def test_instantiate(self):
         """ New instance of DaemonRunner should be created. """
-        self.assertIsInstance(self.test_instance, runner.DaemonRunner)
+        self.assertIsInstance(self.test_instance, daemon.runner.DaemonRunner)
 
     def test_parses_commandline_args(self):
         """ Should parse commandline arguments. """
@@ -251,7 +251,7 @@ class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
         pidfile_path = None
         self.test_app.pidfile_path = pidfile_path
         expected_pidfile = None
-        instance = runner.DaemonRunner(self.test_app)
+        instance = daemon.runner.DaemonRunner(self.test_app)
         self.assertIs(expected_pidfile, instance.pidfile)
 
     def test_error_when_pidfile_path_not_string(self):
@@ -261,7 +261,7 @@ class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
         expected_error = ValueError
         self.assertRaises(
                 expected_error,
-                runner.DaemonRunner, self.test_app)
+                daemon.runner.DaemonRunner, self.test_app)
 
     def test_error_when_pidfile_path_not_absolute(self):
         """ Should raise ValueError when PID file path not absolute. """
@@ -270,13 +270,13 @@ class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
         expected_error = ValueError
         self.assertRaises(
                 expected_error,
-                runner.DaemonRunner, self.test_app)
+                daemon.runner.DaemonRunner, self.test_app)
 
     def test_creates_lock_with_specified_parameters(self):
         """ Should create a TimeoutPIDLockFile with specified params. """
         pidfile_path = self.scenario['pidfile_path']
         pidfile_timeout = self.scenario['pidfile_timeout']
-        pidfile.TimeoutPIDLockFile.assert_called_with(
+        daemon.pidfile.TimeoutPIDLockFile.assert_called_with(
                 pidfile_path, pidfile_timeout)
 
     def test_has_created_pidfile(self):
@@ -423,7 +423,7 @@ class DaemonRunner_do_action_TestCase(DaemonRunner_BaseTestCase):
         """ Should emit a usage message and exit if action is unknown. """
         instance = self.test_instance
         instance.action = 'bogus'
-        expected_error = runner.DaemonRunnerInvalidActionError
+        expected_error = daemon.runner.DaemonRunnerInvalidActionError
         self.assertRaises(
                 expected_error,
                 instance.do_action)
@@ -444,7 +444,7 @@ class DaemonRunner_do_action_start_TestCase(DaemonRunner_BaseTestCase):
         instance = self.test_instance
         instance.daemon_context.open.side_effect = lockfile.AlreadyLocked
         pidfile_path = self.scenario['pidfile_path']
-        expected_error = runner.DaemonRunnerStartFailureError
+        expected_error = daemon.runner.DaemonRunnerStartFailureError
         expected_message_content = pidfile_path
         exc = self.assertRaises(
                 expected_error,
@@ -515,7 +515,7 @@ class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
         self.mock_runner_lockfile.read_pid.return_value = (
                 self.scenario['pidlockfile_scenario']['pidfile_pid'])
         pidfile_path = self.scenario['pidfile_path']
-        expected_error = runner.DaemonRunnerStopFailureError
+        expected_error = daemon.runner.DaemonRunnerStopFailureError
         expected_message_content = pidfile_path
         exc = self.assertRaises(
                 expected_error,
@@ -548,7 +548,7 @@ class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
         pidfile_path = self.scenario['pidfile_path']
         test_error = OSError(errno.EPERM, "Nice try")
         os.kill.side_effect = test_error
-        expected_error = runner.DaemonRunnerStopFailureError
+        expected_error = daemon.runner.DaemonRunnerStopFailureError
         expected_message_content = unicode(test_pid)
         exc = self.assertRaises(
                 expected_error,
