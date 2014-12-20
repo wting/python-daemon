@@ -31,9 +31,11 @@ from .daemon import DaemonContext
 
 try:
     # Python 2 has both ‘str’ (bytes) and ‘unicode’.
+    basestring
     unicode
 except NameError:
     # Python 3 names the Unicode data type ‘str’.
+    basestring = str
     unicode = str
 
 
@@ -206,7 +208,7 @@ def emit_message(message, stream=None):
 
 def make_pidlockfile(path, acquire_timeout):
     """ Make a PIDLockFile instance with the given filesystem path. """
-    if not isinstance(path, unicode):
+    if not isinstance(path, basestring):
         error = ValueError("Not a filesystem path: %(path)r" % vars())
         raise error
     if not os.path.isabs(path):
