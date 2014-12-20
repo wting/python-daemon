@@ -114,7 +114,7 @@ class DaemonContext(object):
             umask is set to an explicit known value.
 
             If the conventional value of 0 is too open, consider setting a
-            value such as 022, 027, 077, or another specific value.
+            value such as 0o022, 0o027, 0o077, or another specific value.
             Otherwise, ensure the daemon creates every file with an
             explicit access mode for the purpose.
 

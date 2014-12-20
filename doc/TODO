@@ -51,7 +51,7 @@ DONE
 
 * Allow specification of working directory (default: '/').
 
-* Allow specification of umask (default: 0000).
+* Allow specification of umask (default: 0o000).
 
 * Drop ‘suid’ and ‘sgid’ privileges if set.
 

@@ -2,7 +2,7 @@
 ##########################################
 
 :Author: Ben Finney <ben+python@benfinney.id.au>
-:Updated: 2014-12-16
+:Updated: 2014-12-21
 
 ..  contents::
 ..
@@ -66,9 +66,9 @@ access mode. So when the daemon context opens, the umask is set to an
 explicit known value.
 
 If the conventional value of 0 is too open, consider setting a value
-such as 022, 027, 077, or another specific value. Otherwise, ensure
-the daemon creates every file with an explicit access mode for the
-purpose.
+such as 0o022, 0o027, 0o077, or another specific value. Otherwise,
+ensure the daemon creates every file with an explicit access mode for
+the purpose.
 
 
 File descriptors
