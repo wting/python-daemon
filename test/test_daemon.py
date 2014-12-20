@@ -702,7 +702,7 @@ class DaemonContext_get_exclude_file_descriptors_TestCase(
         instance.files_preserve = list(self.test_files.values())
         stream_files = self.stream_files_by_name
         mock_fileno_method = mock.MagicMock(
-                spec=file.fileno,
+                spec=sys.__stdin__.fileno,
                 side_effect=ValueError)
         expected_result = self.test_file_descriptors.copy()
         for (pseudo_stream_name, pseudo_stream) in stream_files.items():

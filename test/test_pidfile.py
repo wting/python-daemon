@@ -15,6 +15,12 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
+try:
+    # Python 3 standard library.
+    import builtins
+except ImportError:
+    # Python 2 standard library.
+    import __builtin__ as builtins
 import os
 import itertools
 import tempfile
@@ -215,8 +221,8 @@ def setup_pidfile_fixtures(testcase):
     mock_open = mock.mock_open()
     mock_open.side_effect = fake_open
 
-    func_patcher_builtin_open = mock.patch(
-            "__builtin__.open",
+    func_patcher_builtin_open = mock.patch.object(
+            builtins, "open",
             new=mock_open)
     func_patcher_builtin_open.start()
     testcase.addCleanup(func_patcher_builtin_open.stop)
