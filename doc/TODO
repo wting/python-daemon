@@ -37,7 +37,7 @@ Documentation
 Standard library inclusion
 ==========================
 
-* Convert to Python 3.
+* Convert to Python 2 and Python 3 compatible code base.
 
 
 ====
