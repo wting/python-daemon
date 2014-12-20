@@ -453,7 +453,7 @@ class DaemonContext(object):
         """ Make the signal handler for a specified target object.
 
             If `target` is ``None``, returns ``signal.SIG_IGN``. If
-            `target` is a test string, returns the attribute of this
+            `target` is a text string, returns the attribute of this
             instance named by that string. Otherwise, returns `target`
             itself.
 
