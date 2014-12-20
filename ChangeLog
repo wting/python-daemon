@@ -1,3 +1,7 @@
+2014-12-21  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Migrate to built-in ‘next’ function.
+
 2014-12-20  Ben Finney  <ben+python@benfinney.id.au>
 
     * Remove custom test suite creation, we now use ‘unittest2’.

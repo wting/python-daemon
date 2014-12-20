@@ -1313,7 +1313,7 @@ class detach_process_context_TestCase(scaffold.TestCase):
         test_pids_iter = iter([fork_error])
 
         def fake_fork():
-            next_item = test_pids_iter.next()
+            next_item = next(test_pids_iter)
             if isinstance(next_item, Exception):
                 raise next_item
             else:
@@ -1357,7 +1357,7 @@ class detach_process_context_TestCase(scaffold.TestCase):
         test_pids_iter = iter([0, fork_error])
 
         def fake_fork():
-            next_item = test_pids_iter.next()
+            next_item = next(test_pids_iter)
             if isinstance(next_item, Exception):
                 raise next_item
             else:

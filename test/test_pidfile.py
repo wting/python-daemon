@@ -47,7 +47,7 @@ class FakeFileDescriptorStringIO(StringIO, object):
     _fileno_generator = itertools.count()
 
     def __init__(self, *args, **kwargs):
-        self._fileno = self._fileno_generator.next()
+        self._fileno = next(self._fileno_generator)
         StringIO.__init__(self, *args, **kwargs)
 
     def fileno(self):
