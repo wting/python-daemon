@@ -116,7 +116,7 @@ def make_pidlockfile_scenarios():
                 },
             }
 
-    for scenario in scenarios.itervalues():
+    for scenario in scenarios.values():
         scenario['pid'] = fake_current_pid
         scenario['pidfile_path'] = fake_pidfile_path
         if 'pidfile' not in scenario:
@@ -195,7 +195,7 @@ def setup_pidfile_fixtures(testcase):
             return result
 
         funcs = dict(
-                (name, obj) for (name, obj) in vars().iteritems()
+                (name, obj) for (name, obj) in vars().items()
                 if hasattr(obj, '__call__'))
 
         return funcs
@@ -284,7 +284,7 @@ def make_lockfile_method_fakes(scenario):
             (
                 func_name.replace('fake_func_', ''),
                 mock.MagicMock(side_effect=fake_func))
-            for (func_name, fake_func) in vars().iteritems()
+            for (func_name, fake_func) in vars().items()
                 if func_name.startswith('fake_func_'))
 
     return fake_methods
@@ -295,10 +295,10 @@ def apply_lockfile_method_mocks(mock_lockfile, testcase, scenario):
     fake_methods = dict(
             (func_name, fake_func)
             for (func_name, fake_func) in
-                make_lockfile_method_fakes(scenario).iteritems()
+                make_lockfile_method_fakes(scenario).items()
             if func_name not in ['read_pid'])
 
-    for (func_name, fake_func) in fake_methods.iteritems():
+    for (func_name, fake_func) in fake_methods.items():
         func_patcher = mock.patch.object(
                 mock_lockfile, func_name,
                 new=fake_func)

@@ -309,7 +309,7 @@ class DaemonContext_open_TestCase(DaemonContext_BaseTestCase):
                     "set_signal_handlers",
                     "register_atexit_function",
                     ])
-        for (func_name, patcher) in daemon_func_patchers.iteritems():
+        for (func_name, patcher) in daemon_func_patchers.items():
             mock_func = patcher.start()
             self.addCleanup(patcher.stop)
             self.mock_module_daemon.attach_mock(mock_func, func_name)
@@ -330,8 +330,8 @@ class DaemonContext_open_TestCase(DaemonContext_BaseTestCase):
                     func_name,
                     return_value=return_value))
                 for (func_name, return_value) in
-                    daemoncontext_method_return_values.iteritems())
-        for (func_name, patcher) in daemoncontext_func_patchers.iteritems():
+                    daemoncontext_method_return_values.items())
+        for (func_name, patcher) in daemoncontext_func_patchers.items():
             mock_func = patcher.start()
             self.addCleanup(patcher.stop)
             self.mock_module_daemon.DaemonContext.attach_mock(
@@ -637,11 +637,11 @@ class DaemonContext_get_exclude_file_descriptors_TestCase(
                 37: 37,
                 42: FakeFileDescriptorStringIO(),
                 }
-        for (fileno, item) in self.test_files.iteritems():
+        for (fileno, item) in self.test_files.items():
             if hasattr(item, '_fileno'):
                 item._fileno = fileno
         self.test_file_descriptors = set(
-                fd for (fd, item) in self.test_files.iteritems()
+                fd for (fd, item) in self.test_files.items()
                 if item is not None)
         self.test_file_descriptors.update(
                 self.stream_files_by_name[name].fileno()
@@ -651,7 +651,7 @@ class DaemonContext_get_exclude_file_descriptors_TestCase(
     def test_returns_expected_file_descriptors(self):
         """ Should return expected set of file descriptors. """
         instance = self.test_instance
-        instance.files_preserve = self.test_files.values()
+        instance.files_preserve = list(self.test_files.values())
         expected_result = self.test_file_descriptors
         result = instance._get_exclude_file_descriptors()
         self.assertEqual(expected_result, result)
@@ -662,7 +662,7 @@ class DaemonContext_get_exclude_file_descriptors_TestCase(
         instance.files_preserve = None
         expected_result = set(
                 stream.fileno()
-                for stream in self.stream_files_by_name.itervalues())
+                for stream in self.stream_files_by_name.values())
         result = instance._get_exclude_file_descriptors()
         self.assertEqual(expected_result, result)
 
@@ -678,10 +678,10 @@ class DaemonContext_get_exclude_file_descriptors_TestCase(
     def test_omits_non_file_streams(self):
         """ Should omit non-file stream attributes. """
         instance = self.test_instance
-        instance.files_preserve = self.test_files.values()
+        instance.files_preserve = list(self.test_files.values())
         stream_files = self.stream_files_by_name
         expected_result = self.test_file_descriptors.copy()
-        for (pseudo_stream_name, pseudo_stream) in stream_files.iteritems():
+        for (pseudo_stream_name, pseudo_stream) in stream_files.items():
             test_non_file_object = object()
             setattr(instance, pseudo_stream_name, test_non_file_object)
             stream_fd = pseudo_stream.fileno()
@@ -692,13 +692,13 @@ class DaemonContext_get_exclude_file_descriptors_TestCase(
     def test_includes_verbatim_streams_without_file_descriptor(self):
         """ Should include verbatim any stream without a file descriptor. """
         instance = self.test_instance
-        instance.files_preserve = self.test_files.values()
+        instance.files_preserve = list(self.test_files.values())
         stream_files = self.stream_files_by_name
         mock_fileno_method = mock.MagicMock(
                 spec=file.fileno,
                 side_effect=ValueError)
         expected_result = self.test_file_descriptors.copy()
-        for (pseudo_stream_name, pseudo_stream) in stream_files.iteritems():
+        for (pseudo_stream_name, pseudo_stream) in stream_files.items():
             test_non_fd_stream = StringIO()
             if not hasattr(test_non_fd_stream, 'fileno'):
                 # Python < 3 StringIO doesn't have ‘fileno’ at all.
@@ -714,10 +714,10 @@ class DaemonContext_get_exclude_file_descriptors_TestCase(
     def test_omits_none_streams(self):
         """ Should omit any stream attribute which is None. """
         instance = self.test_instance
-        instance.files_preserve = self.test_files.values()
+        instance.files_preserve = list(self.test_files.values())
         stream_files = self.stream_files_by_name
         expected_result = self.test_file_descriptors.copy()
-        for (pseudo_stream_name, pseudo_stream) in stream_files.iteritems():
+        for (pseudo_stream_name, pseudo_stream) in stream_files.items():
             setattr(instance, pseudo_stream_name, None)
             stream_fd = pseudo_stream.fileno()
             expected_result.discard(stream_fd)
@@ -778,10 +778,10 @@ class DaemonContext_make_signal_handler_map_TestCase(
 
         self.test_signal_handlers = dict(
                 (key, object())
-                for key in self.test_instance.signal_map.itervalues())
+                for key in self.test_instance.signal_map.values())
         self.test_signal_handler_map = dict(
                 (key, self.test_signal_handlers[target])
-                for (key, target) in self.test_instance.signal_map.iteritems())
+                for (key, target) in self.test_instance.signal_map.items())
 
         def fake_make_signal_handler(target):
             return self.test_signal_handlers[target]
@@ -1640,7 +1640,7 @@ class make_default_signal_map_TestCase(scaffold.TestCase):
                 }
         self.default_signal_map = dict(
                 (getattr(self.fake_signal_module, name), target)
-                for (name, target) in default_signal_map_by_name.iteritems())
+                for (name, target) in default_signal_map_by_name.items())
 
     def test_returns_constructed_signal_map(self):
         """ Should return map per default. """
@@ -1683,7 +1683,7 @@ class set_signal_handlers_TestCase(scaffold.TestCase):
         signal_handler_map = self.signal_handler_map
         expected_calls = [
                 mock.call(signal_number, handler)
-                for (signal_number, handler) in signal_handler_map.iteritems()]
+                for (signal_number, handler) in signal_handler_map.items()]
         daemon.daemon.set_signal_handlers(signal_handler_map)
         self.assertEquals(expected_calls, mock_func_signal_signal.mock_calls)
 

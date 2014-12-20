@@ -88,7 +88,7 @@ def make_runner_scenarios():
                 },
             }
 
-    for scenario in scenarios.itervalues():
+    for scenario in scenarios.values():
         if 'pidlockfile_scenario_name' in scenario:
             pidlockfile_scenario = pidlockfile_scenarios.pop(
                     scenario['pidlockfile_scenario_name'])
@@ -405,7 +405,7 @@ class DaemonRunner_parse_args_TestCase(DaemonRunner_BaseTestCase):
     def test_sets_action_from_first_argument(self):
         """ Should set action from first commandline argument. """
         instance = self.test_instance
-        for name, argv in self.valid_argv_params.iteritems():
+        for name, argv in self.valid_argv_params.items():
             expected_action = name
             instance.parse_args(argv)
             self.assertEqual(expected_action, instance.action)
