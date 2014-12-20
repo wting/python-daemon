@@ -13,7 +13,7 @@
 """ Unit test for ‘daemon’ module.
     """
 
-from __future__ import unicode_literals
+from __future__ import (absolute_import, unicode_literals)
 
 import os
 import sys
@@ -32,14 +32,14 @@ except ImportError:
     from StringIO import StringIO
 
 import mock
+from lockfile import pidlockfile
 
-import scaffold
-from test_pidfile import (
+from . import scaffold
+from .test_pidfile import (
         FakeFileDescriptorStringIO,
         setup_pidfile_fixtures,
         )
 
-from lockfile import pidlockfile
 import daemon
 
 

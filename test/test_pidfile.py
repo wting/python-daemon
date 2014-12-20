@@ -13,7 +13,7 @@
 """ Unit test for ‘pidfile’ module.
     """
 
-from __future__ import unicode_literals
+from __future__ import (absolute_import, unicode_literals)
 
 import os
 import itertools
@@ -30,7 +30,7 @@ import mock
 import lockfile
 from lockfile import pidlockfile
 
-import scaffold
+from . import scaffold
 
 from daemon import pidfile
 

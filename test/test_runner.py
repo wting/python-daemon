@@ -13,7 +13,7 @@
 """ Unit test for ‘runner’ module.
     """
 
-from __future__ import unicode_literals
+from __future__ import (absolute_import, unicode_literals)
 
 try:
     # Python 3 standard library.
@@ -31,18 +31,18 @@ import signal
 import lockfile
 import mock
 
-import scaffold
-from test_pidfile import (
+from . import scaffold
+from .test_pidfile import (
         FakeFileDescriptorStringIO,
         setup_pidfile_fixtures,
         make_pidlockfile_scenarios,
         apply_lockfile_method_mocks,
         )
-from test_daemon import (
+from .test_daemon import (
         setup_streams_fixtures,
         )
-import daemon.daemon
 
+import daemon
 from daemon import pidfile
 from daemon import runner
 

@@ -13,13 +13,9 @@
 """ Scaffolding for unit test modules.
     """
 
-from __future__ import unicode_literals
+from __future__ import (absolute_import, unicode_literals)
 
 import unittest
-from unittest import (
-        TestSuite,
-        TestLoader,
-        )
 import doctest
 import logging
 import os
