@@ -1232,7 +1232,7 @@ class close_all_open_files_TestCase(scaffold.TestCase):
     def test_requests_all_open_files_to_close(
             self, mock_func_close_file_descriptor_if_open):
         """ Should request close of all open files. """
-        expected_file_descriptors = xrange(fake_default_maxfd)
+        expected_file_descriptors = range(fake_default_maxfd)
         expected_calls = [
                 mock.call(fd) for fd in expected_file_descriptors]
         daemon.daemon.close_all_open_files()
@@ -1247,7 +1247,7 @@ class close_all_open_files_TestCase(scaffold.TestCase):
                 exclude=test_exclude,
                 )
         expected_file_descriptors = set(
-                fd for fd in xrange(fake_default_maxfd)
+                fd for fd in range(fake_default_maxfd)
                 if fd not in test_exclude)
         expected_calls = [
                 mock.call(fd) for fd in expected_file_descriptors]
