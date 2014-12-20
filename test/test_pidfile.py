@@ -34,11 +34,10 @@ except ImportError:
 
 import mock
 import lockfile
-from lockfile import pidlockfile
 
 from . import scaffold
 
-from daemon import pidfile
+import daemon.pidfile
 
 
 class FakeFileDescriptorStringIO(StringIO, object):
@@ -321,7 +320,7 @@ def setup_pidlockfile_fixtures(testcase, scenario_name=None):
             'write_pid_to_pidfile',
             'remove_existing_pidfile',
             ]:
-        func_patcher = mock.patch.object(pidlockfile, func_name)
+        func_patcher = mock.patch.object(lockfile.pidlockfile, func_name)
         func_patcher.start()
         testcase.addCleanup(func_patcher.stop)
 
@@ -339,7 +338,7 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
 
         for func_name in ['__init__', 'acquire']:
             func_patcher = mock.patch.object(
-                    pidlockfile.PIDLockFile, func_name)
+                    lockfile.pidlockfile.PIDLockFile, func_name)
             func_patcher.start()
             self.addCleanup(func_patcher.stop)
 
@@ -352,21 +351,21 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
                 path=self.scenario['pidfile_path'],
                 acquire_timeout=self.scenario['acquire_timeout'],
                 )
-        self.test_instance = pidfile.TimeoutPIDLockFile(
+        self.test_instance = daemon.pidfile.TimeoutPIDLockFile(
                 **self.test_kwargs)
 
     def test_inherits_from_pidlockfile(self):
         """ Should inherit from PIDLockFile. """
         instance = self.test_instance
-        self.assertIsInstance(instance, pidlockfile.PIDLockFile)
+        self.assertIsInstance(instance, lockfile.pidlockfile.PIDLockFile)
 
     def test_init_has_expected_signature(self):
         """ Should have expected signature for ‘__init__’. """
         def test_func(self, path, acquire_timeout=None, *args, **kwargs): pass
-        test_func.__name__ = b'__init__'
+        test_func.__name__ = str('__init__')
         self.assertFunctionSignatureMatch(
                 test_func,
-                pidfile.TimeoutPIDLockFile.__init__)
+                daemon.pidfile.TimeoutPIDLockFile.__init__)
 
     def test_has_specified_acquire_timeout(self):
         """ Should have specified ‘acquire_timeout’ value. """
@@ -375,16 +374,16 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
         self.assertEqual(expected_timeout, instance.acquire_timeout)
 
     @mock.patch.object(
-            pidlockfile.PIDLockFile, "__init__",
+            lockfile.pidlockfile.PIDLockFile, "__init__",
             autospec=True)
     def test_calls_superclass_init(self, mock_init):
         """ Should call the superclass ‘__init__’. """
         expected_path = self.test_kwargs['path']
-        instance = pidfile.TimeoutPIDLockFile(**self.test_kwargs)
+        instance = daemon.pidfile.TimeoutPIDLockFile(**self.test_kwargs)
         mock_init.assert_called_with(instance, expected_path)
 
     @mock.patch.object(
-            pidlockfile.PIDLockFile, "acquire",
+            lockfile.pidlockfile.PIDLockFile, "acquire",
             autospec=True)
     def test_acquire_uses_specified_timeout(self, mock_func_acquire):
         """ Should call the superclass ‘acquire’ with specified timeout. """
@@ -395,7 +394,7 @@ class TimeoutPIDLockFile_TestCase(scaffold.TestCase):
         mock_func_acquire.assert_called_with(instance, expected_timeout)
 
     @mock.patch.object(
-            pidlockfile.PIDLockFile, "acquire",
+            lockfile.pidlockfile.PIDLockFile, "acquire",
             autospec=True)
     def test_acquire_uses_stored_timeout_by_default(self, mock_func_acquire):
         """ Should call superclass ‘acquire’ with stored timeout by default. """
