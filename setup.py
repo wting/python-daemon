@@ -62,7 +62,7 @@ setup(
             ],
         install_requires=[
             "setuptools",
-            "lockfile >=0.9",
+            "lockfile >=0.10",
             ],
 
         # PyPI metadata.
@@ -78,9 +78,8 @@ setup(
             "Development Status :: 4 - Beta",
             "License :: OSI Approved :: Apache Software License",
             "Operating System :: POSIX",
-            "Programming Language :: Python :: 2 :: Only",
-            "Programming Language :: Python :: 2.6",
             "Programming Language :: Python :: 2.7",
+            "Programming Language :: Python :: 3",
             "Intended Audience :: Developers",
             "Topic :: Software Development :: Libraries :: Python Modules",
             ],
