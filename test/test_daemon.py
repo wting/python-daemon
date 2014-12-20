@@ -618,10 +618,9 @@ class DaemonContext_terminate_TestCase(DaemonContext_BaseTestCase):
         args = self.test_args
         signal_number = self.test_signal
         expected_exception = SystemExit
-        try:
-            instance.terminate(*args)
-        except expected_exception as exc:
-            pass
+        exc = self.assertRaises(
+                expected_exception,
+                instance.terminate, *args)
         self.assertIn(unicode(signal_number), unicode(exc))
 
 
@@ -850,10 +849,9 @@ class change_working_directory_TestCase(scaffold.TestCase):
         test_error = OSError(errno.ENOENT, "No such directory")
         mock_func_os_chdir.side_effect = test_error
         expected_error = daemon.daemon.DaemonOSEnvironmentError
-        try:
-            daemon.daemon.change_working_directory(**args)
-        except expected_error as exc:
-            pass
+        exc = self.assertRaises(
+                expected_error,
+                daemon.daemon.change_working_directory, **args)
         self.assertIn(unicode(test_error), unicode(exc))
 
 
@@ -921,10 +919,9 @@ class change_root_directory_TestCase(scaffold.TestCase):
         test_error = OSError(errno.ENOENT, "No such directory")
         mock_func_os_chdir.side_effect = test_error
         expected_error = daemon.daemon.DaemonOSEnvironmentError
-        try:
-            daemon.daemon.change_root_directory(**args)
-        except expected_error as exc:
-            pass
+        exc = self.assertRaises(
+                expected_error,
+                daemon.daemon.change_root_directory, **args)
         self.assertIn(unicode(test_error), unicode(exc))
 
 
@@ -968,10 +965,9 @@ class change_file_creation_mask_TestCase(scaffold.TestCase):
         test_error = OSError(errno.ENOENT, "No such directory")
         mock_func_os_umask.side_effect = test_error
         expected_error = daemon.daemon.DaemonOSEnvironmentError
-        try:
-            daemon.daemon.change_file_creation_mask(**args)
-        except expected_error as exc:
-            pass
+        exc = self.assertRaises(
+                expected_error,
+                daemon.daemon.change_file_creation_mask, **args)
         self.assertIn(unicode(test_error), unicode(exc))
 
 
@@ -1056,10 +1052,9 @@ class change_process_owner_TestCase(scaffold.TestCase):
         test_error = OSError(errno.EINVAL, "Whatchoo talkin' 'bout?")
         mock_func_os_setuid.side_effect = test_error
         expected_error = daemon.daemon.DaemonOSEnvironmentError
-        try:
-            daemon.daemon.change_process_owner(**args)
-        except expected_error as exc:
-            pass
+        exc = self.assertRaises(
+                expected_error,
+                daemon.daemon.change_process_owner, **args)
         self.assertIn(unicode(test_error), unicode(exc))
 
 

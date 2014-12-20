@@ -383,10 +383,9 @@ class DaemonRunner_parse_args_TestCase(DaemonRunner_BaseTestCase):
         """ Should emit a usage message and exit if too few arguments. """
         instance = self.test_instance
         argv = [self.test_program_path]
-        try:
-            instance.parse_args(argv)
-        except NotImplementedError:
-            pass
+        exc = self.assertRaises(
+                NotImplementedError,
+                instance.parse_args, argv)
         daemon.runner.DaemonRunner._usage_exit.assert_called_with(argv)
 
     def test_emits_usage_message_if_unknown_action_arg(self):
@@ -394,10 +393,9 @@ class DaemonRunner_parse_args_TestCase(DaemonRunner_BaseTestCase):
         instance = self.test_instance
         progname = self.test_program_name
         argv = [self.test_program_path, 'bogus']
-        try:
-            instance.parse_args(argv)
-        except NotImplementedError:
-            pass
+        exc = self.assertRaises(
+                NotImplementedError,
+                instance.parse_args, argv)
         daemon.runner.DaemonRunner._usage_exit.assert_called_with(argv)
 
     def test_should_parse_system_argv_by_default(self):
@@ -448,13 +446,9 @@ class DaemonRunner_do_action_start_TestCase(DaemonRunner_BaseTestCase):
         pidfile_path = self.scenario['pidfile_path']
         expected_error = runner.DaemonRunnerStartFailureError
         expected_message_content = pidfile_path
-        try:
-            instance.do_action()
-        except expected_error as exc:
-            pass
-        else:
-            raise self.failureException(
-                    "Failed to raise " + expected_error.__name__)
+        exc = self.assertRaises(
+                expected_error,
+                instance.do_action)
         self.assertIn(expected_message_content, unicode(exc.message))
 
     def test_breaks_lock_if_no_such_process(self):
@@ -523,13 +517,9 @@ class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
         pidfile_path = self.scenario['pidfile_path']
         expected_error = runner.DaemonRunnerStopFailureError
         expected_message_content = pidfile_path
-        try:
-            instance.do_action()
-        except expected_error as exc:
-            pass
-        else:
-            raise self.failureException(
-                    "Failed to raise " + expected_error.__name__)
+        exc = self.assertRaises(
+                expected_error,
+                instance.do_action)
         self.assertIn(expected_message_content, unicode(exc))
 
     def test_breaks_lock_if_pidfile_stale(self):
@@ -560,13 +550,9 @@ class DaemonRunner_do_action_stop_TestCase(DaemonRunner_BaseTestCase):
         os.kill.side_effect = test_error
         expected_error = runner.DaemonRunnerStopFailureError
         expected_message_content = unicode(test_pid)
-        try:
-            instance.do_action()
-        except expected_error as exc:
-            pass
-        else:
-            raise self.failureException(
-                    "Failed to raise " + expected_error.__name__)
+        exc = self.assertRaises(
+                expected_error,
+                instance.do_action)
         self.assertIn(expected_message_content, unicode(exc))
 
 
