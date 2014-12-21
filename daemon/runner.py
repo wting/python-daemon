@@ -29,6 +29,15 @@ import lockfile
 from . import pidfile
 from .daemon import DaemonContext
 
+try:
+    # Python 2 has both ‘str’ (bytes) and ‘unicode’.
+    basestring
+    unicode
+except NameError:
+    # Python 3 names the Unicode data type ‘str’.
+    basestring = str
+    unicode = str
+
 
 class DaemonRunnerError(Exception):
     """ Abstract base class for errors from DaemonRunner. """
