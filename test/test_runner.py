@@ -302,7 +302,7 @@ class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
 
     def test_daemon_context_has_stdin_in_read_mode(self):
         """ DaemonContext component should open stdin file for read. """
-        expected_mode = 'r'
+        expected_mode = 'rt'
         daemon_context = self.test_instance.daemon_context
         self.assertIn(expected_mode, daemon_context.stdin.mode)
 
@@ -315,7 +315,7 @@ class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
 
     def test_daemon_context_has_stdout_in_append_mode(self):
         """ DaemonContext component should open stdout file for append. """
-        expected_mode = 'w+'
+        expected_mode = 'w+t'
         daemon_context = self.test_instance.daemon_context
         self.assertIn(expected_mode, daemon_context.stdout.mode)
 
@@ -328,7 +328,7 @@ class DaemonRunner_TestCase(DaemonRunner_BaseTestCase):
 
     def test_daemon_context_has_stderr_in_append_mode(self):
         """ DaemonContext component should open stderr file for append. """
-        expected_mode = 'w+'
+        expected_mode = 'w+t'
         daemon_context = self.test_instance.daemon_context
         self.assertIn(expected_mode, daemon_context.stderr.mode)
 

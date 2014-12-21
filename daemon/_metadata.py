@@ -36,7 +36,7 @@ def read_version_info_from_file(file_path):
         was built.
 
         """
-    infile = open(file_path, 'r')
+    infile = open(file_path, 'rt')
     info_raw = json.load(infile)
 
     item_converters = {}

@@ -4,6 +4,7 @@
     * Declare compatibility with current Python versions.
     * Depend on Python 3 compatible libraries.
     * Wrap function introspection for Python 3 compatibility.
+    * Specify explicit text or binary mode when opening files.
 
 2014-12-20  Ben Finney  <ben+python@benfinney.id.au>
 

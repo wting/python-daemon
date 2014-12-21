@@ -88,10 +88,10 @@ class DaemonRunner(object):
         self.parse_args()
         self.app = app
         self.daemon_context = DaemonContext()
-        self.daemon_context.stdin = open(app.stdin_path, 'r')
-        self.daemon_context.stdout = open(app.stdout_path, 'w+')
+        self.daemon_context.stdin = open(app.stdin_path, 'rt')
+        self.daemon_context.stdout = open(app.stdout_path, 'w+t')
         self.daemon_context.stderr = open(
-                app.stderr_path, 'w+', buffering=0)
+                app.stderr_path, 'w+t', buffering=0)
 
         self.pidfile = None
         if app.pidfile_path is not None:

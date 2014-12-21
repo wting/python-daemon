@@ -160,7 +160,7 @@ def setup_pidfile_fixtures(testcase):
     def make_fake_open_funcs(testcase):
 
         def fake_open_nonexist(filename, mode, buffering):
-            if 'r' in mode:
+            if mode.startswith('r'):
                 raise IOError(
                         errno.ENOENT, "No such file %(filename)r" % vars())
             else:
@@ -168,7 +168,7 @@ def setup_pidfile_fixtures(testcase):
             return result
 
         def fake_open_read_denied(filename, mode, buffering):
-            if 'r' in mode:
+            if mode.startswith('r'):
                 raise IOError(
                         errno.EPERM, "Read denied on %(filename)r" % vars())
             else:
@@ -207,7 +207,7 @@ def setup_pidfile_fixtures(testcase):
 
     testcase.fake_pidfile_open_funcs = make_fake_open_funcs(testcase)
 
-    def fake_open(filename, mode='r', buffering=None):
+    def fake_open(filename, mode='rt', buffering=None):
         scenario_path = get_scenario_option(testcase, 'pidfile_path')
         if filename == scenario_path:
             func_name = testcase.scenario['open_func_name']
@@ -244,7 +244,7 @@ def setup_pidfile_fixtures(testcase):
     func_patcher_os_open.start()
     testcase.addCleanup(func_patcher_os_open.stop)
 
-    def fake_os_fdopen(fd, mode='r', buffering=None):
+    def fake_os_fdopen(fd, mode='rt', buffering=None):
         scenario_pidfile = get_scenario_option(
                 testcase, 'pidfile', FakeFileDescriptorStringIO())
         if fd == testcase.scenario['pidfile'].fileno():
