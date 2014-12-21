@@ -14,7 +14,7 @@
 """ Distribution setup for ‘python-daemon’ library.
     """
 
-from __future__ import unicode_literals
+from __future__ import (absolute_import, unicode_literals)
 
 import sys
 import os
@@ -33,7 +33,9 @@ distribution_name = "python-daemon"
 main_module_name = 'daemon'
 main_module_fromlist = list(map(fromlist_expects_type, [
         '_metadata']))
-main_module = __import__(main_module_name, fromlist=main_module_fromlist)
+main_module = __import__(
+        main_module_name,
+        level=0, fromlist=main_module_fromlist)
 metadata = main_module._metadata
 
 synopsis, long_description = pydoc.splitdoc(
