@@ -48,7 +48,7 @@ class DaemonProcessDetachError(DaemonError, OSError):
     """ Exception raised when process detach fails. """
 
 
-class DaemonContext(object):
+class DaemonContext:
     """ Context for turning the current program into a daemon process.
 
         A `DaemonContext` instance represents the behaviour settings and
@@ -218,6 +218,8 @@ class DaemonContext(object):
             file named by `os.devnull`.
 
         """
+
+    __metaclass__ = type
 
     def __init__(
             self,

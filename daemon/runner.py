@@ -52,7 +52,7 @@ class DaemonRunnerStopFailureError(RuntimeError, DaemonRunnerError):
     """ Raised when failure stopping DaemonRunner. """
 
 
-class DaemonRunner(object):
+class DaemonRunner:
     """ Controller for a callable running in a separate background process.
 
         The first command-line argument is the action to take:
@@ -62,6 +62,8 @@ class DaemonRunner(object):
         * 'restart': Stop, then start.
 
         """
+
+    __metaclass__ = type
 
     start_message = "started with pid %(pid)d"
 
