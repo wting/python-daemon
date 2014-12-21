@@ -53,7 +53,7 @@ setup(
 
         # Setuptools metadata.
         zip_safe=False,
-        test_suite="test.suite",
+        test_suite="unittest2.collector",
         tests_require=[
             "unittest2",
             "testtools",

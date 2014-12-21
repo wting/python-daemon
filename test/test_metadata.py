@@ -76,8 +76,13 @@ class metadata_value_TestCase(scaffold.TestCaseWithScenarios):
             ])
 
     scenarios = [
-            (name, {'attribute_name': name}) for name in expected_str_attributes]
+            (name, {'attribute_name': name})
+            for name in expected_str_attributes]
     for (name, params) in scenarios:
+        if name == 'version_installed':
+            # No duck typing, this attribute might be None.
+            params['ducktype_attribute_name'] = NotImplemented
+            continue
         # Expect an attribute of ‘str’ to test this value.
         params['ducktype_attribute_name'] = 'isdigit'
 
@@ -88,6 +93,8 @@ class metadata_value_TestCase(scaffold.TestCaseWithScenarios):
 
     def test_module_attribute_has_duck_type(self):
         """ Metadata value should have expected duck-typing attribute. """
+        if self.ducktype_attribute_name == NotImplemented:
+            self.skipTest("Can't assert this attribute's type")
         instance = getattr(metadata, self.attribute_name)
         self.assertThat(
                 instance, HasAttribute(self.ducktype_attribute_name))
