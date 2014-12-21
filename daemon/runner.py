@@ -28,6 +28,7 @@ import lockfile
 
 from . import pidfile
 from .daemon import DaemonContext
+from .daemon import _chain_exception_from_existing_exception_context
 
 try:
     # Python 2 has both ‘str’ (bytes) and ‘unicode’.
@@ -42,11 +43,26 @@ except NameError:
 class DaemonRunnerError(Exception):
     """ Abstract base class for errors from DaemonRunner. """
 
+    def __init__(self, *args, **kwargs):
+        self._chain_from_context()
+
+        super(DaemonRunnerError, self).__init__(*args, **kwargs)
+
+    def _chain_from_context(self):
+        _chain_exception_from_existing_exception_context(self, as_cause=True)
+
+
 class DaemonRunnerInvalidActionError(ValueError, DaemonRunnerError):
     """ Raised when specified action for DaemonRunner is invalid. """
 
+    def _chain_from_context(self):
+        # This exception is normally not caused by another.
+        _chain_exception_from_existing_exception_context(self, as_cause=False)
+
+
 class DaemonRunnerStartFailureError(RuntimeError, DaemonRunnerError):
     """ Raised when failure starting DaemonRunner. """
+
 
 class DaemonRunnerStopFailureError(RuntimeError, DaemonRunnerError):
     """ Raised when failure stopping DaemonRunner. """

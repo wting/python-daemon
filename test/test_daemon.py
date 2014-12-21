@@ -836,9 +836,10 @@ class change_working_directory_TestCase(scaffold.TestCase):
         test_error = OSError(errno.ENOENT, "No such directory")
         mock_func_os_chdir.side_effect = test_error
         expected_error = daemon.daemon.DaemonOSEnvironmentError
-        self.assertRaises(
+        exc = self.assertRaises(
                 expected_error,
                 daemon.daemon.change_working_directory, **args)
+        self.assertEqual(test_error, exc.__cause__)
 
     def test_error_message_contains_original_error_message(
             self,
@@ -894,9 +895,10 @@ class change_root_directory_TestCase(scaffold.TestCase):
         test_error = OSError(errno.ENOENT, "No such directory")
         mock_func_os_chdir.side_effect = test_error
         expected_error = daemon.daemon.DaemonOSEnvironmentError
-        self.assertRaises(
+        exc = self.assertRaises(
                 expected_error,
                 daemon.daemon.change_root_directory, **args)
+        self.assertEqual(test_error, exc.__cause__)
 
     def test_raises_daemon_error_on_os_error_from_chroot(
             self,
@@ -906,9 +908,10 @@ class change_root_directory_TestCase(scaffold.TestCase):
         test_error = OSError(errno.EPERM, "No chroot for you!")
         mock_func_os_chroot.side_effect = test_error
         expected_error = daemon.daemon.DaemonOSEnvironmentError
-        self.assertRaises(
+        exc = self.assertRaises(
                 expected_error,
                 daemon.daemon.change_root_directory, **args)
+        self.assertEqual(test_error, exc.__cause__)
 
     def test_error_message_contains_original_error_message(
             self,
@@ -952,9 +955,10 @@ class change_file_creation_mask_TestCase(scaffold.TestCase):
         test_error = OSError(errno.EINVAL, "Whatchoo talkin' 'bout?")
         mock_func_os_umask.side_effect = test_error
         expected_error = daemon.daemon.DaemonOSEnvironmentError
-        self.assertRaises(
+        exc = self.assertRaises(
                 expected_error,
                 daemon.daemon.change_file_creation_mask, **args)
+        self.assertEqual(test_error, exc.__cause__)
 
     def test_error_message_contains_original_error_message(
             self,
@@ -1027,9 +1031,10 @@ class change_process_owner_TestCase(scaffold.TestCase):
         test_error = OSError(errno.EPERM, "No switching for you!")
         mock_func_os_setgid.side_effect = test_error
         expected_error = daemon.daemon.DaemonOSEnvironmentError
-        self.assertRaises(
+        exc = self.assertRaises(
                 expected_error,
                 daemon.daemon.change_process_owner, **args)
+        self.assertEqual(test_error, exc.__cause__)
 
     def test_raises_daemon_error_on_os_error_from_setuid(
             self,
@@ -1039,9 +1044,10 @@ class change_process_owner_TestCase(scaffold.TestCase):
         test_error = OSError(errno.EPERM, "No switching for you!")
         mock_func_os_setuid.side_effect = test_error
         expected_error = daemon.daemon.DaemonOSEnvironmentError
-        self.assertRaises(
+        exc = self.assertRaises(
                 expected_error,
                 daemon.daemon.change_process_owner, **args)
+        self.assertEqual(test_error, exc.__cause__)
 
     def test_error_message_contains_original_error_message(
             self,
@@ -1086,16 +1092,18 @@ class prevent_core_dump_TestCase(scaffold.TestCase):
             self,
             mock_func_resource_getrlimit, mock_func_resource_setrlimit):
         """ Should raise DaemonError if no RLIMIT_CORE resource. """
+        test_error = ValueError("Bogus platform doesn't have RLIMIT_CORE")
         def fake_getrlimit(res):
             if res == resource.RLIMIT_CORE:
-                raise ValueError("Bogus platform doesn't have RLIMIT_CORE")
+                raise test_error
             else:
                 return None
         mock_func_resource_getrlimit.side_effect = fake_getrlimit
         expected_error = daemon.daemon.DaemonOSEnvironmentError
-        self.assertRaises(
+        exc = self.assertRaises(
                 expected_error,
                 daemon.daemon.prevent_core_dump)
+        self.assertEqual(test_error, exc.__cause__)
 
 
 @mock.patch.object(os, "close")
@@ -1132,9 +1140,10 @@ class close_file_descriptor_if_open_TestCase(scaffold.TestCase):
             raise test_error
         mock_func_os_close.side_effect = fake_os_close
         expected_error = daemon.daemon.DaemonOSEnvironmentError
-        self.assertRaises(
+        exc = self.assertRaises(
                 expected_error,
                 daemon.daemon.close_file_descriptor_if_open, fd)
+        self.assertEqual(test_error, exc.__cause__)
 
 
 class maxfd_TestCase(scaffold.TestCase):
@@ -1308,8 +1317,8 @@ class detach_process_context_TestCase(scaffold.TestCase):
         """ Error on first fork should raise DaemonProcessDetachError. """
         fork_errno = 13
         fork_strerror = "Bad stuff happened"
-        fork_error = OSError(fork_errno, fork_strerror)
-        test_pids_iter = iter([fork_error])
+        test_error = OSError(fork_errno, fork_strerror)
+        test_pids_iter = iter([test_error])
 
         def fake_fork():
             next_item = next(test_pids_iter)
@@ -1319,9 +1328,10 @@ class detach_process_context_TestCase(scaffold.TestCase):
                 return next_item
 
         self.mock_func_os_fork.side_effect = fake_fork
-        self.assertRaises(
+        exc = self.assertRaises(
                 daemon.daemon.DaemonProcessDetachError,
                 daemon.daemon.detach_process_context)
+        self.assertEqual(test_error, exc.__cause__)
         self.mock_module_os.assert_has_calls([
                 mock.call.fork(),
                 ])
@@ -1352,8 +1362,8 @@ class detach_process_context_TestCase(scaffold.TestCase):
         """ Error on second fork should cause report to stderr. """
         fork_errno = 17
         fork_strerror = "Nasty stuff happened"
-        fork_error = OSError(fork_errno, fork_strerror)
-        test_pids_iter = iter([0, fork_error])
+        test_error = OSError(fork_errno, fork_strerror)
+        test_pids_iter = iter([0, test_error])
 
         def fake_fork():
             next_item = next(test_pids_iter)
@@ -1363,9 +1373,10 @@ class detach_process_context_TestCase(scaffold.TestCase):
                 return next_item
 
         self.mock_func_os_fork.side_effect = fake_fork
-        self.assertRaises(
+        exc = self.assertRaises(
                 daemon.daemon.DaemonProcessDetachError,
                 daemon.daemon.detach_process_context)
+        self.assertEqual(test_error, exc.__cause__)
         self.mock_module_os.assert_has_calls([
                 mock.call.fork(),
                 mock.call.setsid(),

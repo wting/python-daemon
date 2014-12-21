@@ -39,6 +39,14 @@ except NameError:
 class DaemonError(Exception):
     """ Base exception class for errors from this module. """
 
+    def __init__(self, *args, **kwargs):
+        self._chain_from_context()
+
+        super(DaemonError, self).__init__(*args, **kwargs)
+
+    def _chain_from_context(self):
+        _chain_exception_from_existing_exception_context(self, as_cause=True)
+
 
 class DaemonOSEnvironmentError(DaemonError, OSError):
     """ Exception raised when daemon OS environment setup receives error. """
@@ -819,6 +827,29 @@ def register_atexit_function(func):
 
         """
     atexit.register(func)
+
+
+def _chain_exception_from_existing_exception_context(exc, as_cause=False):
+    """Decorate the specified exception with the existing exception context.
+
+        :param exc: The exception instance to decorate.
+        :param as_cause: If true, the existing context is declared to be
+            the cause of the exception.
+        :return: None.
+
+        :PEP:`344` describes syntax and attributes (`__traceback__`,
+        `__context__`, `__cause__`) for use in exception chaining.
+
+        Python 2 does not have this syntax, so this function decorates
+        the exception with values from the existing exception context.
+
+        """
+    (existing_exc_type, existing_exc, existing_traceback) = sys.exc_info()
+    if as_cause:
+        exc.__cause__ = existing_exc
+    else:
+        exc.__context__ = existing_exc
+    exc.__traceback__ = existing_traceback
 
 
 # Local variables:
