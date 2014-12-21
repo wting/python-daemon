@@ -206,7 +206,8 @@ class DaemonContext(object):
             which will be used as the new file for the standard I/O stream
             `sys.stdin`, `sys.stdout`, and `sys.stderr` respectively. The file
             should therefore be open, with a minimum of mode 'r' in the case
-            of `stdin`, and mode 'w+' in the case of `stdout` and `stderr`.
+            of `stdin`, and mimimum of mode 'w+' in the case of `stdout` and
+            `stderr`.
 
             If the object has a `fileno()` method that returns a file
             descriptor, the corresponding file will be excluded from being
@@ -221,7 +222,7 @@ class DaemonContext(object):
     def __init__(
             self,
             chroot_directory=None,
-            working_directory='/',
+            working_directory="/",
             umask=0,
             uid=None,
             gid=None,

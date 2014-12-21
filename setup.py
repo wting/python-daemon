@@ -42,7 +42,7 @@ synopsis, long_description = pydoc.splitdoc(
 setup_dir = os.path.dirname(__file__)
 version_string_filename = "VERSION"
 version_string_file = open(
-        os.path.join(setup_dir, version_string_filename), 'r')
+        os.path.join(setup_dir, version_string_filename), 'rt')
 version_string = version_string_file.read().strip()
 
 
