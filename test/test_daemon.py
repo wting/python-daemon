@@ -25,10 +25,10 @@ import socket
 from types import ModuleType
 import collections
 try:
-    # Python 3 standard library.
+    # Standard library of Python 2.7 and later.
     from io import StringIO
 except ImportError:
-    # Python 2 standard library.
+    # Standard library of Python 2.6 and earlier.
     from StringIO import StringIO
 
 import mock
