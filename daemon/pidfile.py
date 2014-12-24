@@ -31,12 +31,30 @@ class TimeoutPIDLockFile(PIDLockFile, object):
         """
 
     def __init__(self, path, acquire_timeout=None, *args, **kwargs):
-        """ Set up the parameters of a TimeoutPIDLockFile. """
+        """ Set up the parameters of a TimeoutPIDLockFile.
+
+            :param path: Filesystem path to the PID file.
+            :param acquire_timeout: Value to use by default for the
+                `acquire` call.
+            :return: ``None``.
+
+            """
         self.acquire_timeout = acquire_timeout
         super(TimeoutPIDLockFile, self).__init__(path, *args, **kwargs)
 
     def acquire(self, timeout=None, *args, **kwargs):
-        """ Acquire the lock. """
+        """ Acquire the lock.
+
+            :param timeout: Specifies the timeout; see below for valid
+                values.
+            :return: ``None``.
+
+            The `timeout` defaults to the value set during
+            initialisation with the `acquire_timeout` parameter. It is
+            passed to `PIDLockFile.acquire`; see that method for
+            details.
+
+            """
         if timeout is None:
             timeout = self.acquire_timeout
         super(TimeoutPIDLockFile, self).acquire(timeout, *args, **kwargs)

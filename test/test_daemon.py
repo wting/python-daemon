@@ -72,7 +72,15 @@ class ModuleExceptions_TestCase(scaffold.Exception_TestCase):
 
 
 def setup_daemon_context_fixtures(testcase):
-    """ Set up common test fixtures for DaemonContext test case. """
+    """ Set up common test fixtures for DaemonContext test case.
+
+        :param testcase: A ``TestCase`` instance to decorate.
+        :return: ``None``.
+
+        Decorate the `testcase` with fixtures for tests involving
+        `DaemonContext`.
+
+        """
     setup_streams_fixtures(testcase)
 
     setup_pidfile_fixtures(testcase)
