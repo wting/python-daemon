@@ -26,10 +26,10 @@ import itertools
 import tempfile
 import errno
 try:
-    # Python 3 standard library.
+    # Standard library of Python 2.7 and later.
     from io import StringIO
 except ImportError:
-    # Python 2 standard library.
+    # Standard library of Python 2.6 and earlier.
     from StringIO import StringIO
 
 import mock
