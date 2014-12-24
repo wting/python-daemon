@@ -86,18 +86,21 @@ class DaemonRunner:
     def __init__(self, app):
         """ Set up the parameters of a new runner.
 
+            :param app: The application instance; see below.
+            :return: ``None``.
+
             The `app` argument must have the following attributes:
 
-            * `stdin_path`, `stdout_path`, `stderr_path`: Filesystem
-              paths to open and replace the existing `sys.stdin`,
-              `sys.stdout`, `sys.stderr`.
+            * `stdin_path`, `stdout_path`, `stderr_path`: Filesystem paths
+              to open and replace the existing `sys.stdin`, `sys.stdout`,
+              `sys.stderr`.
 
-            * `pidfile_path`: Absolute filesystem path to a file that
-              will be used as the PID file for the daemon. If
-              ``None``, no PID file will be used.
+            * `pidfile_path`: Absolute filesystem path to a file that will
+              be used as the PID file for the daemon. If ``None``, no PID
+              file will be used.
 
-            * `pidfile_timeout`: Used as the default acquisition
-              timeout value supplied to the runner's PID lock file.
+            * `pidfile_timeout`: Used as the default acquisition timeout
+              value supplied to the runner's PID lock file.
 
             * `run`: Callable that will be invoked when the daemon is
               started.
@@ -119,6 +122,11 @@ class DaemonRunner:
 
     def _usage_exit(self, argv):
         """ Emit a usage message, then exit.
+
+            :param argv: The command-line arguments used to invoke the
+                program, as a sequence of strings.
+            :return: ``None``.
+
             """
         progname = os.path.basename(argv[0])
         usage_exit_code = 2
@@ -129,6 +137,18 @@ class DaemonRunner:
 
     def parse_args(self, argv=None):
         """ Parse command-line arguments.
+
+            :param argv: The command-line arguments used to invoke the
+                program, as a sequence of strings.
+
+            :return: ``None``.
+
+            The parser expects the first argument as the program name, the
+            second argument as the action to perform.
+
+            If the parser fails to parse the arguments, emit a usage
+            message and exit the program.
+
             """
         if argv is None:
             argv = sys.argv
@@ -143,6 +163,11 @@ class DaemonRunner:
 
     def _start(self):
         """ Open the daemon context and run the application.
+
+            :return: ``None``.
+            :raises DaemonRunnerStartFailureError: If the PID file cannot
+                be locked by this process.
+
             """
         if is_pidfile_stale(self.pidfile):
             self.pidfile.break_lock()
@@ -162,6 +187,11 @@ class DaemonRunner:
 
     def _terminate_daemon_process(self):
         """ Terminate the daemon process specified in the current PID file.
+
+            :return: ``None``.
+            :raises DaemonRunnerStopFailureError: If terminating the daemon
+                fails with an OS error.
+
             """
         pid = self.pidfile.read_pid()
         try:
@@ -172,6 +202,11 @@ class DaemonRunner:
 
     def _stop(self):
         """ Exit the daemon process specified in the current PID file.
+
+            :return: ``None``.
+            :raises DaemonRunnerStopFailureError: If the PID file is not
+                already locked.
+
             """
         if not self.pidfile.is_locked():
             pidfile_path = self.pidfile.path
@@ -196,10 +231,15 @@ class DaemonRunner:
             }
 
     def _get_action_func(self):
-        """ Return the function for the specified action.
+        """ Get the function for the specified action.
 
-            Raises ``DaemonRunnerInvalidActionError`` if the action is
-            unknown.
+            :return: The function object corresponding to the specified
+                action.
+            :raises DaemonRunnerInvalidActionError: if the action is
+               unknown.
+
+            The action is specified by the `action` attribute, which is set
+            during `parse_args`.
 
             """
         try:
@@ -211,6 +251,12 @@ class DaemonRunner:
 
     def do_action(self):
         """ Perform the requested action.
+
+            :return: ``None``.
+
+            The action is specified by the `action` attribute, which is set
+            during `parse_args`.
+
             """
         func = self._get_action_func()
         func(self)
@@ -240,9 +286,10 @@ def make_pidlockfile(path, acquire_timeout):
 def is_pidfile_stale(pidfile):
     """ Determine whether a PID file is stale.
 
-        Return ``True`` (“stale”) if the contents of the PID file are
-        valid but do not match the PID of a currently-running process;
-        otherwise return ``False``.
+        :return: ``True`` iff the PID file is stale; otherwise ``False``.
+
+        The PID file is “stale” if its contents are
+        valid but do not match the PID of a currently-running process.
 
         """
     result = False

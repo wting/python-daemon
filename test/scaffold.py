@@ -41,7 +41,21 @@ logging.disable(logging.CRITICAL)
 
 
 def get_function_signature(func):
-    """ Get the function signature as a mapping of attributes. """
+    """ Get the function signature as a mapping of attributes.
+
+        :param func: The function object to interrogate.
+        :return: A mapping of the components of a function signature.
+
+        The signature is constructed as a mapping:
+
+        * 'name': The function's defined name.
+        * 'arg_count': The number of arguments expected by the function.
+        * 'arg_names': A sequence of the argument names, as strings.
+        * 'arg_defaults': A sequence of the default values for the arguments.
+        * 'va_args': The name bound to remaining positional arguments.
+        * 'va_kw_args': The name bound to remaining keyword arguments.
+
+        """
     try:
         # Python 3 function attributes.
         func_code = func.__code__
@@ -80,7 +94,16 @@ def get_function_signature(func):
 
 
 def format_function_signature(func):
-    """ Format the function signature as printable text. """
+    """ Format the function signature as printable text.
+
+        :param func: The function object to interrogate.
+        :return: A formatted text representation of the function signature.
+
+        The signature is rendered a text; for example::
+
+            foo(spam, eggs, ham=True, beans=None, *args, **kwargs)
+
+        """
     signature = get_function_signature(func)
 
     args_text = []
@@ -110,10 +133,16 @@ class TestCase(testtools.testcase.TestCase):
     def failUnlessOutputCheckerMatch(self, want, got, msg=None):
         """ Fail unless the specified string matches the expected.
 
-            Fail the test unless ``want`` matches ``got``, as
-            determined by a ``doctest.OutputChecker`` instance. This
-            is not an equality check, but a pattern match according to
-            the ``OutputChecker`` rules.
+            :param want: The desired output pattern.
+            :param got: The actual text to match.
+            :param msg: A message to prefix on the failure message.
+            :return: ``None``.
+            :raises self.failureException: If the text does not match.
+
+            Fail the test unless ``want`` matches ``got``, as determined by
+            a ``doctest.OutputChecker`` instance. This is not an equality
+            check, but a pattern match according to the ``OutputChecker``
+            rules.
 
             """
         checker = doctest.OutputChecker()
@@ -139,8 +168,16 @@ class TestCase(testtools.testcase.TestCase):
     def failUnlessFunctionInTraceback(self, traceback, function, msg=None):
         """ Fail if the function is not in the traceback.
 
-            Fail the test if the function ``function`` is not at any
-            of the levels in the traceback object ``traceback``.
+            :param traceback: The traceback object to interrogate.
+            :param function: The function object to match.
+            :param msg: A message to prefix on the failure message.
+            :return: ``None``.
+
+            :raises self.failureException: If the function is not in the
+                traceback.
+
+            Fail the test if the function ``function`` is not at any of the
+            levels in the traceback object ``traceback``.
 
             """
         func_in_traceback = False
@@ -165,9 +202,16 @@ class TestCase(testtools.testcase.TestCase):
     def failUnlessFunctionSignatureMatch(self, first, second, msg=None):
         """ Fail if the function signatures do not match.
 
-            Fail the test if the function signature does not match
-            between the ``first`` function and the ``second``
-            function.
+            :param first: The first function to compare.
+            :param second: The second function to compare.
+            :param msg: A message to prefix to the failure message.
+            :return: ``None``.
+
+            :raises self.failureException: If the function signatures do
+                not match.
+
+            Fail the test if the function signature does not match between
+            the ``first`` function and the ``second`` function.
 
             The function signature includes:
 
@@ -224,13 +268,15 @@ class Exception_TestCase(TestCaseWithScenarios):
 def make_exception_scenarios(scenarios):
     """ Make test scenarios for exception classes.
 
-        Use this with `testscenarios` to adapt `Exception_TestCase`_
-        for any exceptions that need testing.
+        :param scenarios: Sequence of scenarios.
+        :return: List of scenarios with additional mapping entries.
 
-        :param scenarios:
-            List of scenarios Each scenario is a tuple (`name`, `map`)
-            where `map` is a mapping of attributes to be applied to
-            each test case. Attributes map must contain items for:
+        Use this with `testscenarios` to adapt `Exception_TestCase`_ for
+        any exceptions that need testing.
+
+        Each scenario is a tuple (`name`, `map`) where `map` is a mapping
+        of attributes to be applied to each test case. Attributes map must
+        contain items for:
 
             :key exc_type:
                 The exception type to be tested.
@@ -240,9 +286,6 @@ def make_exception_scenarios(scenarios):
             :key types:
                 Sequence of types that should be superclasses of each
                 instance of the exception type.
-
-        :return:
-            List of scenarios with additional mapping entries.
 
         """
     updated_scenarios = deepcopy(scenarios)

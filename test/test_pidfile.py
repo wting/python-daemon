@@ -60,7 +60,15 @@ class FakeFileDescriptorStringIO(StringIO, object):
 
 
 def make_pidlockfile_scenarios():
-    """ Make a collection of scenarios for testing PIDLockFile instances. """
+    """ Make a collection of scenarios for testing `PIDLockFile` instances.
+
+        :return: A collection of scenarios for tests involving
+            `PIDLockfFile` instances.
+
+        The collection is a mapping from scenario name to a dictionary of
+        scenario attributes.
+
+        """
 
     fake_current_pid = 235
     fake_other_pid = 8642
@@ -139,7 +147,14 @@ def make_pidlockfile_scenarios():
 
 
 def setup_pidfile_fixtures(testcase):
-    """ Set up common fixtures for PID file test cases. """
+    """ Set up common fixtures for PID file test cases.
+
+        :param testcase: A `TestCase` instance to decorate.
+
+        Decorate the `testcase` with attributes to be fixtures for tests
+        involving `PIDLockFile` instances.
+
+        """
     scenarios = make_pidlockfile_scenarios()
     testcase.pidlockfile_scenarios = scenarios
 
@@ -263,7 +278,15 @@ def setup_pidfile_fixtures(testcase):
 
 
 def make_lockfile_method_fakes(scenario):
-    """ Make common fake methods for lockfile class. """
+    """ Make common fake methods for lockfile class.
+
+        :param scenario: A scenario for testing with PIDLockFile.
+        :return: A mapping from normal function name to the corresponding
+            fake function.
+
+        Each fake function behaves appropriately for the specified `scenario`.
+
+        """
 
     def fake_func_read_pid():
         return scenario['pidfile_pid']
@@ -296,7 +319,18 @@ def make_lockfile_method_fakes(scenario):
 
 
 def apply_lockfile_method_mocks(mock_lockfile, testcase, scenario):
-    """ Apply common fake methods to mock lockfile class. """
+    """ Apply common fake methods to mock lockfile class.
+
+        :param mock_lockfile: An object providing the `LockFile` interface.
+        :param testcase: The `TestCase` instance providing the context for
+            the patch.
+        :param scenario: The `PIDLockFile` test scenario to use.
+
+        Mock the `LockFile` methods of `mock_lockfile`, by applying fake
+        methods customised for `scenario`. The mock is does by a patch
+        within the context of `testcase`.
+
+        """
     fake_methods = dict(
             (func_name, fake_func)
             for (func_name, fake_func) in
@@ -312,7 +346,15 @@ def apply_lockfile_method_mocks(mock_lockfile, testcase, scenario):
 
 
 def setup_pidlockfile_fixtures(testcase, scenario_name=None):
-    """ Set up common fixtures for PIDLockFile test cases. """
+    """ Set up common fixtures for PIDLockFile test cases.
+
+        :param testcase: The `TestCase` instance to decorate.
+        :param scenario_name: The name of the `PIDLockFile` scenario to use.
+
+        Decorate the `testcase` with attributes that are fixtures for test
+        cases involving `PIDLockFile` instances.`
+
+        """
 
     setup_pidfile_fixtures(testcase)
 

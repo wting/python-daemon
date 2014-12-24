@@ -82,7 +82,15 @@ class ModuleExceptions_TestCase(scaffold.Exception_TestCase):
 
 
 def make_runner_scenarios():
-    """ Make a collection of scenarios for testing DaemonRunner instances. """
+    """ Make a collection of scenarios for testing `DaemonRunner` instances.
+
+        :return: A collection of scenarios for tests involving
+            `DaemonRunner` instances.
+
+        The collection is a mapping from scenario name to a dictionary of
+        scenario attributes.
+
+        """
 
     pidlockfile_scenarios = make_pidlockfile_scenarios()
 
@@ -108,7 +116,15 @@ def make_runner_scenarios():
 
 
 def set_runner_scenario(testcase, scenario_name):
-    """ Set the DaemonRunner test scenario for the test case. """
+    """ Set the DaemonRunner test scenario for the test case.
+
+        :param testcase: The `TestCase` instance to decorate.
+        :param scenario_name: The name of the scenario to use.
+
+        Set the `DaemonRunner` test scenario name and decorate the
+        `testcase` with the corresponding scenario fixtures.
+
+        """
     scenarios = testcase.runner_scenarios
     testcase.scenario = scenarios[scenario_name]
     apply_lockfile_method_mocks(
@@ -118,7 +134,14 @@ def set_runner_scenario(testcase, scenario_name):
 
 
 def setup_runner_fixtures(testcase):
-    """ Set up common test fixtures for DaemonRunner test case. """
+    """ Set up common fixtures for `DaemonRunner` test cases.
+
+        :param testcase: A `TestCase` instance to decorate.
+
+        Decorate the `testcase` with attributes to be fixtures for tests
+        involving `DaemonRunner` instances.
+
+        """
     setup_pidfile_fixtures(testcase)
     setup_streams_fixtures(testcase)
 
