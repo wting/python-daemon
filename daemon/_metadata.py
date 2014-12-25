@@ -71,7 +71,7 @@ version_installed = get_distribution_version()
 
 author_name = "Ben Finney"
 author_email = "ben+python@benfinney.id.au"
-author = "%(author_name)s <%(author_email)s>" % vars()
+author = "{name} <{email}>".format(name=author_name, email=author_email)
 
 version_info = read_version_info_from_file(version_info_file_path)
 copyright_year_begin = "2001"
@@ -79,11 +79,11 @@ date = version_info['date'].split(' ', 1)[0]
 copyright_year = date.split('-')[0]
 copyright_year_range = copyright_year_begin
 if copyright_year > copyright_year_begin:
-    copyright_year_range += "–%(copyright_year)s" % vars()
+    copyright_year_range = "{begin}–{end}".format(
+            begin=copyright_year_begin, end=copyright_year)
 
-copyright = (
-        "Copyright © %(copyright_year_range)s %(author)s and others"
-        ) % vars()
+copyright = "Copyright © {year_range} {author} and others".format(
+        year_range=copyright_year_range, author=author)
 license = "Apache-2"
 url = "https://alioth.debian.org/projects/python-daemon/"
 

@@ -109,20 +109,21 @@ def format_function_signature(func):
     args_text = []
     for arg_name in signature['arg_names']:
         if arg_name in signature['arg_defaults']:
-            arg_default = signature['arg_defaults'][arg_name]
-            arg_text_template = "%(arg_name)s=%(arg_default)r"
+            arg_text = "{name}={value!r}".format(
+                    name=arg_name, value=signature['arg_defaults'][arg_name])
         else:
-            arg_text_template = "%(arg_name)s"
-        args_text.append(arg_text_template % vars())
+            arg_text = "{name}".format(
+                    name=arg_name)
+        args_text.append(arg_text)
     if 'var_args' in signature:
-        args_text.append("*%(var_args)s" % signature)
+        args_text.append("*{var_args}".format(signature))
     if 'var_kw_args' in signature:
-        args_text.append("**%(var_kw_args)s" % signature)
+        args_text.append("**{var_kw_args}".format(signature))
     signature_args_text = ", ".join(args_text)
 
     func_name = signature['name']
-    signature_text = (
-            "%(func_name)s(%(signature_args_text)s)" % vars())
+    signature_text = "{name}({args})".format(
+            name=func_name, args=signature_args_text)
 
     return signature_text
 
@@ -159,8 +160,9 @@ class TestCase(testtools.testcase.TestCase):
                         example, got, checker_optionflags)
                 msg = "\n".join([
                         "Output received did not match expected output",
-                        "%(diff)s",
-                        ]) % vars()
+                        "{diff}",
+                        ]).format(
+                            diff=diff)
             raise self.failureException(msg)
 
     assertOutputCheckerMatch = failUnlessOutputCheckerMatch
@@ -193,8 +195,9 @@ class TestCase(testtools.testcase.TestCase):
             if msg is None:
                 msg = (
                         "Traceback did not lead to original function"
-                        " %(function)s"
-                        ) % vars()
+                        " {function}"
+                        ).format(
+                            function=function)
             raise self.failureException(msg)
 
     assertFunctionInTraceback = failUnlessFunctionInTraceback
@@ -237,12 +240,17 @@ class TestCase(testtools.testcase.TestCase):
                 second_signature_text = format_function_signature(second)
                 msg = (textwrap.dedent("""\
                         Function signatures do not match:
-                            %(first_signature)r != %(second_signature)r
+                            {first!r} != {second!r}
                         Expected:
-                            %(first_signature_text)s
+                            {first_text}
                         Got:
-                            %(second_signature_text)s""")
-                        ) % vars()
+                            {second_text}""")
+                        ).format(
+                            first=first_signature,
+                            first_text=first_signature_text,
+                            second=second_signature,
+                            second_text=second_signature_text,
+                            )
             raise self.failureException(msg)
 
     assertFunctionSignatureMatch = failUnlessFunctionSignatureMatch
