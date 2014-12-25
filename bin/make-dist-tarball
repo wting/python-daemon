@@ -159,7 +159,7 @@ version_string_file = open(
         os.path.join(workingtree.basedir, version_string_filename), 'r')
 version_string = version_string_file.read().strip()
 
-export_dir_name = "%(dist_name)s-%(version_string)s" % vars()
+export_dir_name = "{dist_name}-{version_string}".format(**vars())
 export_root_dir = tempfile.mkdtemp()
 export_dir_path = os.path.join(export_root_dir, export_dir_name)
 bzrlib.export.export(revision_tree, export_dir_path, format="dir")
@@ -187,7 +187,7 @@ def make_dist_tarball(tarball_path, tree_root):
     os.chdir(save_curdir)
 
 tarball_suffix = ".tar.gz"
-tarball_name = "%(export_dir_name)s%(tarball_suffix)s" % vars()
+tarball_name = "{export_dir_name}{tarball_suffix}".format(**vars())
 parent_dir = os.path.dirname(os.path.abspath(os.path.curdir))
 tarball_path = os.path.join(parent_dir, tarball_name)
 make_dist_tarball(tarball_path, export_root_dir)

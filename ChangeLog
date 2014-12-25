@@ -1,3 +1,7 @@
+2014-12-26  Ben Finney  <ben+python@benfinney.id.au>
+
+    * Migrate to ‘str.format’ for interpolation of values into text.
+
 2014-12-24  Ben Finney  <ben+python@benfinney.id.au>
 
     * Document the API of all functions comprehensively in docstrings.

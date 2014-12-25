@@ -76,9 +76,9 @@ def make_pidlockfile_scenarios():
 
     fake_pidfile_empty = FakeFileDescriptorStringIO()
     fake_pidfile_current_pid = FakeFileDescriptorStringIO(
-            "%(fake_current_pid)d\n" % vars())
+            "{fake_current_pid:d}\n".format(**vars()))
     fake_pidfile_other_pid = FakeFileDescriptorStringIO(
-            "%(fake_other_pid)d\n" % vars())
+            "{fake_other_pid:d}\n".format(**vars()))
     fake_pidfile_bogus = FakeFileDescriptorStringIO(
             "b0gUs")
 
@@ -176,16 +176,20 @@ def setup_pidfile_fixtures(testcase):
 
         def fake_open_nonexist(filename, mode, buffering):
             if mode.startswith('r'):
-                raise IOError(
-                        errno.ENOENT, "No such file %(filename)r" % vars())
+                error = IOError(
+                        errno.ENOENT, "No such file {filename!r}".format(
+                            **vars()))
+                raise error
             else:
                 result = testcase.scenario['pidfile']
             return result
 
         def fake_open_read_denied(filename, mode, buffering):
             if mode.startswith('r'):
-                raise IOError(
-                        errno.EPERM, "Read denied on %(filename)r" % vars())
+                error = IOError(
+                        errno.EPERM, "Read denied on {filename!r}".format(
+                            **vars()))
+                raise error
             else:
                 result = testcase.scenario['pidfile']
             return result
@@ -198,16 +202,20 @@ def setup_pidfile_fixtures(testcase):
             if (flags & os.O_CREAT):
                 result = testcase.scenario['pidfile'].fileno()
             else:
-                raise OSError(
-                        errno.ENOENT, "No such file %(filename)r" % vars())
+                error = OSError(
+                        errno.ENOENT, "No such file {filename!r}".format(
+                            **vars()))
+                raise error
             return result
 
         def fake_os_open_read_denied(filename, flags, mode):
             if (flags & os.O_CREAT):
                 result = testcase.scenario['pidfile'].fileno()
             else:
-                raise OSError(
-                        errno.EPERM, "Read denied on %(filename)r" % vars())
+                error = OSError(
+                        errno.EPERM, "Read denied on {filename!r}".format(
+                            **vars()))
+                raise error
             return result
 
         def fake_os_open_okay(filename, flags, mode):

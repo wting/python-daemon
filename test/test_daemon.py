@@ -1180,8 +1180,10 @@ class maxfd_TestCase(scaffold.TestCase):
         maxfd = daemon.daemon.MAXFD
         self.assertTrue(
                 expected_minimum <= maxfd,
-                msg="MAXFD should be at least %(expected_minimum)r (got %(maxfd)r)"
-                    % vars())
+                msg=(
+                    "MAXFD should be at least {expected_minimum!r}"
+                    " (got {maxfd!r})".format(
+                        **vars())))
 
 
 fake_default_maxfd = 8

@@ -59,8 +59,9 @@ class AttributeNotFoundMismatch(testtools.matchers.Mismatch):
     def describe(self):
         """ Emit a text description of this mismatch. """
         text = (
-                "%(instance)r"
-                " has no attribute named %(attribute_name)r") % vars(self)
+                "{instance!r}"
+                " has no attribute named {attribute_name!r}").format(
+                    **vars(self))
         return text
 
 
@@ -137,7 +138,8 @@ class metadata_content_TestCase(scaffold.TestCase):
         result = urlparse.urlparse(metadata.url)
         self.assertIsInstance(
                 result, urlparse.ParseResult,
-                "URL value %(url)r did not parse correctly" % vars(metadata))
+                "URL value {url!r} did not parse correctly".format(
+                    **vars(metadata)))
 
 
 def fake_func_get_distribution(testcase, distribution_name):

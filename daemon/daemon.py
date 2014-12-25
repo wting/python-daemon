@@ -426,8 +426,8 @@ class DaemonContext:
 
             """
         exception = SystemExit(
-                "Terminating on signal %(signal_number)r"
-                    % vars())
+                "Terminating on signal {signal_number!r}".format(
+                    **vars()))
         raise exception
 
     def _get_exclude_file_descriptors(self):
@@ -540,8 +540,8 @@ def change_working_directory(directory):
         os.chdir(directory)
     except Exception as exc:
         error = DaemonOSEnvironmentError(
-                "Unable to change working directory (%(exc)s)"
-                    % vars())
+                "Unable to change working directory ({exc})".format(
+                    **vars()))
         raise error
 
 
@@ -561,8 +561,8 @@ def change_root_directory(directory):
         os.chroot(directory)
     except Exception as exc:
         error = DaemonOSEnvironmentError(
-                "Unable to change root directory (%(exc)s)"
-                    % vars())
+                "Unable to change root directory ({exc})".format(
+                    **vars()))
         raise error
 
 
@@ -577,8 +577,8 @@ def change_file_creation_mask(mask):
         os.umask(mask)
     except Exception as exc:
         error = DaemonOSEnvironmentError(
-                "Unable to change file creation mask (%(exc)s)"
-                    % vars())
+                "Unable to change file creation mask ({exc})".format(
+                    **vars()))
         raise error
 
 
@@ -599,8 +599,8 @@ def change_process_owner(uid, gid):
         os.setuid(uid)
     except Exception as exc:
         error = DaemonOSEnvironmentError(
-                "Unable to change process owner (%(exc)s)"
-                    % vars())
+                "Unable to change process owner ({exc})".format(
+                    **vars()))
         raise error
 
 
@@ -621,8 +621,9 @@ def prevent_core_dump():
         core_limit_prev = resource.getrlimit(core_resource)
     except ValueError as exc:
         error = DaemonOSEnvironmentError(
-                "System does not support RLIMIT_CORE resource limit (%(exc)s)"
-                    % vars())
+                "System does not support RLIMIT_CORE resource limit"
+                " ({exc})".format(
+                    **vars()))
         raise error
 
     # Set hard and soft limits to zero, i.e. no core dump at all.
@@ -661,8 +662,8 @@ def detach_process_context():
             exc_errno = exc.errno
             exc_strerror = exc.strerror
             error = DaemonProcessDetachError(
-                    "%(error_message)s: [%(exc_errno)d] %(exc_strerror)s"
-                        % vars())
+                    "{error_message}: [{exc_errno:d}] {exc_strerror}".format(
+                        **vars()))
             raise error
 
     fork_then_exit_parent(error_message="Failed first fork")
@@ -783,9 +784,9 @@ def close_file_descriptor_if_open(fd):
             pass
         else:
             error = DaemonOSEnvironmentError(
-                    "Failed to close file descriptor %(fd)d"
-                    " (%(exc)s)"
-                        % vars())
+                    "Failed to close file descriptor {fd:d}"
+                    " ({exc})".format(
+                        **vars()))
             raise error
 
 
