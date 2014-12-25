@@ -377,12 +377,11 @@ class DaemonRunner_usage_exit_TestCase(DaemonRunner_BaseTestCase):
     def test_message_follows_conventional_format(self):
         """ Should emit a conventional usage message. """
         instance = self.test_instance
-        progname = self.test_program_name
         argv = [self.test_program_path]
         expected_stderr_output = """\
                 usage: {progname} ...
                 """.format(
-                    **vars())
+                    progname=self.test_program_name)
         self.assertRaises(
                 SystemExit,
                 instance._usage_exit, argv)
@@ -499,11 +498,10 @@ class DaemonRunner_do_action_start_TestCase(DaemonRunner_BaseTestCase):
     def test_emits_start_message_to_stderr(self):
         """ Should emit start message to stderr. """
         instance = self.test_instance
-        current_pid = self.scenario['pid']
         expected_stderr = """\
-                started with pid {current_pid:d}
+                started with pid {pid:d}
                 """.format(
-                    **vars())
+                    pid=self.scenario['pid'])
         instance.do_action()
         self.assertOutputCheckerMatch(
                 expected_stderr, self.fake_stderr.getvalue())

@@ -131,8 +131,8 @@ class DaemonRunner:
         progname = os.path.basename(argv[0])
         usage_exit_code = 2
         action_usage = "|".join(self.action_funcs.keys())
-        message = "usage: {progname} {action_usage}".format(
-                **vars())
+        message = "usage: {progname} {usage}".format(
+                progname=progname, usage=action_usage)
         emit_message(message)
         sys.exit(usage_exit_code)
 
@@ -176,14 +176,13 @@ class DaemonRunner:
         try:
             self.daemon_context.open()
         except lockfile.AlreadyLocked:
-            pidfile_path = self.pidfile.path
-            raise DaemonRunnerStartFailureError(
-                    "PID file {pidfile_path!r} already locked".format(
-                        **vars()))
+            error = DaemonRunnerStartFailureError(
+                    "PID file {pidfile.path!r} already locked".format(
+                        pidfile=self.pidfile))
+            raise error
 
         pid = os.getpid()
-        message = self.start_message.format(
-                **vars())
+        message = self.start_message.format(pid=pid)
         emit_message(message)
 
         self.app.run()
@@ -200,9 +199,10 @@ class DaemonRunner:
         try:
             os.kill(pid, signal.SIGTERM)
         except OSError as exc:
-            raise DaemonRunnerStopFailureError(
+            error = DaemonRunnerStopFailureError(
                     "Failed to terminate {pid:d}: {exc}".format(
-                        **vars()))
+                        pid=pid, exc=exc))
+            raise error
 
     def _stop(self):
         """ Exit the daemon process specified in the current PID file.
@@ -213,10 +213,10 @@ class DaemonRunner:
 
             """
         if not self.pidfile.is_locked():
-            pidfile_path = self.pidfile.path
-            raise DaemonRunnerStopFailureError(
-                    "PID file {pidfile_path!r} not locked".format(
-                        **vars()))
+            error = DaemonRunnerStopFailureError(
+                    "PID file {pidfile.path!r} not locked".format(
+                        pidfile=self.pidfile))
+            raise error
 
         if is_pidfile_stale(self.pidfile):
             self.pidfile.break_lock()
@@ -250,9 +250,10 @@ class DaemonRunner:
         try:
             func = self.action_funcs[self.action]
         except KeyError:
-            raise DaemonRunnerInvalidActionError(
+            error = DaemonRunnerInvalidActionError(
                     "Unknown action: {action!r}".format(
-                        **vars(self)))
+                        action=self.action))
+            raise error
         return func
 
     def do_action(self):
@@ -272,7 +273,7 @@ def emit_message(message, stream=None):
     """ Emit a message to the specified stream (default `sys.stderr`). """
     if stream is None:
         stream = sys.stderr
-    stream.write("{message}\n".format(**vars()))
+    stream.write("{message}\n".format(message=message))
     stream.flush()
 
 
@@ -280,11 +281,11 @@ def make_pidlockfile(path, acquire_timeout):
     """ Make a PIDLockFile instance with the given filesystem path. """
     if not isinstance(path, basestring):
         error = ValueError("Not a filesystem path: {path!r}".format(
-                **vars()))
+                path=path))
         raise error
     if not os.path.isabs(path):
         error = ValueError("Not an absolute path: {path!r}".format(
-                **vars()))
+                path=path))
         raise error
     lockfile = pidfile.TimeoutPIDLockFile(path, acquire_timeout)
 

@@ -76,9 +76,9 @@ def make_pidlockfile_scenarios():
 
     fake_pidfile_empty = FakeFileDescriptorStringIO()
     fake_pidfile_current_pid = FakeFileDescriptorStringIO(
-            "{fake_current_pid:d}\n".format(**vars()))
+            "{pid:d}\n".format(pid=fake_current_pid))
     fake_pidfile_other_pid = FakeFileDescriptorStringIO(
-            "{fake_other_pid:d}\n".format(**vars()))
+            "{pid:d}\n".format(pid=fake_other_pid))
     fake_pidfile_bogus = FakeFileDescriptorStringIO(
             "b0gUs")
 
@@ -178,7 +178,7 @@ def setup_pidfile_fixtures(testcase):
             if mode.startswith('r'):
                 error = IOError(
                         errno.ENOENT, "No such file {filename!r}".format(
-                            **vars()))
+                            filename=filename))
                 raise error
             else:
                 result = testcase.scenario['pidfile']
@@ -188,7 +188,7 @@ def setup_pidfile_fixtures(testcase):
             if mode.startswith('r'):
                 error = IOError(
                         errno.EPERM, "Read denied on {filename!r}".format(
-                            **vars()))
+                            filename=filename))
                 raise error
             else:
                 result = testcase.scenario['pidfile']
@@ -204,7 +204,7 @@ def setup_pidfile_fixtures(testcase):
             else:
                 error = OSError(
                         errno.ENOENT, "No such file {filename!r}".format(
-                            **vars()))
+                            filename=filename))
                 raise error
             return result
 
@@ -214,7 +214,7 @@ def setup_pidfile_fixtures(testcase):
             else:
                 error = OSError(
                         errno.EPERM, "Read denied on {filename!r}".format(
-                            **vars()))
+                            filename=filename))
                 raise error
             return result
 

@@ -109,12 +109,12 @@ def format_function_signature(func):
     args_text = []
     for arg_name in signature['arg_names']:
         if arg_name in signature['arg_defaults']:
-            arg_default = signature['arg_defaults'][arg_name]
-            arg_text_template = "{arg_name}={arg_default!r}"
+            arg_text = "{name}={value!r}".format(
+                    name=arg_name, value=signature['arg_defaults'][arg_name])
         else:
-            arg_text_template = "{arg_name}"
-        args_text.append(arg_text_template.format(
-                **vars()))
+            arg_text = "{name}".format(
+                    name=arg_name)
+        args_text.append(arg_text)
     if 'var_args' in signature:
         args_text.append("*{var_args}".format(signature))
     if 'var_kw_args' in signature:
@@ -122,9 +122,8 @@ def format_function_signature(func):
     signature_args_text = ", ".join(args_text)
 
     func_name = signature['name']
-    signature_text = (
-            "{func_name}({signature_args_text})".format(
-                **vars()))
+    signature_text = "{name}({args})".format(
+            name=func_name, args=signature_args_text)
 
     return signature_text
 
@@ -163,7 +162,7 @@ class TestCase(testtools.testcase.TestCase):
                         "Output received did not match expected output",
                         "{diff}",
                         ]).format(
-                            **vars())
+                            diff=diff)
             raise self.failureException(msg)
 
     assertOutputCheckerMatch = failUnlessOutputCheckerMatch
@@ -198,7 +197,7 @@ class TestCase(testtools.testcase.TestCase):
                         "Traceback did not lead to original function"
                         " {function}"
                         ).format(
-                            **vars())
+                            function=function)
             raise self.failureException(msg)
 
     assertFunctionInTraceback = failUnlessFunctionInTraceback
@@ -241,13 +240,17 @@ class TestCase(testtools.testcase.TestCase):
                 second_signature_text = format_function_signature(second)
                 msg = (textwrap.dedent("""\
                         Function signatures do not match:
-                            {first_signature!r} != {second_signature!r}
+                            {first!r} != {second!r}
                         Expected:
-                            {first_signature_text}
+                            {first_text}
                         Got:
-                            {second_signature_text}""")
+                            {second_text}""")
                         ).format(
-                            **vars())
+                            first=first_signature,
+                            first_text=first_signature_text,
+                            second=second_signature,
+                            second_text=second_signature_text,
+                            )
             raise self.failureException(msg)
 
     assertFunctionSignatureMatch = failUnlessFunctionSignatureMatch

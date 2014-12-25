@@ -1181,9 +1181,9 @@ class maxfd_TestCase(scaffold.TestCase):
         self.assertTrue(
                 expected_minimum <= maxfd,
                 msg=(
-                    "MAXFD should be at least {expected_minimum!r}"
+                    "MAXFD should be at least {minimum!r}"
                     " (got {maxfd!r})".format(
-                        **vars())))
+                        minimum=expected_minimum, maxfd=maxfd)))
 
 
 fake_default_maxfd = 8
