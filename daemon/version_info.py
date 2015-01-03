@@ -24,9 +24,11 @@ import collections
 
 try:
     # Python 2 has both ‘str’ (bytes) and ‘unicode’.
-    unicode
+    basestring = basestring
+    unicode = unicode
 except NameError:
     # Python 3 names the Unicode data type ‘str’.
+    basestring = str
     unicode = str
 
 from docutils.core import publish_string
@@ -146,10 +148,10 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
     def visit_Text(self, node):
         raw_text = node.astext()
         text = textwrap.fill(
-            raw_text,
-            width=self.wrap_width,
-            initial_indent=self.initial_indent,
-            subsequent_indent=self.subsequent_indent)
+                raw_text,
+                width=self.wrap_width,
+                initial_indent=self.initial_indent,
+                subsequent_indent=self.subsequent_indent)
         self.append_to_current_entry(text)
 
     def depart_Text(self, node):
