@@ -275,7 +275,7 @@ def get_generated_version_info_content(infile_path):
                 infile_content, writer=VersionInfoWriter())
         versions_all = json.loads(versions_all_json.decode('utf-8'))
         latest_version = get_latest_version(versions_all)
-        content = json.dumps(latest_version)
+        content = json.dumps(latest_version, indent=4)
 
     return content
 
