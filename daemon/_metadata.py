@@ -19,6 +19,15 @@ import os.path
 import json
 import datetime
 
+try:
+    # Python 2 has both ‘str’ (bytes) and ‘unicode’.
+    basestring = basestring
+    unicode = unicode
+except NameError:
+    # Python 3 names the Unicode data type ‘str’.
+    basestring = str
+    unicode = str
+
 import pkg_resources
 
 

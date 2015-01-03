@@ -31,6 +31,7 @@ import testtools.helpers
 import testtools.matchers
 
 from . import scaffold
+from .scaffold import (basestring, unicode)
 
 import daemon._metadata as metadata
 
