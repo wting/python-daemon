@@ -32,6 +32,7 @@ import lockfile
 import mock
 
 from . import scaffold
+from .scaffold import (basestring, unicode)
 from .test_pidfile import (
         FakeFileDescriptorStringIO,
         setup_pidfile_fixtures,
@@ -45,13 +46,6 @@ from .test_daemon import (
 import daemon.daemon
 import daemon.runner
 import daemon.pidfile
-
-try:
-    # Python 2 has both ‘str’ (bytes) and ‘unicode’.
-    unicode
-except NameError:
-    # Python 3 names the Unicode data type ‘str’.
-    unicode = str
 
 
 class ModuleExceptions_TestCase(scaffold.Exception_TestCase):

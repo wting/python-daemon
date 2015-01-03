@@ -24,6 +24,7 @@ except ImportError:
     # Python 2 standard library.
     import urlparse
 import functools
+import collections
 
 import pkg_resources
 import mock
@@ -31,6 +32,7 @@ import testtools.helpers
 import testtools.matchers
 
 from . import scaffold
+from .scaffold import (basestring, unicode)
 
 import daemon._metadata as metadata
 
@@ -99,6 +101,70 @@ class metadata_value_TestCase(scaffold.TestCaseWithScenarios):
         instance = getattr(metadata, self.attribute_name)
         self.assertThat(
                 instance, HasAttribute(self.ducktype_attribute_name))
+
+
+class YearRange_TestCase(scaffold.TestCaseWithScenarios):
+    """ Test cases for ‘YearRange’ class. """
+
+    scenarios = [
+            ('simple', {
+                'begin_year': 1970,
+                'end_year': 1979,
+                'expected_text': "1970–1979",
+                }),
+            ('same year', {
+                'begin_year': 1970,
+                'end_year': 1970,
+                'expected_text': "1970",
+                }),
+            ('no end year', {
+                'begin_year': 1970,
+                'end_year': None,
+                'expected_text': "1970",
+                }),
+            ]
+
+    def setUp(self):
+        """ Set up test fixtures. """
+        super(YearRange_TestCase, self).setUp()
+
+        self.test_instance = metadata.YearRange(
+                self.begin_year, self.end_year)
+
+    def test_text_representation_as_expected(self):
+        """ Text representation should be as expected. """
+        result = unicode(self.test_instance)
+        self.assertEqual(result, self.expected_text)
+
+
+FakeYearRange = collections.namedtuple('FakeYearRange', ['begin', 'end'])
+
+@mock.patch.object(metadata, 'YearRange', new=FakeYearRange)
+class make_year_range_TestCase(scaffold.TestCaseWithScenarios):
+    """ Test cases for ‘make_year_range’ function. """
+
+    scenarios = [
+            ('simple', {
+                'begin_year': "1970",
+                'end_date': "1979-01-01",
+                'expected_range': FakeYearRange(begin=1970, end=1979),
+                }),
+            ('same year', {
+                'begin_year': "1970",
+                'end_date': "1970-01-01",
+                'expected_range': FakeYearRange(begin=1970, end=1970),
+                }),
+            ('no end year', {
+                'begin_year': "1970",
+                'end_date': None,
+                'expected_range': FakeYearRange(begin=1970, end=None),
+                }),
+            ]
+
+    def test_result_matches_expected_range(self):
+        """ Result should match expected YearRange. """
+        result = metadata.make_year_range(self.begin_year, self.end_date)
+        self.assertEqual(result, self.expected_range)
 
 
 class metadata_content_TestCase(scaffold.TestCase):

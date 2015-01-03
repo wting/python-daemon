@@ -19,6 +19,15 @@ import os.path
 import json
 import datetime
 
+try:
+    # Python 2 has both ‘str’ (bytes) and ‘unicode’.
+    basestring = basestring
+    unicode = unicode
+except NameError:
+    # Python 3 names the Unicode data type ‘str’.
+    basestring = str
+    unicode = str
+
 import pkg_resources
 
 
@@ -73,14 +82,53 @@ author_name = "Ben Finney"
 author_email = "ben+python@benfinney.id.au"
 author = "{name} <{email}>".format(name=author_name, email=author_email)
 
+
+class YearRange:
+    """ A range of years spanning a period. """
+
+    def __init__(self, begin, end=None):
+        self.begin = begin
+        self.end = end
+
+    def __unicode__(self):
+        text = "{range.begin:04d}".format(range=self)
+        if self.end is not None:
+            if self.end > self.begin:
+                text = "{range.begin:04d}–{range.end:04d}".format(range=self)
+        return text
+
+    __str__ = __unicode__
+
+
+def make_year_range(begin_year, end_date=None):
+    """ Construct the year range given a start and possible end date.
+
+        :param begin_date: The beginning year (text) for the range.
+        :param end_date: The end date (text, ISO-8601 format) for the
+            range.
+        :return: The range of years as a `YearRange` instance.
+
+        If the `end_date` is ``None``, the range has ``None`` for the
+        end year.
+
+        """
+    begin_year = int(begin_year)
+
+    end_year = None
+    if end_date is not None:
+        end_year_text = end_date.split('-')[0]
+        end_year = int(end_year_text)
+
+    year_range = YearRange(begin=begin_year, end=end_year)
+
+    return year_range
+
 version_info = read_version_info_from_file(version_info_file_path)
+
 copyright_year_begin = "2001"
-date = version_info['date'].split(' ', 1)[0]
-copyright_year = date.split('-')[0]
-copyright_year_range = copyright_year_begin
-if copyright_year > copyright_year_begin:
-    copyright_year_range = "{begin}–{end}".format(
-            begin=copyright_year_begin, end=copyright_year)
+build_date = version_info['date'].split(' ', 1)[0]
+copyright_year = build_date.split('-')[0]
+copyright_year_range = make_year_range(copyright_year_begin, build_date)
 
 copyright = "Copyright © {year_range} {author} and others".format(
         year_range=copyright_year_range, author=author)

@@ -25,6 +25,15 @@ import textwrap
 from copy import deepcopy
 import functools
 
+try:
+    # Python 2 has both ‘str’ (bytes) and ‘unicode’.
+    basestring = basestring
+    unicode = unicode
+except NameError:
+    # Python 3 names the Unicode data type ‘str’.
+    basestring = str
+    unicode = str
+
 import testscenarios
 import testtools.testcase
 
