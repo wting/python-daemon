@@ -126,7 +126,7 @@ def make_year_range(begin_year, end_date=None):
 version_info = read_version_info_from_file(version_info_file_path)
 
 copyright_year_begin = "2001"
-build_date = version_info['date'].split(' ', 1)[0]
+build_date = version_info['released'].split(' ', 1)[0]
 copyright_year = build_date.split('-')[0]
 copyright_year_range = make_year_range(copyright_year_begin, build_date)
 

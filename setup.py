@@ -20,6 +20,7 @@ import sys
 import os
 import os.path
 import pydoc
+import json
 
 from setuptools import setup, find_packages
 
@@ -42,10 +43,11 @@ synopsis, long_description = pydoc.splitdoc(
         pydoc.getdoc(main_module))
 
 setup_dir = os.path.dirname(__file__)
-version_string_filename = "VERSION"
-version_string_file = open(
-        os.path.join(setup_dir, version_string_filename), 'rt')
-version_string = version_string_file.read().strip()
+version_info_filename = "version_info.json"
+version_info_file = open(
+        os.path.join(main_module_name, version_info_filename), 'rt')
+version_info = json.load(version_info_file)
+version_string = version_info['version']
 
 
 setup(
