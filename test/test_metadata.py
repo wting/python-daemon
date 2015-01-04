@@ -16,6 +16,7 @@
 from __future__ import (absolute_import, unicode_literals)
 
 import sys
+import errno
 import re
 try:
     # Python 3 standard library.
@@ -25,6 +26,7 @@ except ImportError:
     import urlparse
 import functools
 import collections
+import json
 
 import pkg_resources
 import mock
@@ -175,7 +177,7 @@ class metadata_content_TestCase(scaffold.TestCase):
         regex_pattern = (
                 "Copyright © "
                 "\d{4}" # four-digit year
-                "(?:–\d{4})" # optional range dash and ending four-digit year
+                "(?:–\d{4})?" # optional range dash and ending four-digit year
                 )
         regex_flags = re.UNICODE
         self.assertThat(
@@ -208,6 +210,32 @@ class metadata_content_TestCase(scaffold.TestCase):
                     url=metadata.url))
 
 
+try:
+    FileNotFoundError
+except NameError:
+    # Python 2 uses OSError.
+    FileNotFoundError = functools.partial(OSError, errno.ENOENT)
+
+version_info_filename = "version_info.json"
+
+def fake_func_has_metadata(testcase, resource_name):
+    """ Fake the behaviour of ‘pkg_resources.Distribution.has_metadata’. """
+    if resource_name != version_info_filename:
+        return False
+    return True
+
+
+def fake_func_get_metadata(testcase, resource_name):
+    """ Fake the behaviour of ‘pkg_resources.Distribution.get_metadata’. """
+    if (
+            resource_name != version_info_filename
+            or not hasattr(testcase, 'test_version_info')):
+        error = FileNotFoundError(resource_name)
+        raise error
+    content = testcase.test_version_info
+    return content
+
+
 def fake_func_get_distribution(testcase, distribution_name):
     """ Fake the behaviour of ‘pkg_resources.get_distribution’. """
     if distribution_name != metadata.distribution_name:
@@ -215,9 +243,12 @@ def fake_func_get_distribution(testcase, distribution_name):
     if hasattr(testcase, 'get_distribution_error'):
         raise testcase.get_distribution_error
     mock_distribution = mock.MagicMock()
-    if hasattr(testcase, 'test_version'):
-        mock_distribution.version = testcase.test_version
+    mock_distribution.has_metadata.side_effect = functools.partial(
+            fake_func_has_metadata, testcase)
+    mock_distribution.get_metadata.side_effect = functools.partial(
+            fake_func_get_metadata, testcase)
     return mock_distribution
+
 
 @mock.patch.object(pkg_resources, 'get_distribution')
 @mock.patch.object(metadata, 'distribution_name', new="mock-dist")
@@ -226,16 +257,20 @@ class get_distribution_version_TestCase(scaffold.TestCaseWithScenarios):
 
     scenarios = [
             ('version 0.0', {
-                'test_version': "0.0",
-                'expected_version': "0.0",
+                'test_version_info': json.dumps({
+                    'version': "0.0",
+                    }),
+                'expected_version_info': {'version': "0.0"},
                 }),
             ('version 1.0', {
-                'test_version': "1.0",
-                'expected_version': "1.0",
+                'test_version_info': json.dumps({
+                    'version': "1.0",
+                    }),
+                'expected_version_info': {'version': "1.0"},
                 }),
             ('not installed', {
                 'get_distribution_error': pkg_resources.DistributionNotFound(),
-                'expected_version': None,
+                'expected_version_info': {},
                 }),
             ]
 
@@ -245,7 +280,7 @@ class get_distribution_version_TestCase(scaffold.TestCaseWithScenarios):
         mock_func_get_distribution.side_effect = functools.partial(
                 fake_func_get_distribution, self)
         expected_distribution_name = metadata.distribution_name
-        version = metadata.get_distribution_version()
+        version_info = metadata.get_distribution_version_info()
         mock_func_get_distribution.assert_called_with(
                 expected_distribution_name)
 
@@ -254,8 +289,8 @@ class get_distribution_version_TestCase(scaffold.TestCaseWithScenarios):
         """ The ‘version_installed’ value should match the distribution. """
         mock_func_get_distribution.side_effect = functools.partial(
                 fake_func_get_distribution, self)
-        version = metadata.get_distribution_version()
-        self.assertEqual(version, self.expected_version)
+        version_info = metadata.get_distribution_version_info()
+        self.assertEqual(version_info, self.expected_version_info)
 
 
 # Local variables:

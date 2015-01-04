@@ -31,52 +31,28 @@ except NameError:
 import pkg_resources
 
 
-version_info_file_path = os.path.join(
-        os.path.dirname(__file__), "version_info.json")
-
-def read_version_info_from_file(file_path):
-    """ Read the version info from the specified file.
-
-        :param file_path: Filesystem path to the version info file.
-        :return: The version info mapping.
-
-        The version info file is a JSON-serialised mapping of
-        information about the VCS revision from which the source tree
-        was built.
-
-        """
-    infile = open(file_path, 'rt')
-    info_raw = json.load(infile)
-
-    item_converters = {}
-
-    info = {}
-    for (name, value_raw) in info_raw.items():
-        if name in item_converters:
-            value = item_converters[name](value_raw)
-        else:
-            value = value_raw
-        info[name] = value
-
-    return info
-
-
 distribution_name = "python-daemon"
 
-def get_distribution_version():
-    """ Get the version from the installed distribution. """
+def get_distribution_version_info():
+    """ Get the version info from the installed distribution. """
+    version_info = {}
+
     try:
         distribution = pkg_resources.get_distribution(distribution_name)
     except pkg_resources.DistributionNotFound:
         distribution = None
 
-    version = None
+    version_info_filename = "version_info.json"
     if distribution is not None:
-        version = distribution.version
+        if distribution.has_metadata(version_info_filename):
+            content = distribution.get_metadata(version_info_filename)
+            version_info = json.loads(content)
 
-    return version
+    return version_info
 
-version_installed = get_distribution_version()
+version_info = get_distribution_version_info()
+
+version_installed = version_info.get('version', "UNKNOWN")
 
 author_name = "Ben Finney"
 author_email = "ben+python@benfinney.id.au"
@@ -123,11 +99,8 @@ def make_year_range(begin_year, end_date=None):
 
     return year_range
 
-version_info = read_version_info_from_file(version_info_file_path)
-
 copyright_year_begin = "2001"
-build_date = version_info['released'].split(' ', 1)[0]
-copyright_year = build_date.split('-')[0]
+build_date = version_info.get('release_date', None)
 copyright_year_range = make_year_range(copyright_year_begin, build_date)
 
 copyright = "Copyright © {year_range} {author} and others".format(
