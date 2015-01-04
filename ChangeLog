@@ -23,12 +23,10 @@ Version NEXT
   In Python 3, ‘StringIO.fileno’ is callable but raises an exception.
 
 * Declare support explicitly for Python 2 only.
-* Migrate to JSON (instead of Python) for serialised version info.
 * Wrap standard library imports where names changed in Python 3.
 
 * Wrap the ‘fromlist’ parameter of ‘__import__’ for Python 3
   compatibility.
-* Migrate to JSON (instead of Python) for serialised version info.
 
 * Document the security impact of the default umask.
 
@@ -46,7 +44,8 @@ Version NEXT
 * Remove ASCII translation of package description, not needed now the
   docstring is a proper Unicode text value.
 * Move package metadata to ‘daemon/_metadata.py’.
-* Move version string to a plain-text data file, ‘VERSION’.
+* Migrate to JSON (instead of Python) for serialised version info.
+* Store and retrieve version info in Setuptools metadata.
 * Get version string at run-time from installed distribution.
 * Add unit tests for metadata.
 

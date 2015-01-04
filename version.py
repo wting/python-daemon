@@ -1,26 +1,44 @@
 # -*- coding: utf-8 -*-
 
-# daemon/version_info.py
+# version.py
 # Part of ‘python-daemon’, an implementation of PEP 3143.
 #
 # Copyright © 2008–2014 Ben Finney <ben+python@benfinney.id.au>
 #
 # This is free software: you may copy, modify, and/or distribute this work
-# under the terms of the Apache License, version 2.0 as published by the
-# Apache Software Foundation.
-# No warranty expressed or implied. See the file ‘LICENSE.ASF-2’ for details.
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation; version 3 of that license or any later version.
+# No warranty expressed or implied. See the file ‘LICENSE.GPL-3’ for details.
 
-""" Distribution version info parsed from reStructuredText. """
+""" Version information unified for human- and machine-readable formats.
+
+    The project ‘ChangeLog’ file is a reStructuredText document, with
+    each section describing a version of the project. The document is
+    intended to be readable as-is by end users.
+
+    This module handles transformation from the ‘ChangeLog’ to a
+    mapping of version information, serialised as JSON. It also
+    provides functionality for Distutils to use this information.
+
+    Requires:
+
+    * Docutils <http://docutils.sourceforge.net/>
+    * JSON <https://docs.python.org/3/reference/json.html>
+
+    """
 
 from __future__ import (absolute_import, unicode_literals)
 
 import os
 import os.path
+import errno
 import json
 import datetime
 import textwrap
+import re
 import functools
 import collections
+import distutils
 
 try:
     # Python 2 has both ‘str’ (bytes) and ‘unicode’.
@@ -61,15 +79,18 @@ class NewsEntry:
     __metaclass__ = type
 
     field_names = [
-            'released',
+            'release_date',
             'version',
             'maintainer',
             'body',
             ]
 
+    date_format = "%Y-%m-%d"
+
     def __init__(
-            self, released=None, version=None, maintainer=None, body=None):
-        self.released = released
+            self,
+            release_date=None, version=None, maintainer=None, body=None):
+        self.release_date = release_date
         self.version = version
         self.maintainer = maintainer
         self.body = body
@@ -85,7 +106,7 @@ class NewsEntry:
     def as_version_info_entry(self):
         """ Format the news entry as a version info entry. """
         fields = vars(self)
-        fields['released'] = self.released.strftime("%Y-%m-%d")
+        fields['release_date'] = self.release_date.strftime(self.date_format)
         entry = self.make_ordered_dict(fields)
 
         return entry
@@ -110,7 +131,7 @@ def news_timestamp_to_datetime(text):
     if text == "FUTURE":
         timestamp = datetime.datetime.max
     else:
-        timestamp = datetime.datetime.strptime(text, "%Y-%m-%d")
+        timestamp = datetime.datetime.strptime(text, NewsEntry.date_format)
     return timestamp
 
 
@@ -120,9 +141,10 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
     wrap_width = 78
     bullet_text = "* "
 
-    field_convert_funcs = {
-            'released': news_timestamp_to_datetime,
-            'maintainer': unicode,
+    attr_convert_funcs_by_attr_name = {
+            'released': ('release_date', news_timestamp_to_datetime),
+            'version': ('version', unicode),
+            'maintainer': ('maintainer', unicode),
             }
 
     def __init__(self, document):
@@ -164,8 +186,8 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
         pass
 
     def visit_field_body(self, node):
-        convert_func = self.field_convert_funcs[self.current_field_name]
-        attr_name = self.current_field_name
+        (attr_name, convert_func) = self.attr_convert_funcs_by_attr_name[
+                self.current_field_name]
         attr_value = convert_func(node.astext())
         setattr(self.current_entry, attr_name, attr_value)
         raise docutils.nodes.SkipNode
@@ -255,15 +277,15 @@ except AttributeError:
 
 
 @lru_cache(maxsize=128)
-def get_generated_version_info_content(infile_path):
+def generate_version_info_from_changelog(infile_path):
     """ Get the version-info stream generated from the changelog.
 
         :param infile_path: Filesystem path to the input changelog file.
-        :return: The generated version info, serialised for output; or
-            ``None`` if the file cannot be read.
+        :return: The generated version info mapping; or ``None`` if the
+            file cannot be read.
 
         """
-    content = None
+    version_info = collections.OrderedDict()
     infile_content = None
 
     try:
@@ -276,8 +298,19 @@ def get_generated_version_info_content(infile_path):
         versions_all_json = publish_string(
                 infile_content, writer=VersionInfoWriter())
         versions_all = json.loads(versions_all_json.decode('utf-8'))
-        latest_version = get_latest_version(versions_all)
-        content = json.dumps(latest_version, indent=4)
+        version_info = get_latest_version(versions_all)
+
+    return version_info
+
+
+def serialise_version_info_from_mapping(version_info):
+    """ Generate the version info serialised data.
+
+        :param version_info: Mapping of version info items.
+        :return: The version info serialised to JSON.
+
+        """
+    content = json.dumps(version_info, indent=4)
 
     return content
 
@@ -302,8 +335,41 @@ def get_existing_version_info_content(infile_path):
     return content
 
 
-def update_version_info_file_if_needed(outfile_path, changelog_file_path):
-    """ Update the version-info file iff it is out of date.
+def is_source_file_newer(source_path, destination_path, force=False):
+    """ Return True if destination is older than source or does not exist.
+
+        :param source_path: Filesystem path to the source file.
+        :param destination_path: Filesystem path to the destination file.
+        :param force: If true, return ``True`` without examining files.
+
+        :return: ``False`` iff the age of the destination file (if it
+            exists) is no older than the age of the source file.
+
+        A file's age is determined from its content modification
+        timestamp in the filesystem.
+
+        """
+    result = True
+    if not force:
+        source_stat = os.stat(source_path)
+        source_mtime = source_stat.st_mtime
+        try:
+            destination_stat = os.stat(destination_path)
+        except OSError as exc:
+            if exc.errno == errno.ENOENT:
+                destination_mtime = None
+            else:
+                raise
+        else:
+            destination_mtime = destination_stat.st_mtime
+        if destination_mtime is not None:
+            result = (source_mtime > destination_mtime)
+
+    return result
+
+
+def generate_version_info_file(outfile_path, changelog_file_path):
+    """ Generate the version-info file from the changelog.
 
         :param outfile_path: Filesystem path to the version-info file.
         :param changelog_file_path: Filesystem path to the changelog.
@@ -314,10 +380,68 @@ def update_version_info_file_if_needed(outfile_path, changelog_file_path):
     existing_content = get_existing_version_info_content(outfile_path)
 
     if generated_content is not None:
-        if generated_content != existing_content:
-            version_info_file = open(outfile_path, 'w+t')
-            version_info_file.write(generated_content)
-            version_info_file.close()
+        version_info_file = open(outfile_path, 'w+t')
+        version_info_file.write(generated_content)
+        version_info_file.close()
+
+
+@lru_cache(maxsize=128)
+def parse_person_field(value):
+    """ Parse a person field into name and email address. """
+    result = (None, None)
+
+    rfc822_person_regex = re.compile(
+            "(?P<name>[^<]+) <(?P<email>[^>]+)>")
+    match = rfc822_person_regex.match(value)
+    if match is not None:
+        result = (match.name, match.email)
+
+    return result    
+
+
+@lru_cache(maxsize=128)
+def validate_distutils_release_date_value(distribution, attrib, value):
+    """ Validate the ‘release_date’ parameter value. """
+    if value in ["FUTURE"]:
+        # A valid non-date value.
+        return None
+
+    try:
+        datetime.datetime.strptime(value, NewsEntry.date_format)
+    except ValueError as exc:
+        raise distutils.DistutilsSetupError(
+                "{attrib!r} must be a valid release date"
+                " (got {value!r}".format(
+                    attrib=attrib, value=value))
+
+
+@lru_cache(maxsize=128)
+def generate_version_info_from_distribution(distribution):
+    """ Generate a version info mapping from a Setuptools distribution. """
+    if all(
+            getattr(distribution, attr_name)
+            for attr_name in ['maintainer', 'maintainer_email']):
+        maintainer_text = "{name} <{email}>".format(
+                name=distribution.maintainer,
+                email=distribution.maintainer_email)
+    else:
+        maintainer_text = ""
+
+    result = NewsEntry.make_ordered_dict({
+            'version': distribution.version,
+            'release_date': distribution.release_date,
+            'maintainer': maintainer_text,
+            'body': "",
+            })
+
+    return result
+
+
+def generate_egg_info_metadata(cmd, outfile_name, outfile_path):
+    """ Setuptools entry point to generate version info metadata. """
+    version_info = generate_version_info_from_distribution(cmd.distribution)
+    content = serialise_version_info_from_mapping(version_info)
+    cmd.write_file("version info", outfile_path, content)
 
 
 def get_latest_version(version_info):
@@ -328,7 +452,7 @@ def get_latest_version(version_info):
 
         """
     versions_by_release_date = {
-            item['released']: item
+            item['release_date']: item
             for item in version_info}
     latest_release_date = max(versions_by_release_date.keys())
     version = NewsEntry.make_ordered_dict(
