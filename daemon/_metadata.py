@@ -52,7 +52,7 @@ def get_distribution_version_info():
 
 version_info = get_distribution_version_info()
 
-version_installed = version_info.get('version', "UNKNOWN")
+version_installed = version_info['version']
 
 author_name = "Ben Finney"
 author_email = "ben+python@benfinney.id.au"

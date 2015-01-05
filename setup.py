@@ -56,7 +56,7 @@ changelog_filepath = distutils.util.convert_path(
         os.path.join(setup_dir, changelog_filename))
 
 version_info = version.generate_version_info_from_changelog(changelog_filepath)
-version_string = version_info.get('version', "UNKNOWN")
+version_string = version_info['version']
 
 
 (maintainer_name, maintainer_email) = version.parse_person_field(
