@@ -336,20 +336,25 @@ def generate_version_info_from_changelog(infile_path):
     return version_info
 
 
-def get_latest_version(version_info):
-    """ Get the latest version from a version-info stream.
+def get_latest_version(versions):
+    """ Get the latest version from a collection of changelog entries.
 
-        :param version_info: A sequence of mappings for changelog entries.
-        :return: The latest version, as an ordered mapping of fields.
+        :param versions: A collection of mappings for changelog entries.
+        :return: An ordered mapping of fields for the latest version,
+            if `versions` is non-empty; otherwise, an empty mapping.
 
         """
+    version_info = collections.OrderedDict()
+
     versions_by_release_date = {
             item['release_date']: item
-            for item in version_info}
-    latest_release_date = max(versions_by_release_date.keys())
-    version = ChangeLogEntry.make_ordered_dict(
-            versions_by_release_date[latest_release_date])
-    return version
+            for item in versions}
+    if versions_by_release_date:
+        latest_release_date = max(versions_by_release_date.keys())
+        version_info = ChangeLogEntry.make_ordered_dict(
+                versions_by_release_date[latest_release_date])
+
+    return version_info
 
 
 def serialise_version_info_from_mapping(version_info):
