@@ -856,7 +856,7 @@ class parse_person_field_TestCase(
 @mock.patch.object(version.ChangeLogEntry, 'validate_release_date')
 class validate_distutils_release_date_value_TestCase(
         testscenarios.WithScenarios, testtools.TestCase):
-    """ Test cases for ‘get_latest_version’ function. """
+    """ Test cases for ‘validate_distutils_release_date_value’ function. """
 
     scenarios = [
             ('success', {
@@ -891,6 +891,89 @@ class validate_distutils_release_date_value_TestCase(
             result = version.validate_distutils_release_date_value(
                     **self.test_args)
             self.assertEqual(self.expected_result, result)
+
+
+FakeDistribution = collections.namedtuple('FakeDistribution', [
+        'version', 'release_date', 'maintainer', 'maintainer_email'])
+
+def make_fake_distribution(fields_override):
+    fields = {
+            'version': None,
+            'release_date': None,
+            'maintainer': None,
+            'maintainer_email': None,
+            }
+    fields.update(fields_override)
+    distribution = FakeDistribution(**fields)
+    return distribution
+
+@mock.patch.object(
+        version.ChangeLogEntry, 'make_ordered_dict',
+        new=functools.partial((lambda cls, d: d), version.ChangeLogEntry))
+class generate_version_info_from_distribution_TestCase(
+        testscenarios.WithScenarios, testtools.TestCase):
+    """ Test cases for ‘generate_version_info_from_distribution’ function. """
+
+    scenarios = [
+            ('simple', {
+                'test_distribution': make_fake_distribution({
+                    'version': "1.0",
+                    'release_date': "2001-01-01",
+                    'maintainer': "Foo Bar",
+                    'maintainer_email': "foo.bar@example.org",
+                    }),
+                'expected_result': {
+                    'version': "1.0",
+                    'release_date': "2001-01-01",
+                    'maintainer': "Foo Bar <foo.bar@example.org>",
+                    'body': "",
+                    },
+                }),
+            ('no maintainer', {
+                'test_distribution': make_fake_distribution({
+                    'version': "1.0",
+                    'release_date': "2001-01-01",
+                    }),
+                'expected_result': {
+                    'version': "1.0",
+                    'release_date': "2001-01-01",
+                    'maintainer': "",
+                    'body': "",
+                    },
+                }),
+            ('no maintainer name', {
+                'test_distribution': make_fake_distribution({
+                    'version': "1.0",
+                    'release_date': "2001-01-01",
+                    'maintainer_email': "foo.bar@example.org",
+                    }),
+                'expected_result': {
+                    'version': "1.0",
+                    'release_date': "2001-01-01",
+                    'maintainer': "",
+                    'body': "",
+                    },
+                }),
+            ('no maintainer email', {
+                'test_distribution': make_fake_distribution({
+                    'version': "1.0",
+                    'release_date': "2001-01-01",
+                    'maintainer': "Foo Bar",
+                    }),
+                'expected_result': {
+                    'version': "1.0",
+                    'release_date': "2001-01-01",
+                    'maintainer': "",
+                    'body': "",
+                    },
+                }),
+            ]
+
+    def test_returns_expected_result(self):
+        """ Should return expected result. """
+        result = version.generate_version_info_from_distribution(
+                self.test_distribution)
+        self.assertEqual(self.expected_result, result)
 
 
 # Local variables:

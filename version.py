@@ -369,7 +369,7 @@ def serialise_version_info_from_mapping(version_info):
 
     return content
 
-
+
 rfc822_person_regex = re.compile(
         "^(?P<name>[^<]+) <(?P<email>[^>]+)>$")
 
