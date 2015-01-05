@@ -27,7 +27,7 @@ import errno
 import lockfile
 
 from . import pidfile
-from ._metadata import (basestring, unicode)
+from .daemon import (basestring, unicode)
 from .daemon import DaemonContext
 from .daemon import _chain_exception_from_existing_exception_context
 

@@ -1,5 +1,4 @@
 ./dist
 ./build
 *.egg-info
-./daemon/version_info.json
 .coverage

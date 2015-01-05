@@ -20,8 +20,11 @@ import sys
 import os
 import os.path
 import pydoc
+import distutils.util
 
-from setuptools import setup, find_packages
+from setuptools import (setup, find_packages)
+
+import version
 
 
 fromlist_expects_type = str
@@ -41,11 +44,20 @@ metadata = main_module._metadata
 synopsis, long_description = pydoc.splitdoc(
         pydoc.getdoc(main_module))
 
+
+version_info_filename = "version_info.json"
+changelog_filename = "ChangeLog"
+
 setup_dir = os.path.dirname(__file__)
-version_string_filename = "VERSION"
-version_string_file = open(
-        os.path.join(setup_dir, version_string_filename), 'rt')
-version_string = version_string_file.read().strip()
+changelog_filepath = distutils.util.convert_path(
+        os.path.join(setup_dir, changelog_filename))
+
+version_info = version.generate_version_info_from_changelog(changelog_filepath)
+version_string = version_info['version']
+
+
+(maintainer_name, maintainer_email) = version.parse_person_field(
+        version_info['maintainer'])
 
 
 setup(
@@ -54,6 +66,9 @@ setup(
         packages=find_packages(exclude=["test"]),
 
         # Setuptools metadata.
+        release_date=version_info['release_date'],
+        maintainer=maintainer_name,
+        maintainer_email=maintainer_email,
         zip_safe=False,
         test_suite="unittest2.collector",
         tests_require=[
@@ -66,6 +81,15 @@ setup(
             "setuptools",
             "lockfile >=0.10",
             ],
+        entry_points={
+            "distutils.setup_keywords": [
+                "release_date = version:validate_distutils_release_date_value",
+                ],
+            "egg_info.writers": [
+                "{filename} = version:generate_egg_info_metadata".format(
+                    filename=version_info_filename),
+                ],
+            },
 
         # PyPI metadata.
         author=metadata.author_name,
