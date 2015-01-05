@@ -161,6 +161,16 @@ class make_year_range_TestCase(scaffold.TestCaseWithScenarios):
                 'end_date': None,
                 'expected_range': FakeYearRange(begin=1970, end=None),
                 }),
+            ('end date UNKNOWN token', {
+                'begin_year': "1970",
+                'end_date': "UNKNOWN",
+                'expected_range': FakeYearRange(begin=1970, end=None),
+                }),
+            ('end date FUTURE token', {
+                'begin_year': "1970",
+                'end_date': "FUTURE",
+                'expected_range': FakeYearRange(begin=1970, end=None),
+                }),
             ]
 
     def test_result_matches_expected_range(self):

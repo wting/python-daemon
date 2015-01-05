@@ -81,16 +81,15 @@ def make_year_range(begin_year, end_date=None):
 
         :param begin_date: The beginning year (text) for the range.
         :param end_date: The end date (text, ISO-8601 format) for the
-            range.
+            range, or a non-date token string.
         :return: The range of years as a `YearRange` instance.
 
-        If the `end_date` is ``None``, the range has ``None`` for the
-        end year.
+        If the `end_date` is not a valid ISO-8601 date string, the
+        range has ``None`` for the end year.
 
         """
     begin_year = int(begin_year)
 
-    end_year = None
     try:
         end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d")
     except (TypeError, ValueError):
@@ -104,7 +103,7 @@ def make_year_range(begin_year, end_date=None):
     return year_range
 
 copyright_year_begin = "2001"
-build_date = version_info.get('release_date', None)
+build_date = version_info['release_date']
 copyright_year_range = make_year_range(copyright_year_begin, build_date)
 
 copyright = "Copyright © {year_range} {author} and others".format(
