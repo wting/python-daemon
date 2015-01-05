@@ -26,6 +26,7 @@ import collections
 import textwrap
 import json
 import tempfile
+import distutils.cmd
 import distutils.errors
 try:
     # Standard library of Python 2.7 and later.
@@ -974,6 +975,54 @@ class generate_version_info_from_distribution_TestCase(
         result = version.generate_version_info_from_distribution(
                 self.test_distribution)
         self.assertEqual(self.expected_result, result)
+
+
+@mock.patch.object(version, 'generate_version_info_from_distribution')
+@mock.patch.object(version, 'serialise_version_info_from_mapping')
+class generate_egg_info_metadata_TestCase(testtools.TestCase):
+    """ Test cases for ‘generate_egg_info_metadata’ function. """
+
+    def setUp(self):
+        """ Set up test fixtures. """
+        super(generate_egg_info_metadata_TestCase, self).setUp()
+
+        self.fake_command = mock.MagicMock(name="Command")
+        self.fake_outfile_name = self.getUniqueString()
+        self.fake_outfile_path = self.getUniqueString()
+        self.test_args = {
+                'cmd': self.fake_command,
+                'outfile_name': self.fake_outfile_name,
+                'outfile_path': self.fake_outfile_path,
+                }
+
+    def test_generates_version_info_from_distribution(
+            self,
+            mock_func_serialise_version_info,
+            mock_func_generate_version_info):
+        """ Should generate version info from specified distribution. """
+        version.generate_egg_info_metadata(**self.test_args)
+        mock_func_generate_version_info.assert_called_with(
+                self.fake_command.distribution)
+
+    def test_serialises_version_info_from_mapping(
+            self,
+            mock_func_serialise_version_info,
+            mock_func_generate_version_info):
+        """ Should serialise version info from specified mapping. """
+        version.generate_egg_info_metadata(**self.test_args)
+        expected_version_info = mock_func_generate_version_info.return_value
+        mock_func_serialise_version_info.assert_called_with(
+                expected_version_info)
+
+    def test_writes_file_using_command_context(
+            self,
+            mock_func_serialise_version_info,
+            mock_func_generate_version_info):
+        """ Should write the metadata file using the command context. """
+        version.generate_egg_info_metadata(**self.test_args)
+        expected_content = mock_func_serialise_version_info.return_value
+        self.fake_command.write_file.assert_called_with(
+                "version info", self.fake_outfile_path, expected_content)
 
 
 # Local variables:

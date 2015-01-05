@@ -448,7 +448,17 @@ def generate_version_info_from_distribution(distribution):
 
 
 def generate_egg_info_metadata(cmd, outfile_name, outfile_path):
-    """ Setuptools entry point to generate version info metadata. """
+    """ Setuptools entry point to generate version info metadata.
+
+        :param cmd: The Distutils command context.
+        :param outfile_name: Filename for the metadata file.
+        :param outfile_path: Filesystem path for the metadata file.
+
+        This function is designed to be called as a Setuptools entry
+        point for ‘egg_info.writers’. This allows the creation of the
+        metadata file during build.
+
+        """
     version_info = generate_version_info_from_distribution(cmd.distribution)
     content = serialise_version_info_from_mapping(version_info)
     cmd.write_file("version info", outfile_path, content)
