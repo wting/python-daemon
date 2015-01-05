@@ -372,14 +372,29 @@ def serialise_version_info_from_mapping(version_info):
 rfc822_person_regex = re.compile(
         "^(?P<name>[^<]+) <(?P<email>[^>]+)>$")
 
+ParsedPerson = collections.namedtuple('ParsedPerson', ['name', 'email'])
+
 @lru_cache(maxsize=128)
 def parse_person_field(value):
-    """ Parse a person field into name and email address. """
+    """ Parse a person field into name and email address.
+
+        :param value: The text value specifying a person.
+        :return: A 2-tuple (name, email) for the person's details.
+
+        If the `value` does not match a standard person with email
+        address, the `email` item is ``None``.
+
+        """
     result = (None, None)
 
     match = rfc822_person_regex.match(value)
-    if match is not None:
-        result = (match.name, match.email)
+    if len(value):
+        if match is not None:
+            result = ParsedPerson(
+                    name=match.group('name'),
+                    email=match.group('email'))
+        else:
+            result = ParsedPerson(name=value, email=None)
 
     return result    
 
