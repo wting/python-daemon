@@ -38,6 +38,7 @@ import re
 import functools
 import collections
 import distutils
+import distutils.errors
 
 try: # pragma: nocover
     # Python 2 has both ‘str’ (bytes) and ‘unicode’.
@@ -401,11 +402,24 @@ def parse_person_field(value):
 
 @lru_cache(maxsize=128)
 def validate_distutils_release_date_value(distribution, attrib, value):
-    """ Validate the ‘release_date’ parameter value. """
+    """ Validate the ‘release_date’ parameter value.
+
+        :param distribution: The Distutils distribution context.
+        :param attrib: The attribute for the value.
+        :param value: The value to be validated.
+        :return: ``None`` if the value is valid for the atribute.
+        :raises distutils.DistutilsSetupError: If the value is invalid
+            for the attribute.
+
+        This function is designed to be called as a Distutils entry
+        point for ‘distutils.setup_keywords’. This allows the addition
+        of a ‘release_date’ parameter to ‘setup’.
+
+        """
     try:
         ChangeLogEntry.validate_release_date(value)
     except ValueError as exc:
-        raise distutils.DistutilsSetupError(
+        raise distutils.errors.DistutilsSetupError(
                 "{attrib!r} must be a valid release date"
                 " (got {value!r}".format(
                     attrib=attrib, value=value))

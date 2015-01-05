@@ -26,6 +26,7 @@ import collections
 import textwrap
 import json
 import tempfile
+import distutils.errors
 try:
     # Standard library of Python 2.7 and later.
     from io import StringIO
@@ -849,6 +850,46 @@ class parse_person_field_TestCase(
                     version.parse_person_field, self.test_person)
         else:
             result = version.parse_person_field(self.test_person)
+            self.assertEqual(self.expected_result, result)
+
+
+@mock.patch.object(version.ChangeLogEntry, 'validate_release_date')
+class validate_distutils_release_date_value_TestCase(
+        testscenarios.WithScenarios, testtools.TestCase):
+    """ Test cases for ‘get_latest_version’ function. """
+
+    scenarios = [
+            ('success', {
+                'validation_effect': (lambda *args, **kwargs: None),
+                'expected_result': None,
+                }),
+            ('failure', {
+                'validation_effect': ValueError("Do not want"),
+                'expected_error': distutils.errors.DistutilsSetupError,
+                }),
+            ]
+
+    def setUp(self):
+        """ Set up test fixtures. """
+        super(validate_distutils_release_date_value_TestCase, self).setUp()
+
+        self.test_args = {
+                'distribution': object(),
+                'attrib': self.getUniqueString(),
+                'value': self.getUniqueString(),
+                }
+
+    def test_returns_expected_result(self, mock_func_validate_release_date):
+        """ Should return expected result. """
+        mock_func_validate_release_date.side_effect = self.validation_effect
+        if hasattr(self, 'expected_error'):
+            self.assertRaises(
+                    self.expected_error,
+                    version.validate_distutils_release_date_value,
+                    **self.test_args)
+        else:
+            result = version.validate_distutils_release_date_value(
+                    **self.test_args)
             self.assertEqual(self.expected_result, result)
 
 
