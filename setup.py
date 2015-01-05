@@ -19,10 +19,7 @@ from __future__ import (absolute_import, unicode_literals)
 import sys
 import os
 import os.path
-import errno
 import pydoc
-import datetime
-import json
 import distutils.util
 
 from setuptools import (setup, find_packages)
