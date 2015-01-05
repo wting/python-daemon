@@ -372,6 +372,114 @@ class VersionInfoTranslator_astext_TestCase(
                         },
                     ],
                 }),
+            ('trailing comment', {
+                'test_input': textwrap.dedent("""\
+                    Version NEXT
+                    ============
+
+                    :Released: FUTURE
+                    :Maintainer:
+
+                    * Lorem ipsum dolor sit amet.
+
+                    ..
+                        Vivamus aliquam felis rutrum rutrum dictum.
+
+
+                    Version 0.8
+                    ===========
+
+                    :Released: 2001-01-01
+                    :Maintainer: Foo Bar <foo.bar@example.org>
+
+                    * Donec venenatis nisl aliquam ipsum.
+                    """),
+                'expected_version_info': [
+                    {
+                        'release_date': "FUTURE",
+                        'version': "NEXT",
+                        'maintainer': "",
+                        'body': "* Lorem ipsum dolor sit amet.\n",
+                        },
+                    {
+                        'release_date': "2001-01-01",
+                        'version': "0.8",
+                        'maintainer': "Foo Bar <foo.bar@example.org>",
+                        'body': "* Donec venenatis nisl aliquam ipsum.\n",
+                        },
+                    ],
+                }),
+            ('inline comment', {
+                'test_input': textwrap.dedent("""\
+                    Version NEXT
+                    ============
+
+                    :Released: FUTURE
+                    :Maintainer:
+
+                    ..
+                        Vivamus aliquam felis rutrum rutrum dictum.
+
+                    * Lorem ipsum dolor sit amet.
+
+
+                    Version 0.8
+                    ===========
+
+                    :Released: 2001-01-01
+                    :Maintainer: Foo Bar <foo.bar@example.org>
+
+                    * Donec venenatis nisl aliquam ipsum.
+                    """),
+                'expected_version_info': [
+                    {
+                        'release_date': "FUTURE",
+                        'version': "NEXT",
+                        'maintainer': "",
+                        'body': "* Lorem ipsum dolor sit amet.\n",
+                        },
+                    {
+                        'release_date': "2001-01-01",
+                        'version': "0.8",
+                        'maintainer': "Foo Bar <foo.bar@example.org>",
+                        'body': "* Donec venenatis nisl aliquam ipsum.\n",
+                        },
+                    ],
+                }),
+            ('unreleased entry', {
+                'test_input': textwrap.dedent("""\
+                    Version NEXT
+                    ============
+
+                    :Released: FUTURE
+                    :Maintainer:
+
+                    * Lorem ipsum dolor sit amet.
+
+
+                    Version 0.8
+                    ===========
+
+                    :Released: 2001-01-01
+                    :Maintainer: Foo Bar <foo.bar@example.org>
+
+                    * Donec venenatis nisl aliquam ipsum.
+                    """),
+                'expected_version_info': [
+                    {
+                        'release_date': "FUTURE",
+                        'version': "NEXT",
+                        'maintainer': "",
+                        'body': "* Lorem ipsum dolor sit amet.\n",
+                        },
+                    {
+                        'release_date': "2001-01-01",
+                        'version': "0.8",
+                        'maintainer': "Foo Bar <foo.bar@example.org>",
+                        'body': "* Donec venenatis nisl aliquam ipsum.\n",
+                        },
+                    ],
+                }),
             ('document title', {
                 'test_input': textwrap.dedent("""\
                     Change Log for frobnicator
@@ -456,6 +564,70 @@ class VersionInfoTranslator_astext_TestCase(
                     :Maintainer: Foo Bar <foo.bar@example.org>
 
                     * Lorem ipsum dolor sit amet.
+                    """),
+                'expected_error': version.InvalidFormatError,
+                }),
+            ('unknown field', {
+                'test_input': textwrap.dedent("""\
+                    Version 1.0
+                    ===========
+
+                    :Released: 2009-01-01
+                    :Maintainer: Foo Bar <foo.bar@example.org>
+                    :Favourite: Spam
+
+                    * Lorem ipsum dolor sit amet.
+
+
+                    Version 0.8
+                    ===========
+
+                    :Released: 2001-01-01
+                    :Maintainer: Foo Bar <foo.bar@example.org>
+
+                    * Donec venenatis nisl aliquam ipsum.
+                    """),
+                'expected_error': version.InvalidFormatError,
+                }),
+            ('invalid version word', {
+                'test_input': textwrap.dedent("""\
+                    BoGuS 1.0
+                    =========
+
+                    :Released: 2009-01-01
+                    :Maintainer: Foo Bar <foo.bar@example.org>
+
+                    * Lorem ipsum dolor sit amet.
+
+
+                    Version 0.8
+                    ===========
+
+                    :Released: 2001-01-01
+                    :Maintainer: Foo Bar <foo.bar@example.org>
+
+                    * Donec venenatis nisl aliquam ipsum.
+                    """),
+                'expected_error': version.InvalidFormatError,
+                }),
+            ('invalid section title', {
+                'test_input': textwrap.dedent("""\
+                    Lorem Ipsum 1.0
+                    ===============
+
+                    :Released: 2009-01-01
+                    :Maintainer: Foo Bar <foo.bar@example.org>
+
+                    * Lorem ipsum dolor sit amet.
+
+
+                    Version 0.8
+                    ===========
+
+                    :Released: 2001-01-01
+                    :Maintainer: Foo Bar <foo.bar@example.org>
+
+                    * Donec venenatis nisl aliquam ipsum.
                     """),
                 'expected_error': version.InvalidFormatError,
                 }),
