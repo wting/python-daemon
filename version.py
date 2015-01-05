@@ -73,8 +73,8 @@ class VersionInfoWriter(docutils.writers.Writer, object):
         self.output = visitor.astext()
 
 
-class NewsEntry:
-    """ An individual entry from the ‘NEWS’ document. """
+class ChangeLogEntry:
+    """ An individual entry from the ‘ChangeLog’ document. """
 
     __metaclass__ = type
 
@@ -116,7 +116,7 @@ class NewsEntry:
             return None
 
         # Raises `ValueError` if parse fails.
-        datetime.datetime.strptime(value, NewsEntry.date_format)
+        datetime.datetime.strptime(value, ChangeLogEntry.date_format)
 
     @classmethod
     def validate_maintainer(cls, value):
@@ -148,7 +148,7 @@ class NewsEntry:
         return result
 
     def as_version_info_entry(self):
-        """ Format the news entry as a version info entry. """
+        """ Format the changelog entry as a version info entry. """
         fields = vars(self)
         entry = self.make_ordered_dict(fields)
 
@@ -166,15 +166,16 @@ def get_name_for_field_body(node):
 
 
 class InvalidFormatError(ValueError):
-    """ Raised when the document is not a valid NEWS document. """
+    """ Raised when the document is not a valid ‘ChangeLog’ document. """
 
 
-def news_timestamp_to_datetime(text):
-    """ Return a datetime value from the news entry timestamp. """
+def changelog_timestamp_to_datetime(text):
+    """ Return a datetime value from the changelog entry timestamp. """
     if text == "FUTURE":
         timestamp = datetime.datetime.max
     else:
-        timestamp = datetime.datetime.strptime(text, NewsEntry.date_format)
+        timestamp = datetime.datetime.strptime(
+                text, ChangeLogEntry.date_format)
     return timestamp
 
 
@@ -285,7 +286,7 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
         self.append_to_current_entry("\n")
 
     def visit_section(self, node):
-        self.current_entry = NewsEntry()
+        self.current_entry = ChangeLogEntry()
 
     def depart_section(self, node):
         self.content.append(
@@ -447,7 +448,7 @@ def parse_person_field(value):
 def validate_distutils_release_date_value(distribution, attrib, value):
     """ Validate the ‘release_date’ parameter value. """
     try:
-        NewsEntry.validate_release_date(value)
+        ChangeLogEntry.validate_release_date(value)
     except ValueError as exc:
         raise distutils.DistutilsSetupError(
                 "{attrib!r} must be a valid release date"
@@ -467,7 +468,7 @@ def generate_version_info_from_distribution(distribution):
     else:
         maintainer_text = ""
 
-    result = NewsEntry.make_ordered_dict({
+    result = ChangeLogEntry.make_ordered_dict({
             'version': distribution.version,
             'release_date': distribution.release_date,
             'maintainer': maintainer_text,
@@ -495,7 +496,7 @@ def get_latest_version(version_info):
             item['release_date']: item
             for item in version_info}
     latest_release_date = max(versions_by_release_date.keys())
-    version = NewsEntry.make_ordered_dict(
+    version = ChangeLogEntry.make_ordered_dict(
             versions_by_release_date[latest_release_date])
     return version
 

@@ -82,35 +82,35 @@ class VersionInfoWriter_translate_TestCase(testtools.TestCase):
         self.assertEqual(expected_output, instance.output)
 
 
-class NewsEntry_TestCase(testtools.TestCase):
-    """ Test cases for ‘NewsEntry’ class. """
+class ChangeLogEntry_TestCase(testtools.TestCase):
+    """ Test cases for ‘ChangeLogEntry’ class. """
 
     def setUp(self):
         """ Set up test fixtures. """
-        super(NewsEntry_TestCase, self).setUp()
+        super(ChangeLogEntry_TestCase, self).setUp()
 
-        self.test_instance = version.NewsEntry()
+        self.test_instance = version.ChangeLogEntry()
 
     def test_instantiate(self):
-        """ New instance of ‘NewsEntry’ should be created. """
+        """ New instance of ‘ChangeLogEntry’ should be created. """
         self.assertIsInstance(
-                self.test_instance, version.NewsEntry)
+                self.test_instance, version.ChangeLogEntry)
 
     def test_minimum_zero_arguments(self):
         """ Initialiser should not require any arguments. """
-        instance = version.NewsEntry()
+        instance = version.ChangeLogEntry()
         self.assertIsNot(instance, None)
 
 
-class NewsEntry_release_date_TestCase(
+class ChangeLogEntry_release_date_TestCase(
         testscenarios.WithScenarios, testtools.TestCase):
-    """ Test cases for ‘NewsEntry.release_date’ attribute. """
+    """ Test cases for ‘ChangeLogEntry.release_date’ attribute. """
 
     scenarios = [
             ('default', {
                 'test_args': {},
                 'expected_release_date':
-                    version.NewsEntry.default_release_date,
+                    version.ChangeLogEntry.default_release_date,
                 }),
             ('unknown token', {
                 'test_args': {'release_date': "UNKNOWN"},
@@ -135,21 +135,21 @@ class NewsEntry_release_date_TestCase(
         if hasattr(self, 'expected_error'):
             self.assertRaises(
                     self.expected_error,
-                    version.NewsEntry, **self.test_args)
+                    version.ChangeLogEntry, **self.test_args)
         else:
-            instance = version.NewsEntry(**self.test_args)
+            instance = version.ChangeLogEntry(**self.test_args)
             self.assertEqual(self.expected_release_date, instance.release_date)
 
 
-class NewsEntry_version_TestCase(
+class ChangeLogEntry_version_TestCase(
         testscenarios.WithScenarios, testtools.TestCase):
-    """ Test cases for ‘NewsEntry.version’ attribute. """
+    """ Test cases for ‘ChangeLogEntry.version’ attribute. """
 
     scenarios = [
             ('default', {
                 'test_args': {},
                 'expected_version':
-                    version.NewsEntry.default_version,
+                    version.ChangeLogEntry.default_version,
                 }),
             ('unknown token', {
                 'test_args': {'version': "UNKNOWN"},
@@ -163,13 +163,13 @@ class NewsEntry_version_TestCase(
 
     def test_has_expected_version(self):
         """ Should have default `version` attribute. """
-        instance = version.NewsEntry(**self.test_args)
+        instance = version.ChangeLogEntry(**self.test_args)
         self.assertEqual(self.expected_version, instance.version)
 
 
-class NewsEntry_maintainer_TestCase(
+class ChangeLogEntry_maintainer_TestCase(
         testscenarios.WithScenarios, testtools.TestCase):
-    """ Test cases for ‘NewsEntry.maintainer’ attribute. """
+    """ Test cases for ‘ChangeLogEntry.maintainer’ attribute. """
 
     scenarios = [
             ('default', {
@@ -191,15 +191,15 @@ class NewsEntry_maintainer_TestCase(
         if hasattr(self, 'expected_error'):
             self.assertRaises(
                     self.expected_error,
-                    version.NewsEntry, **self.test_args)
+                    version.ChangeLogEntry, **self.test_args)
         else:
-            instance = version.NewsEntry(**self.test_args)
+            instance = version.ChangeLogEntry(**self.test_args)
             self.assertEqual(self.expected_maintainer, instance.maintainer)
 
 
-class NewsEntry_body_TestCase(
+class ChangeLogEntry_body_TestCase(
         testscenarios.WithScenarios, testtools.TestCase):
-    """ Test cases for ‘NewsEntry.body’ attribute. """
+    """ Test cases for ‘ChangeLogEntry.body’ attribute. """
 
     scenarios = [
             ('default', {
@@ -214,20 +214,20 @@ class NewsEntry_body_TestCase(
 
     def test_has_expected_body(self):
         """ Should have default `body` attribute. """
-        instance = version.NewsEntry(**self.test_args)
+        instance = version.ChangeLogEntry(**self.test_args)
         self.assertEqual(self.expected_body, instance.body)
 
 
-class NewsEntry_as_version_info_entry_TestCase(
+class ChangeLogEntry_as_version_info_entry_TestCase(
         testscenarios.WithScenarios, testtools.TestCase):
-    """ Test cases for ‘NewsEntry.as_version_info_entry’ attribute. """
+    """ Test cases for ‘ChangeLogEntry.as_version_info_entry’ attribute. """
 
     scenarios = [
         ('default', {
             'test_args': {},
             'expected_result': collections.OrderedDict([
-                ('release_date', version.NewsEntry.default_release_date),
-                ('version', version.NewsEntry.default_version),
+                ('release_date', version.ChangeLogEntry.default_release_date),
+                ('version', version.ChangeLogEntry.default_version),
                 ('maintainer', None),
                 ('body', None),
                 ]),
@@ -236,9 +236,9 @@ class NewsEntry_as_version_info_entry_TestCase(
 
     def setUp(self):
         """ Set up test fixtures. """
-        super(NewsEntry_as_version_info_entry_TestCase, self).setUp()
+        super(ChangeLogEntry_as_version_info_entry_TestCase, self).setUp()
 
-        self.test_instance = version.NewsEntry(**self.test_args)
+        self.test_instance = version.ChangeLogEntry(**self.test_args)
 
     def test_returns_result(self):
         """ Should return expected result. """
