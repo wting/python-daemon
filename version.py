@@ -48,7 +48,7 @@ except NameError: # pragma: nocover
     basestring = str
     unicode = str
 
-from docutils.core import publish_string
+import docutils.core
 import docutils.nodes
 import docutils.writers
 
@@ -324,16 +324,32 @@ def generate_version_info_from_changelog(infile_path):
     try:
         with open(infile_path, 'rt') as infile:
             infile_content = infile.read()
-    except IOError:
+    except OSError:
         pass
 
     if infile_content is not None:
-        versions_all_json = publish_string(
+        versions_all_json = docutils.core.publish_string(
                 infile_content, writer=VersionInfoWriter())
         versions_all = json.loads(versions_all_json.decode('utf-8'))
         version_info = get_latest_version(versions_all)
 
     return version_info
+
+
+def get_latest_version(version_info):
+    """ Get the latest version from a version-info stream.
+
+        :param version_info: A sequence of mappings for changelog entries.
+        :return: The latest version, as an ordered mapping of fields.
+
+        """
+    versions_by_release_date = {
+            item['release_date']: item
+            for item in version_info}
+    latest_release_date = max(versions_by_release_date.keys())
+    version = ChangeLogEntry.make_ordered_dict(
+            versions_by_release_date[latest_release_date])
+    return version
 
 
 def serialise_version_info_from_mapping(version_info):
@@ -402,22 +418,6 @@ def generate_egg_info_metadata(cmd, outfile_name, outfile_path):
     version_info = generate_version_info_from_distribution(cmd.distribution)
     content = serialise_version_info_from_mapping(version_info)
     cmd.write_file("version info", outfile_path, content)
-
-
-def get_latest_version(version_info):
-    """ Get the latest version from a version-info stream.
-
-        :param version_info: A sequence of mappings for changelog entries.
-        :return: The latest version, as an ordered mapping of fields.
-
-        """
-    versions_by_release_date = {
-            item['release_date']: item
-            for item in version_info}
-    latest_release_date = max(versions_by_release_date.keys())
-    version = ChangeLogEntry.make_ordered_dict(
-            versions_by_release_date[latest_release_date])
-    return version
 
 
 # Local variables:

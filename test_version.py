@@ -14,14 +14,29 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
+try:
+    # Python 3 standard library.
+    import builtins
+except ImportError:
+    # Python 2 standard library.
+    import __builtin__ as builtins
+import errno
+import functools
 import collections
 import textwrap
+import json
+import tempfile
+try:
+    # Standard library of Python 2.7 and later.
+    from io import StringIO
+except ImportError:
+    # Standard library of Python 2.6 and earlier.
+    from StringIO import StringIO
 
 import mock
 import testtools
 import testscenarios
 import docutils
-import json
 
 import version
 
@@ -646,6 +661,86 @@ class VersionInfoTranslator_astext_TestCase(
         else:
             result = docutils.core.publish_string(**args)
             self.assertThat(result, JsonEqual(self.expected_version_info))
+
+
+try:
+    FileNotFoundError
+    PermissionError
+except NameError:
+    # Python 2 uses OSError.
+    FileNotFoundError = functools.partial(OSError, errno.ENOENT)
+    PermissionError = functools.partial(OSError, errno.EPERM)
+
+fake_version_info = {
+        'release_date': "2001-01-01", 'version': "2.0",
+        'maintainer': None, 'body': None,
+        }
+
+@mock.patch.object(
+        version, "get_latest_version", return_value=fake_version_info)
+@mock.patch.object(docutils.core, "publish_string")
+class generate_version_info_from_changelog_TestCase(
+        testscenarios.WithScenarios, testtools.TestCase):
+    """ Test cases for ‘generate_version_info_from_changelog’ function. """
+
+    fake_open_side_effects = {
+            'success': (
+                lambda *args, **kwargs: StringIO()),
+            'file not found': FileNotFoundError(),
+            'permission denied': PermissionError(),
+            }
+
+    scenarios = [
+            ('simple', {
+                'open_scenario': 'success',
+                'fake_versions_json': json.dumps([fake_version_info]),
+                'expected_result': fake_version_info,
+                }),
+            ('file not found', {
+                'open_scenario': 'file not found',
+                'expected_result': {},
+                }),
+            ('permission denied', {
+                'open_scenario': 'permission denied',
+                'expected_result': {},
+                }),
+            ]
+
+    def setUp(self):
+        """ Set up test fixtures. """
+        super(generate_version_info_from_changelog_TestCase, self).setUp()
+
+        self.fake_changelog_file_path = tempfile.mktemp()
+
+        def fake_open(filename, mode='rt', buffering=None):
+            if filename == self.fake_changelog_file_path:
+                side_effect = self.fake_open_side_effects[self.open_scenario]
+                if hasattr(side_effect, '__call__'):
+                    result = side_effect(filename, mode, buffering)
+                else:
+                    raise side_effect
+            else:
+                result = StringIO()
+            return result
+
+        mock_open = mock.mock_open()
+        mock_open.side_effect = fake_open
+
+        func_patcher_builtin_open = mock.patch.object(
+                builtins, "open",
+                new=mock_open)
+        func_patcher_builtin_open.start()
+        self.addCleanup(func_patcher_builtin_open.stop)
+
+    def test_returns_expected_result(
+            self, mock_func_publish_string, mock_func_get_latest_version):
+        """ Should return expected result. """
+        if hasattr(self, 'fake_versions_json'):
+            mock_func_publish_string.return_value = (
+                    self.fake_versions_json.encode('utf-8'))
+        result = version.generate_version_info_from_changelog(
+                self.fake_changelog_file_path)
+        self.assertEqual(self.expected_result, result)
 
 
 # Local variables:
