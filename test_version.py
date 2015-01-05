@@ -15,14 +15,15 @@
 from __future__ import (absolute_import, unicode_literals)
 
 import collections
+import textwrap
 
 import mock
 import testtools
 import testscenarios
 import docutils
+import json
 
 import version
-from version import (basestring, unicode)
 
 
 class VersionInfoWriter_TestCase(testtools.TestCase):
@@ -223,16 +224,16 @@ class ChangeLogEntry_as_version_info_entry_TestCase(
     """ Test cases for ‘ChangeLogEntry.as_version_info_entry’ attribute. """
 
     scenarios = [
-        ('default', {
-            'test_args': {},
-            'expected_result': collections.OrderedDict([
-                ('release_date', version.ChangeLogEntry.default_release_date),
-                ('version', version.ChangeLogEntry.default_version),
-                ('maintainer', None),
-                ('body', None),
-                ]),
-            }),
-        ]
+            ('default', {
+                'test_args': {},
+                'expected_result': collections.OrderedDict([
+                    ('release_date', version.ChangeLogEntry.default_release_date),
+                    ('version', version.ChangeLogEntry.default_version),
+                    ('maintainer', None),
+                    ('body', None),
+                    ]),
+                }),
+            ]
 
     def setUp(self):
         """ Set up test fixtures. """
@@ -244,6 +245,235 @@ class ChangeLogEntry_as_version_info_entry_TestCase(
         """ Should return expected result. """
         result = self.test_instance.as_version_info_entry()
         self.assertEqual(self.expected_result, result)
+
+
+def make_mock_field_node(field_name, field_body):
+    """ Make a mock Docutils field node for tests. """
+
+    mock_field_node = mock.MagicMock(
+            name='field', spec=docutils.nodes.field)
+
+    mock_field_name_node = mock.MagicMock(
+            name='field_name', spec=docutils.nodes.field_name)
+    mock_field_name_node.parent = mock_field_node
+    mock_field_name_node.children = [field_name]
+
+    mock_field_body_node = mock.MagicMock(
+            name='field_body', spec=docutils.nodes.field_body)
+    mock_field_body_node.parent = mock_field_node
+    mock_field_body_node.children = [field_body]
+
+    mock_field_node.children = [mock_field_name_node, mock_field_body_node]
+
+    def fake_func_first_child_matching_class(node_class):
+        result = None
+        node_class_name = node_class.__name__
+        for (index, node) in enumerate(mock_field_node.children):
+            if node._mock_name == node_class_name:
+                result = index
+                break
+        return result
+
+    mock_field_node.first_child_matching_class.side_effect = (
+            fake_func_first_child_matching_class)
+
+    return mock_field_node
+
+
+class get_name_for_field_body_TestCase(
+        testscenarios.WithScenarios, testtools.TestCase):
+    """ Test cases for ‘get_name_for_field_body’ function. """
+
+    scenarios = [
+            ('simple', {
+                'test_field_node': make_mock_field_node("Foo", "spam"),
+                'expected_field_name': "Foo",
+                }),
+            ]
+
+    def test_returns_expected_field_name(self):
+        """ Should return expected field name. """
+        field_body_node = self.test_field_node.children[1]
+        result = version.get_name_for_field_body(field_body_node)
+        self.assertEqual(self.expected_field_name, result)
+
+
+class JsonEqual(testtools.matchers.Matcher):
+    """ A matcher to compare the value of JSON streams. """
+
+    def __init__(self, expected):
+        self.expected_value = expected
+
+    def match(self, content):
+        """ Assert the JSON `content` matches the `expected_content`. """
+        # import pdb ; pdb.set_trace()
+        result = None
+        actual_value = json.loads(content.decode('utf-8'))
+        if actual_value != self.expected_value:
+            result = JsonValueMismatch(self.expected_value, actual_value)
+        return result
+
+
+class JsonValueMismatch(testtools.matchers.Mismatch):
+    """ The specified JSON stream does not evaluate to the expected value. """
+
+    def __init__(self, expected, actual):
+        self.expected_value = expected
+        self.actual_value = actual
+
+    def describe(self):
+        """ Emit a text description of this mismatch. """
+        expected_json_text = json.dumps(self.expected_value, indent=4)
+        actual_json_text = json.dumps(self.actual_value, indent=4)
+        text = (
+                "\n"
+                "reference: {expected}\n"
+                "actual: {actual}\n").format(
+                    expected=expected_json_text, actual=actual_json_text)
+        return text
+
+
+class VersionInfoTranslator_astext_TestCase(
+        testscenarios.WithScenarios, testtools.TestCase):
+    """ Test cases for ‘VersionInfoTranslator.astext’ method. """
+
+    scenarios = [
+            ('mutiple entries', {
+                'test_input': textwrap.dedent("""\
+                    Version 1.0
+                    ===========
+
+                    :Released: 2009-01-01
+                    :Maintainer: Foo Bar <foo.bar@example.org>
+
+                    * Lorem ipsum dolor sit amet.
+
+
+                    Version 0.8
+                    ===========
+
+                    :Released: 2001-01-01
+                    :Maintainer: Foo Bar <foo.bar@example.org>
+
+                    * Donec venenatis nisl aliquam ipsum.
+                    """),
+                'expected_version_info': [
+                    {
+                        'release_date': "2009-01-01",
+                        'version': "1.0",
+                        'maintainer': "Foo Bar <foo.bar@example.org>",
+                        'body': "* Lorem ipsum dolor sit amet.\n",
+                        },
+                    {
+                        'release_date': "2001-01-01",
+                        'version': "0.8",
+                        'maintainer': "Foo Bar <foo.bar@example.org>",
+                        'body': "* Donec venenatis nisl aliquam ipsum.\n",
+                        },
+                    ],
+                }),
+            ('document title', {
+                'test_input': textwrap.dedent("""\
+                    Change Log for frobnicator
+                    ##########################
+
+                    Version 1.0
+                    ===========
+
+                    :Released: 2009-01-01
+                    :Maintainer: Foo Bar <foo.bar@example.org>
+
+                    * Lorem ipsum dolor sit amet.
+
+
+                    Version 0.8
+                    ===========
+
+                    :Released: 2001-01-01
+                    :Maintainer: Foo Bar <foo.bar@example.org>
+
+                    * Donec venenatis nisl aliquam ipsum.
+                    """),
+                'expected_version_info': [
+                    {
+                        'release_date': "2009-01-01",
+                        'version': "1.0",
+                        'maintainer': "Foo Bar <foo.bar@example.org>",
+                        'body': "* Lorem ipsum dolor sit amet.\n",
+                        },
+                    {
+                        'release_date': "2001-01-01",
+                        'version': "0.8",
+                        'maintainer': "Foo Bar <foo.bar@example.org>",
+                        'body': "* Donec venenatis nisl aliquam ipsum.\n",
+                        },
+                    ],
+                }),
+            ('document title and subtitle', {
+                'test_input': textwrap.dedent("""\
+                    ##########
+                    Change Log
+                    ##########
+
+                    for package Frobnicator
+                    #######################
+
+                    Version 1.0
+                    ===========
+
+                    :Released: 2009-01-01
+                    :Maintainer: Foo Bar <foo.bar@example.org>
+
+                    * Lorem ipsum dolor sit amet.
+
+
+                    Version 0.8
+                    ===========
+
+                    :Released: 2001-01-01
+                    :Maintainer: Foo Bar <foo.bar@example.org>
+
+                    * Donec venenatis nisl aliquam ipsum.
+                    """),
+                'expected_version_info': [
+                    {
+                        'release_date': "2009-01-01",
+                        'version': "1.0",
+                        'maintainer': "Foo Bar <foo.bar@example.org>",
+                        'body': "* Lorem ipsum dolor sit amet.\n",
+                        },
+                    {
+                        'release_date': "2001-01-01",
+                        'version': "0.8",
+                        'maintainer': "Foo Bar <foo.bar@example.org>",
+                        'body': "* Donec venenatis nisl aliquam ipsum.\n",
+                        },
+                    ],
+                }),
+            ('no section', {
+                'test_input': textwrap.dedent("""\
+                    :Released: 2009-01-01
+                    :Maintainer: Foo Bar <foo.bar@example.org>
+
+                    * Lorem ipsum dolor sit amet.
+                    """),
+                'expected_error': version.InvalidFormatError,
+                }),
+            ]
+
+    def test_returns_expected_version_info(self):
+        """ Should return expected version info mapping. """
+        args = {
+                'source': self.test_input,
+                'writer': version.VersionInfoWriter(),
+                }
+        if hasattr(self, 'expected_error'):
+            self.assertRaises(
+                    self.expected_error,
+                    docutils.core.publish_string, **args)
+        else:
+            result = docutils.core.publish_string(**args)
+            self.assertThat(result, JsonEqual(self.expected_version_info))
 
 
 # Local variables:

@@ -164,10 +164,6 @@ def get_name_for_field_body(node):
     return field_name
 
 
-class InvalidFormatError(ValueError):
-    """ Raised when the document is not a valid ‘ChangeLog’ document. """
-
-
 def changelog_timestamp_to_datetime(text):
     """ Return a datetime value from the changelog entry timestamp. """
     if text == "FUTURE":
@@ -176,6 +172,10 @@ def changelog_timestamp_to_datetime(text):
         timestamp = datetime.datetime.strptime(
                 text, ChangeLogEntry.date_format)
     return timestamp
+
+
+class InvalidFormatError(ValueError):
+    """ Raised when the document is not a valid ‘ChangeLog’ document. """
 
 
 class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
@@ -229,6 +229,11 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
         pass
 
     def visit_field_body(self, node):
+        field_list_node = node.parent.parent
+        if not isinstance(field_list_node, docutils.nodes.field_list):
+            raise InvalidFormatError(
+                    "Unexpected field within {node!r}".format(
+                        node=field_list_node))
         (attr_name, convert_func) = self.attr_convert_funcs_by_attr_name[
                 self.current_field_name]
         attr_value = convert_func(node.astext())
