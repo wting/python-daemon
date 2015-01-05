@@ -164,16 +164,6 @@ def get_name_for_field_body(node):
     return field_name
 
 
-def changelog_timestamp_to_datetime(text):
-    """ Return a datetime value from the changelog entry timestamp. """
-    if text == "FUTURE":
-        timestamp = datetime.datetime.max
-    else:
-        timestamp = datetime.datetime.strptime(
-                text, ChangeLogEntry.date_format)
-    return timestamp
-
-
 class InvalidFormatError(ValueError):
     """ Raised when the document is not a valid ‘ChangeLog’ document. """
 
@@ -225,9 +215,6 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
     def visit_comment(self, node):
         raise docutils.nodes.SkipNode
 
-    def depart_comment(self, node):
-        pass
-
     def visit_field_body(self, node):
         field_list_node = node.parent.parent
         if not isinstance(field_list_node, docutils.nodes.field_list):
@@ -238,7 +225,6 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
                 self.current_field_name]
         attr_value = convert_func(node.astext())
         setattr(self.current_entry, attr_name, attr_value)
-        raise docutils.nodes.SkipNode
 
     def depart_field_body(self, node):
         pass
@@ -261,7 +247,6 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
             raise InvalidFormatError(
                     "Unexpected field name {name!r}".format(name=field_name))
         self.current_field_name = field_name.lower()
-        raise docutils.nodes.SkipNode
 
     def depart_field_name(self, node):
         pass
@@ -363,76 +348,6 @@ def serialise_version_info_from_mapping(version_info):
     return content
 
 
-@lru_cache(maxsize=128)
-def get_existing_version_info_content(infile_path):
-    """ Get the content of the existing version-info file.
-
-        :param infile_path: Filesystem path to the input version-info file.
-        :return: The content of the input file, or ``None`` if the
-            file cannot be read.
-
-        """
-    content = None
-
-    try:
-        with open(infile_path, 'rt') as infile:
-            content = infile.read()
-    except IOError:
-        pass
-
-    return content
-
-
-def is_source_file_newer(source_path, destination_path, force=False):
-    """ Return True if destination is older than source or does not exist.
-
-        :param source_path: Filesystem path to the source file.
-        :param destination_path: Filesystem path to the destination file.
-        :param force: If true, return ``True`` without examining files.
-
-        :return: ``False`` iff the age of the destination file (if it
-            exists) is no older than the age of the source file.
-
-        A file's age is determined from its content modification
-        timestamp in the filesystem.
-
-        """
-    result = True
-    if not force:
-        source_stat = os.stat(source_path)
-        source_mtime = source_stat.st_mtime
-        try:
-            destination_stat = os.stat(destination_path)
-        except OSError as exc:
-            if exc.errno == errno.ENOENT:
-                destination_mtime = None
-            else:
-                raise
-        else:
-            destination_mtime = destination_stat.st_mtime
-        if destination_mtime is not None:
-            result = (source_mtime > destination_mtime)
-
-    return result
-
-
-def generate_version_info_file(outfile_path, changelog_file_path):
-    """ Generate the version-info file from the changelog.
-
-        :param outfile_path: Filesystem path to the version-info file.
-        :param changelog_file_path: Filesystem path to the changelog.
-        :return: ``None``.
-
-        """
-    generated_content = get_generated_version_info_content(changelog_file_path)
-    existing_content = get_existing_version_info_content(outfile_path)
-
-    if generated_content is not None:
-        version_info_file = open(outfile_path, 'w+t')
-        version_info_file.write(generated_content)
-        version_info_file.close()
-
-
 rfc822_person_regex = re.compile(
         "^(?P<name>[^<]+) <(?P<email>[^>]+)>$")
 
@@ -503,27 +418,6 @@ def get_latest_version(version_info):
     version = ChangeLogEntry.make_ordered_dict(
             versions_by_release_date[latest_release_date])
     return version
-
-
-@lru_cache(maxsize=128)
-def read_version_info_from_file(infile_path):
-    """ Read the version info from the specified file.
-
-        :param infile_path: Filesystem path to the version-info file.
-        :return: The version info mapping for the recorded version.
-
-        The version info file contains a JSON-serialised rendering of
-        the changelog entry for the distribution from which the
-        package was built.
-
-        """
-    result = None
-
-    infile_content = get_existing_version_info_content(infile_path)
-    if infile_content is not None:
-        result = json.loads(infile_content)
-
-    return result
 
 
 # Local variables:
