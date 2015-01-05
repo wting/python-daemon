@@ -28,11 +28,11 @@ import signal
 import socket
 import atexit
 
-try:
+try: # pragma: nocover
     # Python 2 has both ‘str’ (bytes) and ‘unicode’.
     basestring = basestring
     unicode = unicode
-except NameError:
+except NameError: # pragma: nocover
     # Python 3 names the Unicode data type ‘str’.
     basestring = str
     unicode = str

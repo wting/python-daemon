@@ -38,17 +38,18 @@ import re
 import functools
 import collections
 import distutils
+import distutils.errors
 
-try:
+try: # pragma: nocover
     # Python 2 has both ‘str’ (bytes) and ‘unicode’.
     basestring = basestring
     unicode = unicode
-except NameError:
+except NameError: # pragma: nocover
     # Python 3 names the Unicode data type ‘str’.
     basestring = str
     unicode = str
 
-from docutils.core import publish_string
+import docutils.core
 import docutils.nodes
 import docutils.writers
 
@@ -168,16 +169,6 @@ class InvalidFormatError(ValueError):
     """ Raised when the document is not a valid ‘ChangeLog’ document. """
 
 
-def changelog_timestamp_to_datetime(text):
-    """ Return a datetime value from the changelog entry timestamp. """
-    if text == "FUTURE":
-        timestamp = datetime.datetime.max
-    else:
-        timestamp = datetime.datetime.strptime(
-                text, ChangeLogEntry.date_format)
-    return timestamp
-
-
 class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
     """ Translator from document nodes to a version info stream. """
 
@@ -225,15 +216,16 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
     def visit_comment(self, node):
         raise docutils.nodes.SkipNode
 
-    def depart_comment(self, node):
-        pass
-
     def visit_field_body(self, node):
+        field_list_node = node.parent.parent
+        if not isinstance(field_list_node, docutils.nodes.field_list):
+            raise InvalidFormatError(
+                    "Unexpected field within {node!r}".format(
+                        node=field_list_node))
         (attr_name, convert_func) = self.attr_convert_funcs_by_attr_name[
                 self.current_field_name]
         attr_value = convert_func(node.astext())
         setattr(self.current_entry, attr_name, attr_value)
-        raise docutils.nodes.SkipNode
 
     def depart_field_body(self, node):
         pass
@@ -256,7 +248,6 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
             raise InvalidFormatError(
                     "Unexpected field name {name!r}".format(name=field_name))
         self.current_field_name = field_name.lower()
-        raise docutils.nodes.SkipNode
 
     def depart_field_name(self, node):
         pass
@@ -311,9 +302,9 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
         self.current_entry.version = version
 
 
-try:
+try: # pragma: nocover
     lru_cache = functools.lru_cache
-except AttributeError:
+except AttributeError: # pragma: nocover
     # Python < 3.2 does not have the `functools.lru_cache` function.
     # Not essential, so replace it with a no-op.
     lru_cache = lambda maxsize=None, typed=False: lambda func: func
@@ -334,14 +325,35 @@ def generate_version_info_from_changelog(infile_path):
     try:
         with open(infile_path, 'rt') as infile:
             infile_content = infile.read()
-    except IOError:
+    except OSError:
         pass
 
     if infile_content is not None:
-        versions_all_json = publish_string(
+        versions_all_json = docutils.core.publish_string(
                 infile_content, writer=VersionInfoWriter())
         versions_all = json.loads(versions_all_json.decode('utf-8'))
         version_info = get_latest_version(versions_all)
+
+    return version_info
+
+
+def get_latest_version(versions):
+    """ Get the latest version from a collection of changelog entries.
+
+        :param versions: A collection of mappings for changelog entries.
+        :return: An ordered mapping of fields for the latest version,
+            if `versions` is non-empty; otherwise, an empty mapping.
+
+        """
+    version_info = collections.OrderedDict()
+
+    versions_by_release_date = {
+            item['release_date']: item
+            for item in versions}
+    if versions_by_release_date:
+        latest_release_date = max(versions_by_release_date.keys())
+        version_info = ChangeLogEntry.make_ordered_dict(
+                versions_by_release_date[latest_release_date])
 
     return version_info
 
@@ -357,99 +369,57 @@ def serialise_version_info_from_mapping(version_info):
 
     return content
 
-
-@lru_cache(maxsize=128)
-def get_existing_version_info_content(infile_path):
-    """ Get the content of the existing version-info file.
-
-        :param infile_path: Filesystem path to the input version-info file.
-        :return: The content of the input file, or ``None`` if the
-            file cannot be read.
-
-        """
-    content = None
-
-    try:
-        with open(infile_path, 'rt') as infile:
-            content = infile.read()
-    except IOError:
-        pass
-
-    return content
-
-
-def is_source_file_newer(source_path, destination_path, force=False):
-    """ Return True if destination is older than source or does not exist.
-
-        :param source_path: Filesystem path to the source file.
-        :param destination_path: Filesystem path to the destination file.
-        :param force: If true, return ``True`` without examining files.
-
-        :return: ``False`` iff the age of the destination file (if it
-            exists) is no older than the age of the source file.
-
-        A file's age is determined from its content modification
-        timestamp in the filesystem.
-
-        """
-    result = True
-    if not force:
-        source_stat = os.stat(source_path)
-        source_mtime = source_stat.st_mtime
-        try:
-            destination_stat = os.stat(destination_path)
-        except OSError as exc:
-            if exc.errno == errno.ENOENT:
-                destination_mtime = None
-            else:
-                raise
-        else:
-            destination_mtime = destination_stat.st_mtime
-        if destination_mtime is not None:
-            result = (source_mtime > destination_mtime)
-
-    return result
-
-
-def generate_version_info_file(outfile_path, changelog_file_path):
-    """ Generate the version-info file from the changelog.
-
-        :param outfile_path: Filesystem path to the version-info file.
-        :param changelog_file_path: Filesystem path to the changelog.
-        :return: ``None``.
-
-        """
-    generated_content = get_generated_version_info_content(changelog_file_path)
-    existing_content = get_existing_version_info_content(outfile_path)
-
-    if generated_content is not None:
-        version_info_file = open(outfile_path, 'w+t')
-        version_info_file.write(generated_content)
-        version_info_file.close()
-
-
+
 rfc822_person_regex = re.compile(
         "^(?P<name>[^<]+) <(?P<email>[^>]+)>$")
 
+ParsedPerson = collections.namedtuple('ParsedPerson', ['name', 'email'])
+
 @lru_cache(maxsize=128)
 def parse_person_field(value):
-    """ Parse a person field into name and email address. """
+    """ Parse a person field into name and email address.
+
+        :param value: The text value specifying a person.
+        :return: A 2-tuple (name, email) for the person's details.
+
+        If the `value` does not match a standard person with email
+        address, the `email` item is ``None``.
+
+        """
     result = (None, None)
 
     match = rfc822_person_regex.match(value)
-    if match is not None:
-        result = (match.name, match.email)
+    if len(value):
+        if match is not None:
+            result = ParsedPerson(
+                    name=match.group('name'),
+                    email=match.group('email'))
+        else:
+            result = ParsedPerson(name=value, email=None)
 
     return result    
 
 
 @lru_cache(maxsize=128)
 def validate_distutils_release_date_value(distribution, attrib, value):
-    """ Validate the ‘release_date’ parameter value. """
+    """ Validate the ‘release_date’ parameter value.
+
+        :param distribution: The Distutils distribution context.
+        :param attrib: The attribute for the value.
+        :param value: The value to be validated.
+        :return: ``None`` if the value is valid for the atribute.
+        :raises distutils.DistutilsSetupError: If the value is invalid
+            for the attribute.
+
+        This function is designed to be called as a Distutils entry
+        point for ‘distutils.setup_keywords’. This allows the addition
+        of a ‘release_date’ parameter to ‘setup’.
+
+        """
     try:
         ChangeLogEntry.validate_release_date(value)
     except ValueError as exc:
-        raise distutils.DistutilsSetupError(
+        raise distutils.errors.DistutilsSetupError(
                 "{attrib!r} must be a valid release date"
                 " (got {value!r}".format(
                     attrib=attrib, value=value))
@@ -478,47 +448,20 @@ def generate_version_info_from_distribution(distribution):
 
 
 def generate_egg_info_metadata(cmd, outfile_name, outfile_path):
-    """ Setuptools entry point to generate version info metadata. """
+    """ Setuptools entry point to generate version info metadata.
+
+        :param cmd: The Distutils command context.
+        :param outfile_name: Filename for the metadata file.
+        :param outfile_path: Filesystem path for the metadata file.
+
+        This function is designed to be called as a Setuptools entry
+        point for ‘egg_info.writers’. This allows the creation of the
+        metadata file during build.
+
+        """
     version_info = generate_version_info_from_distribution(cmd.distribution)
     content = serialise_version_info_from_mapping(version_info)
     cmd.write_file("version info", outfile_path, content)
-
-
-def get_latest_version(version_info):
-    """ Get the latest version from a version-info stream.
-
-        :param version_info: A sequence of mappings for changelog entries.
-        :return: The latest version, as an ordered mapping of fields.
-
-        """
-    versions_by_release_date = {
-            item['release_date']: item
-            for item in version_info}
-    latest_release_date = max(versions_by_release_date.keys())
-    version = ChangeLogEntry.make_ordered_dict(
-            versions_by_release_date[latest_release_date])
-    return version
-
-
-@lru_cache(maxsize=128)
-def read_version_info_from_file(infile_path):
-    """ Read the version info from the specified file.
-
-        :param infile_path: Filesystem path to the version-info file.
-        :return: The version info mapping for the recorded version.
-
-        The version info file contains a JSON-serialised rendering of
-        the changelog entry for the distribution from which the
-        package was built.
-
-        """
-    result = None
-
-    infile_content = get_existing_version_info_content(infile_path)
-    if infile_content is not None:
-        result = json.loads(infile_content)
-
-    return result
 
 
 # Local variables:
