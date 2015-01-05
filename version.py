@@ -86,14 +86,58 @@ class NewsEntry:
             ]
 
     date_format = "%Y-%m-%d"
+    default_version = "UNKNOWN"
+    default_release_date = "UNKNOWN"
 
     def __init__(
             self,
-            release_date=None, version=None, maintainer=None, body=None):
+            release_date=default_release_date, version=default_version,
+            maintainer=None, body=None):
+        self.validate_release_date(release_date)
         self.release_date = release_date
+
         self.version = version
+
+        self.validate_maintainer(maintainer)
         self.maintainer = maintainer
         self.body = body
+
+    @classmethod
+    def validate_release_date(cls, value):
+        """ Validate the `release_date` value.
+
+            :param value: The prospective `release_date` value.
+            :return: ``None`` if the value is valid.
+            :raises ValueError: If the value is invalid.
+
+            """
+        if value in ["UNKNOWN", "FUTURE"]:
+            # A valid non-date value.
+            return None
+
+        # Raises `ValueError` if parse fails.
+        datetime.datetime.strptime(value, NewsEntry.date_format)
+
+    @classmethod
+    def validate_maintainer(cls, value):
+        """ Validate the `maintainer` value.
+
+            :param value: The prospective `maintainer` value.
+            :return: ``None`` if the value is valid.
+            :raises ValueError: If the value is invalid.
+
+            """
+        valid = False
+
+        if value is None:
+            valid = True
+        elif rfc822_person_regex.search(value):
+            valid = True
+
+        if not valid:
+            raise ValueError("Not a valid person specification {value!r}")
+        else:
+            return None
 
     @classmethod
     def make_ordered_dict(cls, fields):
@@ -106,7 +150,6 @@ class NewsEntry:
     def as_version_info_entry(self):
         """ Format the news entry as a version info entry. """
         fields = vars(self)
-        fields['release_date'] = self.release_date.strftime(self.date_format)
         entry = self.make_ordered_dict(fields)
 
         return entry
@@ -142,7 +185,7 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
     bullet_text = "* "
 
     attr_convert_funcs_by_attr_name = {
-            'released': ('release_date', news_timestamp_to_datetime),
+            'released': ('release_date', unicode),
             'version': ('version', unicode),
             'maintainer': ('maintainer', unicode),
             }
@@ -385,13 +428,14 @@ def generate_version_info_file(outfile_path, changelog_file_path):
         version_info_file.close()
 
 
+rfc822_person_regex = re.compile(
+        "^(?P<name>[^<]+) <(?P<email>[^>]+)>$")
+
 @lru_cache(maxsize=128)
 def parse_person_field(value):
     """ Parse a person field into name and email address. """
     result = (None, None)
 
-    rfc822_person_regex = re.compile(
-            "(?P<name>[^<]+) <(?P<email>[^>]+)>")
     match = rfc822_person_regex.match(value)
     if match is not None:
         result = (match.name, match.email)
@@ -402,12 +446,8 @@ def parse_person_field(value):
 @lru_cache(maxsize=128)
 def validate_distutils_release_date_value(distribution, attrib, value):
     """ Validate the ‘release_date’ parameter value. """
-    if value in ["FUTURE"]:
-        # A valid non-date value.
-        return None
-
     try:
-        datetime.datetime.strptime(value, NewsEntry.date_format)
+        NewsEntry.validate_release_date(value)
     except ValueError as exc:
         raise distutils.DistutilsSetupError(
                 "{attrib!r} must be a valid release date"

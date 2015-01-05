@@ -91,9 +91,13 @@ def make_year_range(begin_year, end_date=None):
     begin_year = int(begin_year)
 
     end_year = None
-    if end_date is not None:
-        end_year_text = end_date.split('-')[0]
-        end_year = int(end_year_text)
+    try:
+        end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d")
+    except (TypeError, ValueError):
+        # Specified end_date value is not a valid date.
+        end_year = None
+    else:
+        end_year = end_date.year
 
     year_range = YearRange(begin=begin_year, end=end_year)
 
