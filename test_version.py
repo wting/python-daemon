@@ -787,6 +787,37 @@ class get_latest_version_TestCase(
         self.assertDictEqual(self.expected_result, result)
 
 
+@mock.patch.object(json, "dumps", side_effect=json.dumps)
+class serialise_version_info_from_mapping_TestCase(
+        testscenarios.WithScenarios, testtools.TestCase):
+    """ Test cases for ‘get_latest_version’ function. """
+
+    scenarios = [
+            ('simple', {
+                'test_version_info': {'foo': "spam"},
+                }),
+            ]
+
+    for (name, scenario) in scenarios:
+        scenario['fake_json_dump'] = json.dumps(scenario['test_version_info'])
+        scenario['expected_value'] = scenario['test_version_info']
+
+    def test_passes_specified_object(self, mock_func_json_dumps):
+        """ Should pass the specified object to `json.dumps`. """
+        result = version.serialise_version_info_from_mapping(
+                self.test_version_info)
+        mock_func_json_dumps.assert_called_with(
+                self.test_version_info, indent=mock.ANY)
+
+    def test_returns_expected_result(self, mock_func_json_dumps):
+        """ Should return expected result. """
+        mock_func_json_dumps.return_value = self.fake_json_dump
+        result = version.serialise_version_info_from_mapping(
+                self.test_version_info)
+        value = json.loads(result)
+        self.assertEqual(self.expected_value, value)
+
+
 # Local variables:
 # coding: utf-8
 # mode: python
