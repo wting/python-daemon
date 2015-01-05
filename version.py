@@ -39,11 +39,11 @@ import functools
 import collections
 import distutils
 
-try:
+try: # pragma: nocover
     # Python 2 has both ‘str’ (bytes) and ‘unicode’.
     basestring = basestring
     unicode = unicode
-except NameError:
+except NameError: # pragma: nocover
     # Python 3 names the Unicode data type ‘str’.
     basestring = str
     unicode = str
@@ -301,9 +301,9 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
         self.current_entry.version = version
 
 
-try:
+try: # pragma: nocover
     lru_cache = functools.lru_cache
-except AttributeError:
+except AttributeError: # pragma: nocover
     # Python < 3.2 does not have the `functools.lru_cache` function.
     # Not essential, so replace it with a no-op.
     lru_cache = lambda maxsize=None, typed=False: lambda func: func
