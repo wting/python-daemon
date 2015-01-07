@@ -323,7 +323,6 @@ class JsonEqual(testtools.matchers.Matcher):
 
     def match(self, content):
         """ Assert the JSON `content` matches the `expected_content`. """
-        # import pdb ; pdb.set_trace()
         result = None
         actual_value = json.loads(content.decode('utf-8'))
         if actual_value != self.expected_value:
