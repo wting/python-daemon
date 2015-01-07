@@ -30,6 +30,7 @@ import signal
 
 import lockfile
 import mock
+import testtools
 
 from . import scaffold
 from .scaffold import (basestring, unicode)
@@ -594,6 +595,31 @@ class DaemonRunner_do_action_restart_TestCase(DaemonRunner_BaseTestCase):
         instance.do_action()
         mock_func_daemonrunner_start.assert_called_with()
         mock_func_daemonrunner_stop.assert_called_with()
+
+
+@mock.patch.object(sys, "stderr")
+class emit_message_TestCase(scaffold.TestCase):
+    """ Test cases for ‘emit_message’ function. """
+
+    def test_writes_specified_message_to_stream(self, mock_stderr):
+        """ Should write specified message to stream. """
+        test_message = self.getUniqueString()
+        expected_content = "{message}\n".format(message=test_message)
+        daemon.runner.emit_message(test_message, stream=mock_stderr)
+        mock_stderr.write.assert_called_with(expected_content)
+
+    def test_writes_to_specified_stream(self, mock_stderr):
+        """ Should write message to specified stream. """
+        test_message = self.getUniqueString()
+        mock_stream = mock.MagicMock()
+        daemon.runner.emit_message(test_message, stream=mock_stream)
+        mock_stream.write.assert_called_with(mock.ANY)
+
+    def test_writes_to_stderr_by_default(self, mock_stderr):
+        """ Should write message to ‘sys.stderr’ by default. """
+        test_message = self.getUniqueString()
+        daemon.runner.emit_message(test_message)
+        mock_stderr.write.assert_called_with(mock.ANY)
 
 
 # Local variables:
