@@ -23,6 +23,12 @@ import sys
 import os
 import signal
 import errno
+try: # pragma: nocover
+    # Python 3 standard library.
+    ProcessLookupError
+except NameError: # pragma: nocover
+    # No such class in Python 2.
+    ProcessLookupError = NotImplemented
 
 import lockfile
 
@@ -299,8 +305,12 @@ def is_pidfile_stale(pidfile):
     if pidfile_pid is not None:
         try:
             os.kill(pidfile_pid, signal.SIG_DFL)
+        except ProcessLookupError:
+            # The specified PID does not exist.
+            result = True
         except OSError as exc:
             if exc.errno == errno.ESRCH:
+                # Under Python 2, process lookup error is an OSError.
                 # The specified PID does not exist.
                 result = True
 
