@@ -44,7 +44,7 @@ class DaemonRunnerError(Exception):
         _chain_exception_from_existing_exception_context(self, as_cause=True)
 
 
-class DaemonRunnerInvalidActionError(ValueError, DaemonRunnerError):
+class DaemonRunnerInvalidActionError(DaemonRunnerError, ValueError):
     """ Raised when specified action for DaemonRunner is invalid. """
 
     def _chain_from_context(self):
@@ -52,11 +52,11 @@ class DaemonRunnerInvalidActionError(ValueError, DaemonRunnerError):
         _chain_exception_from_existing_exception_context(self, as_cause=False)
 
 
-class DaemonRunnerStartFailureError(RuntimeError, DaemonRunnerError):
+class DaemonRunnerStartFailureError(DaemonRunnerError, RuntimeError):
     """ Raised when failure starting DaemonRunner. """
 
 
-class DaemonRunnerStopFailureError(RuntimeError, DaemonRunnerError):
+class DaemonRunnerStopFailureError(DaemonRunnerError, RuntimeError):
     """ Raised when failure stopping DaemonRunner. """
 
 

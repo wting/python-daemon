@@ -908,8 +908,8 @@ def _chain_exception_from_existing_exception_context(exc, as_cause=False):
         :PEP:`344` describes syntax and attributes (`__traceback__`,
         `__context__`, `__cause__`) for use in exception chaining.
 
-        Python 2 does not have this syntax, so this function decorates
-        the exception with values from the existing exception context.
+        Python 2 does not have that syntax, so this function decorates
+        the exception with values from the current exception context.
 
         """
     (existing_exc_type, existing_exc, existing_traceback) = sys.exc_info()
