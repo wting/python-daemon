@@ -184,6 +184,7 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
     def __init__(self, document):
         docutils.nodes.NodeVisitor.__init__(self, document)
         self.settings = document.settings
+        self.current_section_level = 0
         self.current_field_name = None
         self.content = []
         self.indent_width = 0
@@ -231,11 +232,13 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
         pass
 
     def visit_field_list(self, node):
-        section_node = node.parent
-        if not isinstance(section_node, docutils.nodes.section):
-            raise InvalidFormatError(
-                    "Unexpected field list within {node!r}".format(
-                        node=section_node))
+        if self.current_section_level == 1:
+            # At a top-level section.
+            section_node = node.parent
+            if not isinstance(section_node, docutils.nodes.section):
+                raise InvalidFormatError(
+                        "Unexpected field list within {node!r}".format(
+                            node=section_node))
 
     def depart_field_list(self, node):
         self.current_field_name = None
@@ -244,10 +247,12 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
 
     def visit_field_name(self, node):
         field_name = node.astext()
-        if field_name.lower() not in ["released", "maintainer"]:
-            raise InvalidFormatError(
-                    "Unexpected field name {name!r}".format(name=field_name))
-        self.current_field_name = field_name.lower()
+        if self.current_section_level == 1:
+            # At a top-level section.
+            if field_name.lower() not in ["released", "maintainer"]:
+                raise InvalidFormatError(
+                        "Unexpected field name {name!r}".format(name=field_name))
+            self.current_field_name = field_name.lower()
 
     def depart_field_name(self, node):
         pass
@@ -276,30 +281,56 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
         self.append_to_current_entry("\n")
 
     def visit_section(self, node):
-        self.current_entry = ChangeLogEntry()
+        self.current_section_level += 1
+        if self.current_section_level == 1:
+            # At a top-level section.
+            self.current_entry = ChangeLogEntry()
 
     def depart_section(self, node):
-        self.content.append(
-                self.current_entry.as_version_info_entry())
-        self.current_entry = None
+        self.current_section_level -= 1
+        if self.current_section_level == 0:
+            # Returned to the document level, no section.
+            self.content.append(
+                    self.current_entry.as_version_info_entry())
+            self.current_entry = None
 
-    def visit_title(self, node):
-        section_node = node.parent
-        if not isinstance(section_node, docutils.nodes.section):
-            raise docutils.nodes.SkipNode(
-                    "Only section titles are processed for version info")
+    _expected_title_word_length = len("Version FOO".split(" "))
 
     def depart_title(self, node):
         title_text = node.astext()
-        words = title_text.split(" ")
-        version = None
-        if len(words) == 2:
-            if words[0].lower() in ["version"]:
-                version = words[-1]
-        if version is None:
-            raise InvalidFormatError(
-                    "Unexpected title text {text!r}".format(text=title_text))
-        self.current_entry.version = version
+        if self.current_section_level == 1:
+            if "Change Log" in title_text:
+                import pdb ; pdb.set_trace()
+            # At a top-level section.
+            words = title_text.split(" ")
+            version = None
+            if len(words) != self._expected_title_word_length:
+                raise InvalidFormatError(
+                        "Unexpected title text {text!r}".format(text=title_text))
+            if words[0].lower() not in ["version"]:
+                raise InvalidFormatError(
+                        "Unexpected title text {text!r}".format(text=title_text))
+            version = words[-1]
+            self.current_entry.version = version
+
+
+def changelog_to_version_info_collection(infile, writer):
+    """ Render the ‘ChangeLog’ document to a version info collection.
+
+        :param infile: A file-like object containing the changelog.
+        :param writer: A Docutils writer to render to JSON version
+            info format.
+        :return: The serialised JSON data of the version info collection.
+
+        """
+    settings_overrides = {
+            'doctitle_xform': False,
+            }
+    version_info_json = docutils.core.publish_string(
+            infile.read(), writer=writer,
+            settings_overrides=settings_overrides)
+
+    return version_info_json
 
 
 try: # pragma: nocover
@@ -312,7 +343,7 @@ except AttributeError: # pragma: nocover
 
 @lru_cache(maxsize=128)
 def generate_version_info_from_changelog(infile_path):
-    """ Get the version-info stream generated from the changelog.
+    """ Get the version info for the latest version in the changelog.
 
         :param infile_path: Filesystem path to the input changelog file.
         :return: The generated version info mapping; or ``None`` if the
@@ -320,17 +351,18 @@ def generate_version_info_from_changelog(infile_path):
 
         """
     version_info = collections.OrderedDict()
-    infile_content = None
 
+    writer = VersionInfoWriter()
+    versions_all_json = None
     try:
         with open(infile_path, 'rt') as infile:
-            infile_content = infile.read()
+            versions_all_json = changelog_to_version_info_collection(
+                    infile, writer=writer)
     except OSError:
+        # If we can't read the input file, leave the collection empty.
         pass
 
-    if infile_content is not None:
-        versions_all_json = docutils.core.publish_string(
-                infile_content, writer=VersionInfoWriter())
+    if versions_all_json is not None:
         versions_all = json.loads(versions_all_json.decode('utf-8'))
         version_info = get_latest_version(versions_all)
 

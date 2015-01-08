@@ -350,12 +350,31 @@ class JsonValueMismatch(testtools.matchers.Mismatch):
         return text
 
 
-class VersionInfoTranslator_astext_TestCase(
+class changelog_to_version_info_collection_TestCase(
         testscenarios.WithScenarios, testtools.TestCase):
-    """ Test cases for ‘VersionInfoTranslator.astext’ method. """
+    """ Test cases for ‘changelog_to_version_info_collection’ function. """
 
     scenarios = [
-            ('mutiple entries', {
+            ('single entry', {
+                'test_input': textwrap.dedent("""\
+                    Version 1.0
+                    ===========
+
+                    :Released: 2009-01-01
+                    :Maintainer: Foo Bar <foo.bar@example.org>
+
+                    * Lorem ipsum dolor sit amet.
+                    """),
+                'expected_version_info': [
+                    {
+                        'release_date': "2009-01-01",
+                        'version': "1.0",
+                        'maintainer': "Foo Bar <foo.bar@example.org>",
+                        'body': "* Lorem ipsum dolor sit amet.\n",
+                        },
+                    ],
+                }),
+            ('multiple entries', {
                 'test_input': textwrap.dedent("""\
                     Version 1.0
                     ===========
@@ -369,10 +388,19 @@ class VersionInfoTranslator_astext_TestCase(
                     Version 0.8
                     ===========
 
-                    :Released: 2001-01-01
+                    :Released: 2004-01-01
                     :Maintainer: Foo Bar <foo.bar@example.org>
 
                     * Donec venenatis nisl aliquam ipsum.
+
+
+                    Version 0.7.2
+                    =============
+
+                    :Released: 2001-01-01
+                    :Maintainer: Foo Bar <foo.bar@example.org>
+
+                    * Pellentesque elementum mollis finibus.
                     """),
                 'expected_version_info': [
                     {
@@ -382,10 +410,16 @@ class VersionInfoTranslator_astext_TestCase(
                         'body': "* Lorem ipsum dolor sit amet.\n",
                         },
                     {
-                        'release_date': "2001-01-01",
+                        'release_date': "2004-01-01",
                         'version': "0.8",
                         'maintainer': "Foo Bar <foo.bar@example.org>",
                         'body': "* Donec venenatis nisl aliquam ipsum.\n",
+                        },
+                    {
+                        'release_date': "2001-01-01",
+                        'version': "0.7.2",
+                        'maintainer': "Foo Bar <foo.bar@example.org>",
+                        'body': "* Pellentesque elementum mollis finibus.\n",
                         },
                     ],
                 }),
@@ -401,15 +435,6 @@ class VersionInfoTranslator_astext_TestCase(
 
                     ..
                         Vivamus aliquam felis rutrum rutrum dictum.
-
-
-                    Version 0.8
-                    ===========
-
-                    :Released: 2001-01-01
-                    :Maintainer: Foo Bar <foo.bar@example.org>
-
-                    * Donec venenatis nisl aliquam ipsum.
                     """),
                 'expected_version_info': [
                     {
@@ -417,12 +442,6 @@ class VersionInfoTranslator_astext_TestCase(
                         'version': "NEXT",
                         'maintainer': "",
                         'body': "* Lorem ipsum dolor sit amet.\n",
-                        },
-                    {
-                        'release_date': "2001-01-01",
-                        'version': "0.8",
-                        'maintainer': "Foo Bar <foo.bar@example.org>",
-                        'body': "* Donec venenatis nisl aliquam ipsum.\n",
                         },
                     ],
                 }),
@@ -438,15 +457,6 @@ class VersionInfoTranslator_astext_TestCase(
                         Vivamus aliquam felis rutrum rutrum dictum.
 
                     * Lorem ipsum dolor sit amet.
-
-
-                    Version 0.8
-                    ===========
-
-                    :Released: 2001-01-01
-                    :Maintainer: Foo Bar <foo.bar@example.org>
-
-                    * Donec venenatis nisl aliquam ipsum.
                     """),
                 'expected_version_info': [
                     {
@@ -454,12 +464,6 @@ class VersionInfoTranslator_astext_TestCase(
                         'version': "NEXT",
                         'maintainer': "",
                         'body': "* Lorem ipsum dolor sit amet.\n",
-                        },
-                    {
-                        'release_date': "2001-01-01",
-                        'version': "0.8",
-                        'maintainer': "Foo Bar <foo.bar@example.org>",
-                        'body': "* Donec venenatis nisl aliquam ipsum.\n",
                         },
                     ],
                 }),
@@ -497,84 +501,6 @@ class VersionInfoTranslator_astext_TestCase(
                         },
                     ],
                 }),
-            ('document title', {
-                'test_input': textwrap.dedent("""\
-                    Change Log for frobnicator
-                    ##########################
-
-                    Version 1.0
-                    ===========
-
-                    :Released: 2009-01-01
-                    :Maintainer: Foo Bar <foo.bar@example.org>
-
-                    * Lorem ipsum dolor sit amet.
-
-
-                    Version 0.8
-                    ===========
-
-                    :Released: 2001-01-01
-                    :Maintainer: Foo Bar <foo.bar@example.org>
-
-                    * Donec venenatis nisl aliquam ipsum.
-                    """),
-                'expected_version_info': [
-                    {
-                        'release_date': "2009-01-01",
-                        'version': "1.0",
-                        'maintainer': "Foo Bar <foo.bar@example.org>",
-                        'body': "* Lorem ipsum dolor sit amet.\n",
-                        },
-                    {
-                        'release_date': "2001-01-01",
-                        'version': "0.8",
-                        'maintainer': "Foo Bar <foo.bar@example.org>",
-                        'body': "* Donec venenatis nisl aliquam ipsum.\n",
-                        },
-                    ],
-                }),
-            ('document title and subtitle', {
-                'test_input': textwrap.dedent("""\
-                    ##########
-                    Change Log
-                    ##########
-
-                    for package Frobnicator
-                    #######################
-
-                    Version 1.0
-                    ===========
-
-                    :Released: 2009-01-01
-                    :Maintainer: Foo Bar <foo.bar@example.org>
-
-                    * Lorem ipsum dolor sit amet.
-
-
-                    Version 0.8
-                    ===========
-
-                    :Released: 2001-01-01
-                    :Maintainer: Foo Bar <foo.bar@example.org>
-
-                    * Donec venenatis nisl aliquam ipsum.
-                    """),
-                'expected_version_info': [
-                    {
-                        'release_date': "2009-01-01",
-                        'version': "1.0",
-                        'maintainer': "Foo Bar <foo.bar@example.org>",
-                        'body': "* Lorem ipsum dolor sit amet.\n",
-                        },
-                    {
-                        'release_date': "2001-01-01",
-                        'version': "0.8",
-                        'maintainer': "Foo Bar <foo.bar@example.org>",
-                        'body': "* Donec venenatis nisl aliquam ipsum.\n",
-                        },
-                    ],
-                }),
             ('no section', {
                 'test_input': textwrap.dedent("""\
                     :Released: 2009-01-01
@@ -594,15 +520,6 @@ class VersionInfoTranslator_astext_TestCase(
                     :Favourite: Spam
 
                     * Lorem ipsum dolor sit amet.
-
-
-                    Version 0.8
-                    ===========
-
-                    :Released: 2001-01-01
-                    :Maintainer: Foo Bar <foo.bar@example.org>
-
-                    * Donec venenatis nisl aliquam ipsum.
                     """),
                 'expected_error': version.InvalidFormatError,
                 }),
@@ -615,15 +532,6 @@ class VersionInfoTranslator_astext_TestCase(
                     :Maintainer: Foo Bar <foo.bar@example.org>
 
                     * Lorem ipsum dolor sit amet.
-
-
-                    Version 0.8
-                    ===========
-
-                    :Released: 2001-01-01
-                    :Maintainer: Foo Bar <foo.bar@example.org>
-
-                    * Donec venenatis nisl aliquam ipsum.
                     """),
                 'expected_error': version.InvalidFormatError,
                 }),
@@ -636,15 +544,6 @@ class VersionInfoTranslator_astext_TestCase(
                     :Maintainer: Foo Bar <foo.bar@example.org>
 
                     * Lorem ipsum dolor sit amet.
-
-
-                    Version 0.8
-                    ===========
-
-                    :Released: 2001-01-01
-                    :Maintainer: Foo Bar <foo.bar@example.org>
-
-                    * Donec venenatis nisl aliquam ipsum.
                     """),
                 'expected_error': version.InvalidFormatError,
                 }),
@@ -653,15 +552,15 @@ class VersionInfoTranslator_astext_TestCase(
     def test_returns_expected_version_info(self):
         """ Should return expected version info mapping. """
         args = {
-                'source': self.test_input,
+                'infile': StringIO(self.test_input),
                 'writer': version.VersionInfoWriter(),
                 }
         if hasattr(self, 'expected_error'):
             self.assertRaises(
                     self.expected_error,
-                    docutils.core.publish_string, **args)
+                    version.changelog_to_version_info_collection, **args)
         else:
-            result = docutils.core.publish_string(**args)
+            result = version.changelog_to_version_info_collection(**args)
             self.assertThat(result, JsonEqual(self.expected_version_info))
 
 
@@ -680,7 +579,8 @@ fake_version_info = {
 
 @mock.patch.object(
         version, "get_latest_version", return_value=fake_version_info)
-@mock.patch.object(docutils.core, "publish_string")
+@mock.patch.object(
+        version, "changelog_to_version_info_collection")
 class generate_version_info_from_changelog_TestCase(
         testscenarios.WithScenarios, testtools.TestCase):
     """ Test cases for ‘generate_version_info_from_changelog’ function. """
@@ -734,11 +634,23 @@ class generate_version_info_from_changelog_TestCase(
         func_patcher_builtin_open.start()
         self.addCleanup(func_patcher_builtin_open.stop)
 
+    def test_returns_empty_collection_on_read_error(
+            self,
+            mock_func_changelog_to_version_info, mock_func_get_latest_version):
+        """ Should return empty collection on error reading changelog. """
+        test_error = PermissionError("Not for you")
+        mock_func_changelog_to_version_info.side_effect = test_error
+        result = version.generate_version_info_from_changelog(
+                self.fake_changelog_file_path)
+        expected_result = {}
+        self.assertDictEqual(expected_result, result)
+
     def test_returns_expected_result(
-            self, mock_func_publish_string, mock_func_get_latest_version):
+            self,
+            mock_func_changelog_to_version_info, mock_func_get_latest_version):
         """ Should return expected result. """
         if hasattr(self, 'fake_versions_json'):
-            mock_func_publish_string.return_value = (
+            mock_func_changelog_to_version_info.return_value = (
                     self.fake_versions_json.encode('utf-8'))
         result = version.generate_version_info_from_changelog(
                 self.fake_changelog_file_path)
