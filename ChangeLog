@@ -8,6 +8,7 @@ Version NEXT
   2.7 or later).
 * Document the API of all functions comprehensively in docstrings.
 * Add a hacking guide for developers.
+* Add explicit credit for contributors.
 * Document the security impact of the default umask.
 
 * Specify explicit text or binary mode when opening files.
