@@ -4,6 +4,8 @@ Version NEXT
 :Released: FUTURE
 :Maintainer:
 
+* Include the ‘version’ module with source distribution.
+
 
 Version 2.0
 ===========
