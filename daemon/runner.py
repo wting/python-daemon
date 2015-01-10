@@ -23,10 +23,10 @@ import sys
 import os
 import signal
 import errno
-try: # pragma: nocover
+try:
     # Python 3 standard library.
     ProcessLookupError
-except NameError: # pragma: nocover
+except NameError: #pragma: nocover
     # No such class in Python 2.
     ProcessLookupError = NotImplemented
 

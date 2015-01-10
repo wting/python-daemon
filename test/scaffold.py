@@ -26,7 +26,7 @@ from copy import deepcopy
 import functools
 
 try:
-    # Python 2 has both ‘str’ (bytes) and ‘unicode’.
+    # Python 2 has both ‘str’ (bytes) and ‘unicode’ (text).
     basestring = basestring
     unicode = unicode
 except NameError:
