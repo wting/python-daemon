@@ -3,7 +3,7 @@
 # test/test_metadata.py
 # Part of ‘python-daemon’, an implementation of PEP 3143.
 #
-# Copyright © 2008–2014 Ben Finney <ben+python@benfinney.id.au>
+# Copyright © 2008–2015 Ben Finney <ben+python@benfinney.id.au>
 #
 # This is free software: you may copy, modify, and/or distribute this work
 # under the terms of the Apache License, version 2.0 as published by the
@@ -232,6 +232,8 @@ def fake_func_has_metadata(testcase, resource_name):
     """ Fake the behaviour of ‘pkg_resources.Distribution.has_metadata’. """
     if resource_name != version_info_filename:
         return False
+    if hasattr(testcase, 'has_metadata_return_value'):
+        return testcase.has_metadata_return_value
     return True
 
 
@@ -262,8 +264,8 @@ def fake_func_get_distribution(testcase, distribution_name):
 
 @mock.patch.object(pkg_resources, 'get_distribution')
 @mock.patch.object(metadata, 'distribution_name', new="mock-dist")
-class get_distribution_version_TestCase(scaffold.TestCaseWithScenarios):
-    """ Test cases for ‘get_distribution_version’ function. """
+class get_distribution_version_info_TestCase(scaffold.TestCaseWithScenarios):
+    """ Test cases for ‘get_distribution_version_info’ function. """
 
     scenarios = [
             ('version 0.0', {
@@ -280,6 +282,10 @@ class get_distribution_version_TestCase(scaffold.TestCaseWithScenarios):
                 }),
             ('not installed', {
                 'get_distribution_error': pkg_resources.DistributionNotFound(),
+                'expected_version_info': {},
+                }),
+            ('no version_info', {
+                'has_metadata_return_value': False,
                 'expected_version_info': {},
                 }),
             ]

@@ -3,7 +3,7 @@
 # test/scaffold.py
 # Part of ‘python-daemon’, an implementation of PEP 3143.
 #
-# Copyright © 2007–2014 Ben Finney <ben+python@benfinney.id.au>
+# Copyright © 2007–2015 Ben Finney <ben+python@benfinney.id.au>
 #
 # This is free software: you may copy, modify, and/or distribute this work
 # under the terms of the Apache License, version 2.0 as published by the
@@ -26,7 +26,7 @@ from copy import deepcopy
 import functools
 
 try:
-    # Python 2 has both ‘str’ (bytes) and ‘unicode’.
+    # Python 2 has both ‘str’ (bytes) and ‘unicode’ (text).
     basestring = basestring
     unicode = unicode
 except NameError:

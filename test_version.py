@@ -3,7 +3,7 @@
 # test_version.py
 # Part of ‘python-daemon’, an implementation of PEP 3143.
 #
-# Copyright © 2008–2014 Ben Finney <ben+python@benfinney.id.au>
+# Copyright © 2008–2015 Ben Finney <ben+python@benfinney.id.au>
 #
 # This is free software: you may copy, modify, and/or distribute this work
 # under the terms of the GNU General Public License as published by the
@@ -323,7 +323,6 @@ class JsonEqual(testtools.matchers.Matcher):
 
     def match(self, content):
         """ Assert the JSON `content` matches the `expected_content`. """
-        # import pdb ; pdb.set_trace()
         result = None
         actual_value = json.loads(content.decode('utf-8'))
         if actual_value != self.expected_value:

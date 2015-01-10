@@ -3,7 +3,7 @@
 # daemon/runner.py
 # Part of ‘python-daemon’, an implementation of PEP 3143.
 #
-# Copyright © 2009–2014 Ben Finney <ben+python@benfinney.id.au>
+# Copyright © 2009–2015 Ben Finney <ben+python@benfinney.id.au>
 # Copyright © 2007–2008 Robert Niederreiter, Jens Klein
 # Copyright © 2003 Clark Evans
 # Copyright © 2002 Noah Spurrier
@@ -23,6 +23,12 @@ import sys
 import os
 import signal
 import errno
+try:
+    # Python 3 standard library.
+    ProcessLookupError
+except NameError:
+    # No such class in Python 2.
+    ProcessLookupError = NotImplemented
 
 import lockfile
 
@@ -44,7 +50,7 @@ class DaemonRunnerError(Exception):
         _chain_exception_from_existing_exception_context(self, as_cause=True)
 
 
-class DaemonRunnerInvalidActionError(ValueError, DaemonRunnerError):
+class DaemonRunnerInvalidActionError(DaemonRunnerError, ValueError):
     """ Raised when specified action for DaemonRunner is invalid. """
 
     def _chain_from_context(self):
@@ -52,11 +58,11 @@ class DaemonRunnerInvalidActionError(ValueError, DaemonRunnerError):
         _chain_exception_from_existing_exception_context(self, as_cause=False)
 
 
-class DaemonRunnerStartFailureError(RuntimeError, DaemonRunnerError):
+class DaemonRunnerStartFailureError(DaemonRunnerError, RuntimeError):
     """ Raised when failure starting DaemonRunner. """
 
 
-class DaemonRunnerStopFailureError(RuntimeError, DaemonRunnerError):
+class DaemonRunnerStopFailureError(DaemonRunnerError, RuntimeError):
     """ Raised when failure stopping DaemonRunner. """
 
 
@@ -289,8 +295,8 @@ def is_pidfile_stale(pidfile):
 
         :return: ``True`` iff the PID file is stale; otherwise ``False``.
 
-        The PID file is “stale” if its contents are
-        valid but do not match the PID of a currently-running process.
+        The PID file is “stale” if its contents are valid but do not
+        match the PID of a currently-running process.
 
         """
     result = False
@@ -299,8 +305,12 @@ def is_pidfile_stale(pidfile):
     if pidfile_pid is not None:
         try:
             os.kill(pidfile_pid, signal.SIG_DFL)
+        except ProcessLookupError:
+            # The specified PID does not exist.
+            result = True
         except OSError as exc:
             if exc.errno == errno.ESRCH:
+                # Under Python 2, process lookup error is an OSError.
                 # The specified PID does not exist.
                 result = True
 

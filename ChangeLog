@@ -4,52 +4,42 @@ Version NEXT
 :Released: FUTURE
 :Maintainer: 
 
-* Migrate to ‘str.format’ for interpolation of values into text.
 * Document the API of all functions comprehensively in docstrings.
+* Add a hacking guide for developers.
+* Document the security impact of the default umask.
 
-* Migrate to built-in ‘next’ function.
-* Declare compatibility with current Python versions.
-* Depend on Python 3 compatible libraries.
-* Wrap function introspection for Python 3 compatibility.
 * Specify explicit text or binary mode when opening files.
 * Preserve exception context in custom exceptions.
 
-* Remove custom test suite creation, we now use ‘unittest2’.
-* Discriminate Python 2-and-3 compatible usage of dict methods.
-* Discriminate Python 2-and-3 compatible bytes versus text.
-* Declare explicit absolute and relative imports.
-
-* Discriminate between different ‘fileno’ method behaviours.
-  In Python 3, ‘StringIO.fileno’ is callable but raises an exception.
-
-* Declare support explicitly for Python 2 only.
-* Wrap standard library imports where names changed in Python 3.
-
-* Wrap the ‘fromlist’ parameter of ‘__import__’ for Python 3
-  compatibility.
-
-* Document the security impact of the default umask.
-
+* Declare compatibility with current Python versions.
+* Depend on Python 3 compatible libraries.
+* Update package homepage to Alioth hosted project page.
+* Use ‘pydoc.splitdoc’ to get package description text.
+* Remove ASCII translation of package description, not needed now the
+  docstring is a proper Unicode text value.
 * Include test suite with source distribution.
+* Move package metadata to ‘daemon/_metadata.py’.
+* Migrate to JSON (instead of Python) for serialised version info.
+* Add unit tests for metadata.
+* Store and retrieve version info in Setuptools metadata.
 
+* Migrate to ‘str.format’ for interpolation of values into text.
 * Migrate to ‘mock’ library for mock objects in tests.
   This will ease the port to Python 3, which has ‘mock’ in the
   standard library.
 * Migrate to ‘testscenarios’ library for unit test scenarios.
 * Migrate to ‘unittest2’ library for back-ported improvements.
-
-* Add a hacking guide for developers.
-
-* Use ‘pydoc.splitdoc’ to get package description text.
-* Remove ASCII translation of package description, not needed now the
-  docstring is a proper Unicode text value.
-* Move package metadata to ‘daemon/_metadata.py’.
-* Migrate to JSON (instead of Python) for serialised version info.
-* Store and retrieve version info in Setuptools metadata.
-* Get version string at run-time from installed distribution.
-* Add unit tests for metadata.
-
-* Update package homepage to Alioth hosted project page.
+  Remove custom test suite creation.
+* Discriminate Python 2-and-3 compatible usage of dict methods.
+* Discriminate Python 2-and-3 compatible bytes versus text.
+* Declare explicit absolute and relative imports.
+* Wrap the ‘fromlist’ parameter of ‘__import__’ for Python 3
+  compatibility.
+* Discriminate between different ‘fileno’ method behaviours.
+  In Python 3, ‘StringIO.fileno’ is callable but raises an exception.
+* Migrate to built-in ‘next’ function.
+* Wrap function introspection for Python 3 compatibility.
+* Wrap standard library imports where names changed in Python 3.
 
 
 Version 1.6.1

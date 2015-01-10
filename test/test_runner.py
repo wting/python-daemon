@@ -3,7 +3,7 @@
 # test/test_runner.py
 # Part of ‘python-daemon’, an implementation of PEP 3143.
 #
-# Copyright © 2009–2014 Ben Finney <ben+python@benfinney.id.au>
+# Copyright © 2009–2015 Ben Finney <ben+python@benfinney.id.au>
 #
 # This is free software: you may copy, modify, and/or distribute this work
 # under the terms of the Apache License, version 2.0 as published by the
@@ -27,9 +27,11 @@ import sys
 import tempfile
 import errno
 import signal
+import functools
 
 import lockfile
 import mock
+import testtools
 
 from . import scaffold
 from .scaffold import (basestring, unicode)
@@ -433,6 +435,12 @@ class DaemonRunner_parse_args_TestCase(DaemonRunner_BaseTestCase):
             self.assertEqual(expected_action, instance.action)
 
 
+try:
+    ProcessLookupError
+except NameError:
+    # Python 2 uses OSError.
+    ProcessLookupError = functools.partial(OSError, errno.ESRCH)
+
 class DaemonRunner_do_action_TestCase(DaemonRunner_BaseTestCase):
     """ Test cases for DaemonRunner.do_action method. """
 
@@ -477,7 +485,7 @@ class DaemonRunner_do_action_start_TestCase(DaemonRunner_BaseTestCase):
         pidfile_path = self.scenario['pidfile_path']
         test_pid = self.scenario['pidlockfile_scenario']['pidfile_pid']
         expected_signal = signal.SIG_DFL
-        test_error = OSError(errno.ESRCH, "Not running")
+        test_error = ProcessLookupError("Not running")
         os.kill.side_effect = test_error
         instance.do_action()
         os.kill.assert_called_with(test_pid, expected_signal)
@@ -594,6 +602,70 @@ class DaemonRunner_do_action_restart_TestCase(DaemonRunner_BaseTestCase):
         instance.do_action()
         mock_func_daemonrunner_start.assert_called_with()
         mock_func_daemonrunner_stop.assert_called_with()
+
+
+@mock.patch.object(sys, "stderr")
+class emit_message_TestCase(scaffold.TestCase):
+    """ Test cases for ‘emit_message’ function. """
+
+    def test_writes_specified_message_to_stream(self, mock_stderr):
+        """ Should write specified message to stream. """
+        test_message = self.getUniqueString()
+        expected_content = "{message}\n".format(message=test_message)
+        daemon.runner.emit_message(test_message, stream=mock_stderr)
+        mock_stderr.write.assert_called_with(expected_content)
+
+    def test_writes_to_specified_stream(self, mock_stderr):
+        """ Should write message to specified stream. """
+        test_message = self.getUniqueString()
+        mock_stream = mock.MagicMock()
+        daemon.runner.emit_message(test_message, stream=mock_stream)
+        mock_stream.write.assert_called_with(mock.ANY)
+
+    def test_writes_to_stderr_by_default(self, mock_stderr):
+        """ Should write message to ‘sys.stderr’ by default. """
+        test_message = self.getUniqueString()
+        daemon.runner.emit_message(test_message)
+        mock_stderr.write.assert_called_with(mock.ANY)
+
+
+class is_pidfile_stale_TestCase(scaffold.TestCase):
+    """ Test cases for ‘is_pidfile_stale’ function. """
+
+    def setUp(self):
+        """ Set up test fixtures. """
+        super(is_pidfile_stale_TestCase, self).setUp()
+
+        func_patcher_os_kill = mock.patch.object(os, "kill")
+        func_patcher_os_kill.start()
+        self.addCleanup(func_patcher_os_kill.stop)
+        os.kill.return_value = None
+
+        self.test_pid = self.getUniqueInteger()
+        self.test_pidfile = mock.MagicMock(daemon.pidfile.TimeoutPIDLockFile)
+        self.test_pidfile.read_pid.return_value = self.test_pid
+
+    def test_returns_false_if_no_pid_in_file(self):
+        """ Should return False if the pidfile contains no PID. """
+        self.test_pidfile.read_pid.return_value = None
+        expected_result = False
+        result = daemon.runner.is_pidfile_stale(self.test_pidfile)
+        self.assertEqual(expected_result, result)
+
+    def test_returns_false_if_process_exists(self):
+        """ Should return False if the process with its PID exists. """
+        expected_result = False
+        result = daemon.runner.is_pidfile_stale(self.test_pidfile)
+        self.assertEqual(expected_result, result)
+
+    def test_returns_true_if_process_does_not_exist(self):
+        """ Should return True if the process does not exist. """
+        test_error = ProcessLookupError("No such process")
+        del os.kill.return_value
+        os.kill.side_effect = test_error
+        expected_result = True
+        result = daemon.runner.is_pidfile_stale(self.test_pidfile)
+        self.assertEqual(expected_result, result)
 
 
 # Local variables:
