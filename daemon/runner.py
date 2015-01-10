@@ -26,7 +26,7 @@ import errno
 try:
     # Python 3 standard library.
     ProcessLookupError
-except NameError: #pragma: nocover
+except NameError:
     # No such class in Python 2.
     ProcessLookupError = NotImplemented
 
@@ -295,8 +295,8 @@ def is_pidfile_stale(pidfile):
 
         :return: ``True`` iff the PID file is stale; otherwise ``False``.
 
-        The PID file is “stale” if its contents are
-        valid but do not match the PID of a currently-running process.
+        The PID file is “stale” if its contents are valid but do not
+        match the PID of a currently-running process.
 
         """
     result = False

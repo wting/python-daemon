@@ -28,7 +28,7 @@ import version
 
 
 fromlist_expects_type = str
-if sys.version_info < (3, 0): #pragma: nocover
+if sys.version_info < (3, 0):
     fromlist_expects_type = bytes
 
 
