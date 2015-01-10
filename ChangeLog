@@ -1,8 +1,8 @@
-Version NEXT
-============
+Version 2.0.1
+=============
 
-:Released: FUTURE
-:Maintainer:
+:Released: 2015-01-11
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
 
 * Include the ‘version’ module with source distribution.
 
