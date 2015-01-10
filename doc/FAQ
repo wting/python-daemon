@@ -2,16 +2,18 @@
 ##########################################
 
 :Author: Ben Finney <ben+python@benfinney.id.au>
-:Updated: 2014-12-21
+:Updated: 2015-01-10
 
 ..  contents::
 ..
     1  General
       1.1  What is the purpose of the ‘python-daemon’ library?
       1.2  How can I run a service communicating with a separate daemon process?
-    2  File descriptors
-      2.1  Why does the output stop after opening the daemon context?
-      2.2  How can I preserve a ‘logging’ handler's file descriptor?
+    2  Security
+      2.1  Why is the umask set to 0 by default?
+    3  File descriptors
+      3.1  Why does the output stop after opening the daemon context?
+      3.2  How can I preserve a ‘logging’ handler's file descriptor?
 
 General
 =======
