@@ -509,6 +509,24 @@ class changelog_to_version_info_collection_TestCase(
                     """),
                 'expected_error': version.InvalidFormatError,
                 }),
+            ('subsection', {
+                'test_input': textwrap.dedent("""\
+                    Version 1.0
+                    ===========
+
+                    :Released: 2009-01-01
+                    :Maintainer: Foo Bar <foo.bar@example.org>
+
+                    * Lorem ipsum dolor sit amet.
+
+                    Ut ultricies fermentum quam
+                    ---------------------------
+
+                    * In commodo magna facilisis in.
+                    """),
+                'expected_error': version.InvalidFormatError,
+                'subsection': True,
+                }),
             ('unknown field', {
                 'test_input': textwrap.dedent("""\
                     Version 1.0

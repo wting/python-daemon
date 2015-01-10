@@ -231,18 +231,11 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
         pass
 
     def visit_field_list(self, node):
-        if self.current_section_level == 1:
-            # At a top-level section.
-            section_node = node.parent
-            if not isinstance(section_node, docutils.nodes.section):
-                raise InvalidFormatError(
-                        "Unexpected field list within {node!r}".format(
-                            node=section_node))
+        pass
 
     def depart_field_list(self, node):
         self.current_field_name = None
-        if self.current_entry is not None:
-            self.current_entry.body = ""
+        self.current_entry.body = ""
 
     def visit_field_name(self, node):
         field_name = node.astext()
@@ -284,33 +277,31 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
         if self.current_section_level == 1:
             # At a top-level section.
             self.current_entry = ChangeLogEntry()
+        else:
+            raise InvalidFormatError(
+                    "Subsections not implemented for this writer")
 
     def depart_section(self, node):
         self.current_section_level -= 1
-        if self.current_section_level == 0:
-            # Returned to the document level, no section.
-            self.content.append(
-                    self.current_entry.as_version_info_entry())
-            self.current_entry = None
+        self.content.append(
+                self.current_entry.as_version_info_entry())
+        self.current_entry = None
 
     _expected_title_word_length = len("Version FOO".split(" "))
 
     def depart_title(self, node):
         title_text = node.astext()
-        if self.current_section_level == 1:
-            if "Change Log" in title_text:
-                import pdb ; pdb.set_trace()
-            # At a top-level section.
-            words = title_text.split(" ")
-            version = None
-            if len(words) != self._expected_title_word_length:
-                raise InvalidFormatError(
-                        "Unexpected title text {text!r}".format(text=title_text))
-            if words[0].lower() not in ["version"]:
-                raise InvalidFormatError(
-                        "Unexpected title text {text!r}".format(text=title_text))
-            version = words[-1]
-            self.current_entry.version = version
+        # At a top-level section.
+        words = title_text.split(" ")
+        version = None
+        if len(words) != self._expected_title_word_length:
+            raise InvalidFormatError(
+                    "Unexpected title text {text!r}".format(text=title_text))
+        if words[0].lower() not in ["version"]:
+            raise InvalidFormatError(
+                    "Unexpected title text {text!r}".format(text=title_text))
+        version = words[-1]
+        self.current_entry.version = version
 
 
 def changelog_to_version_info_collection(infile, writer):
