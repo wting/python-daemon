@@ -1,6 +1,8 @@
 TODO for ‘python-daemon’ library
 ################################
 
+:Updated: 2015-01-10
+
 =======
 PENDING
 =======
@@ -8,13 +10,8 @@ PENDING
 Tests
 =====
 
-* Write full unit tests for every new or changed behaviour at time of
-  commit.
-
 Libraries
 =========
-
-* Work correctly with current ‘lockfile’ library (0.10 or later).
 
 * Evaluate switching to ‘flufl.lock’ library for PID lockfile behaviour
   <http://pypi.python.org/pypi/flufl.lock>_.
@@ -37,12 +34,17 @@ Documentation
 Standard library inclusion
 ==========================
 
-* Convert to Python 2 and Python 3 compatible code base.
-
 
 ====
 DONE
 ====
+
+* Convert to Python 2 and Python 3 compatible code base.
+
+* Work correctly with current ‘lockfile’ library (0.10 or later).
+
+* Write full unit tests for every new or changed behaviour at time of
+  commit.
 
 * Detect whether started by another process that handles
   daemonisation, such as ‘inetd’, and behave appropriately.
@@ -85,5 +87,9 @@ DONE
     coding: utf-8
     mode: text
     mode: rst
+    time-stamp-format: "%:y-%02m-%02d"
+    time-stamp-start: "^:Updated:[         ]+"
+    time-stamp-end: "$"
+    time-stamp-line-limit: 20
     End:
     vim: fileencoding=utf-8 filetype=rst :

@@ -4,6 +4,8 @@ Version NEXT
 :Released: FUTURE
 :Maintainer: 
 
+* Support both Python 3 (version 3.2 or later) and Python 2 (version
+  2.7 or later).
 * Document the API of all functions comprehensively in docstrings.
 * Add a hacking guide for developers.
 * Document the security impact of the default umask.
@@ -25,19 +27,17 @@ Version NEXT
 
 * Migrate to ‘str.format’ for interpolation of values into text.
 * Migrate to ‘mock’ library for mock objects in tests.
-  This will ease the port to Python 3, which has ‘mock’ in the
-  standard library.
 * Migrate to ‘testscenarios’ library for unit test scenarios.
 * Migrate to ‘unittest2’ library for back-ported improvements.
   Remove custom test suite creation.
 * Discriminate Python 2-and-3 compatible usage of dict methods.
 * Discriminate Python 2-and-3 compatible bytes versus text.
 * Declare explicit absolute and relative imports.
-* Wrap the ‘fromlist’ parameter of ‘__import__’ for Python 3
-  compatibility.
 * Discriminate between different ‘fileno’ method behaviours.
   In Python 3, ‘StringIO.fileno’ is callable but raises an exception.
 * Migrate to built-in ‘next’ function.
+* Wrap the ‘fromlist’ parameter of ‘__import__’ for Python 3
+  compatibility.
 * Wrap function introspection for Python 3 compatibility.
 * Wrap standard library imports where names changed in Python 3.
 
