@@ -1,8 +1,8 @@
-Version NEXT
-============
+Version 2.0
+===========
 
-:Released: FUTURE
-:Maintainer: 
+:Released: 2015-01-10
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
 
 * Support both Python 3 (version 3.2 or later) and Python 2 (version
   2.7 or later).
