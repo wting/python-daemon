@@ -41,7 +41,7 @@ def get_distribution_version_info():
 
 version_info = get_distribution_version_info()
 
-version_installed = version_info['version']
+version_installed = version_info.get('version', "UNKNOWN")
 
 author_name = "Ben Finney"
 author_email = "ben+python@benfinney.id.au"
@@ -92,7 +92,7 @@ def make_year_range(begin_year, end_date=None):
     return year_range
 
 copyright_year_begin = "2001"
-build_date = version_info['release_date']
+build_date = version_info.get('release_date', "UNKNOWN")
 copyright_year_range = make_year_range(copyright_year_begin, build_date)
 
 copyright = "Copyright © {year_range} {author} and others".format(
