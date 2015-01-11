@@ -80,6 +80,7 @@ setup(
             ],
         install_requires=[
             "setuptools",
+            "docutils",
             "lockfile >=0.10",
             ],
         entry_points={
