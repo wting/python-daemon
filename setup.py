@@ -73,7 +73,7 @@ setup(
         zip_safe=False,
         test_suite="unittest2.collector",
         tests_require=[
-            "unittest2",
+            "unittest2 >=0.6",
             "testtools",
             "testscenarios >=0.4",
             "mock >=1.0",
