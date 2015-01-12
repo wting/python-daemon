@@ -63,7 +63,9 @@ version_string = version_info['version']
 setup(
         name=distribution_name,
         version=version_string,
-        py_modules=['version'],
+        py_modules=[
+            "version", "test_version",
+            ],
         packages=find_packages(exclude=["test"]),
 
         # Setuptools metadata.
