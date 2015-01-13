@@ -4,6 +4,8 @@ Version NEXT
 :Released: FUTURE
 :Maintainer:
 
+* Distribute ‘version’ (and its tests) only in source, not install.
+
 
 Version 2.0.2
 =============
