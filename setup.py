@@ -73,6 +73,9 @@ setup(
         maintainer=maintainer_name,
         maintainer_email=maintainer_email,
         zip_safe=False,
+        setup_requires=[
+            "docutils",
+            ],
         test_suite="unittest2.collector",
         tests_require=[
             "unittest2 >=0.6",

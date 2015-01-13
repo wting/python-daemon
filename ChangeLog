@@ -5,7 +5,7 @@ Version NEXT
 :Maintainer:
 
 * Declare test-time dependency on recent ‘unittest2’.
-* Declare install-time dependency on ‘docutils’ library.
+* Declare packaging-time dependency on ‘docutils’ library.
 * Include unit tests for ‘version’ module with source distribution.
 * Record version info consistent with distribution metadata.
 
