@@ -5,6 +5,7 @@ Version NEXT
 :Maintainer:
 
 * Distribute ‘version’ (and its tests) only in source, not install.
+* Build a “universal” (Python 2 and Python 3) wheel.
 
 
 Version 2.0.2
