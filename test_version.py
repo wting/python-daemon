@@ -26,6 +26,7 @@ import collections
 import textwrap
 import json
 import tempfile
+import distutils.dist
 import distutils.cmd
 import distutils.errors
 try:
@@ -823,18 +824,35 @@ class validate_distutils_release_date_value_TestCase(
             self.assertEqual(self.expected_result, result)
 
 
-FakeDistribution = collections.namedtuple('FakeDistribution', [
-        'version', 'release_date', 'maintainer', 'maintainer_email'])
+DistributionMetadata_defaults = {
+        name: None
+        for name in set(distutils.dist.DistributionMetadata._METHOD_BASENAMES)}
+FakeDistributionMetadata = collections.namedtuple(
+        'FakeDistributionMetadata', DistributionMetadata_defaults.keys())
 
-def make_fake_distribution(fields_override):
-    fields = {
-            'version': None,
-            'release_date': None,
-            'maintainer': None,
-            'maintainer_email': None,
-            }
-    fields.update(fields_override)
+Distribution_defaults = {
+        'metadata': None,
+        'version': None,
+        'release_date': None,
+        'maintainer': None,
+        'maintainer_email': None,
+        }
+FakeDistribution = collections.namedtuple(
+        'FakeDistribution', Distribution_defaults.keys())
+
+def make_fake_distribution(
+        fields_override=None, metadata_fields_override=None):
+    metadata_fields = DistributionMetadata_defaults.copy()
+    if metadata_fields_override is not None:
+        metadata_fields.update(metadata_fields_override)
+    metadata = FakeDistributionMetadata(**metadata_fields)
+
+    fields = Distribution_defaults.copy()
+    fields['metadata'] = metadata
+    if fields_override is not None:
+        fields.update(fields_override)
     distribution = FakeDistribution(**fields)
+
     return distribution
 
 @mock.patch.object(
@@ -846,12 +864,16 @@ class generate_version_info_from_distribution_TestCase(
 
     scenarios = [
             ('simple', {
-                'test_distribution': make_fake_distribution({
-                    'version': "1.0",
-                    'release_date': "2001-01-01",
-                    'maintainer': "Foo Bar",
-                    'maintainer_email': "foo.bar@example.org",
-                    }),
+                'test_distribution': make_fake_distribution(
+                    fields_override={
+                        'release_date': "2001-01-01",
+                        'maintainer': "Foo Bar",
+                        'maintainer_email': "foo.bar@example.org",
+                        },
+                    metadata_fields_override={
+                        'version': "1.0",
+                        },
+                    ),
                 'expected_result': {
                     'version': "1.0",
                     'release_date': "2001-01-01",
@@ -860,10 +882,14 @@ class generate_version_info_from_distribution_TestCase(
                     },
                 }),
             ('no maintainer', {
-                'test_distribution': make_fake_distribution({
-                    'version': "1.0",
-                    'release_date': "2001-01-01",
-                    }),
+                'test_distribution': make_fake_distribution(
+                    fields_override={
+                        'release_date': "2001-01-01",
+                        },
+                    metadata_fields_override={
+                        'version': "1.0",
+                        },
+                    ),
                 'expected_result': {
                     'version': "1.0",
                     'release_date': "2001-01-01",
@@ -872,11 +898,15 @@ class generate_version_info_from_distribution_TestCase(
                     },
                 }),
             ('no maintainer name', {
-                'test_distribution': make_fake_distribution({
-                    'version': "1.0",
-                    'release_date': "2001-01-01",
-                    'maintainer_email': "foo.bar@example.org",
-                    }),
+                'test_distribution': make_fake_distribution(
+                    fields_override={
+                        'release_date': "2001-01-01",
+                        'maintainer_email': "foo.bar@example.org",
+                        },
+                    metadata_fields_override={
+                        'version': "1.0",
+                        },
+                    ),
                 'expected_result': {
                     'version': "1.0",
                     'release_date': "2001-01-01",
@@ -885,11 +915,15 @@ class generate_version_info_from_distribution_TestCase(
                     },
                 }),
             ('no maintainer email', {
-                'test_distribution': make_fake_distribution({
-                    'version': "1.0",
-                    'release_date': "2001-01-01",
-                    'maintainer': "Foo Bar",
-                    }),
+                'test_distribution': make_fake_distribution(
+                    fields_override={
+                        'release_date': "2001-01-01",
+                        'maintainer': "Foo Bar",
+                        },
+                    metadata_fields_override={
+                        'version': "1.0",
+                        },
+                    ),
                 'expected_result': {
                     'version': "1.0",
                     'release_date': "2001-01-01",

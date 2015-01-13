@@ -7,6 +7,7 @@ Version NEXT
 * Declare test-time dependency on recent ‘unittest2’.
 * Declare install-time dependency on ‘docutils’ library.
 * Include unit tests for ‘version’ module with source distribution.
+* Record version info consistent with distribution metadata.
 
 
 Version 2.0.1

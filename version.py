@@ -460,7 +460,7 @@ def generate_version_info_from_distribution(distribution):
         maintainer_text = ""
 
     result = ChangeLogEntry.make_ordered_dict({
-            'version': distribution.version,
+            'version': distribution.metadata.version,
             'release_date': distribution.release_date,
             'maintainer': maintainer_text,
             'body': "",
