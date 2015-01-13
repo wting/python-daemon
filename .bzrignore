@@ -1,4 +1,6 @@
 ./dist
 ./build
+*.egg
 *.egg-info
-.coverage
+./.coverage
+./htmlcov
