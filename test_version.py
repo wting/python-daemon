@@ -826,7 +826,8 @@ class validate_distutils_release_date_value_TestCase(
 
 DistributionMetadata_defaults = {
         name: None
-        for name in set(distutils.dist.DistributionMetadata._METHOD_BASENAMES)}
+        for name in list(collections.OrderedDict.fromkeys(
+            distutils.dist.DistributionMetadata._METHOD_BASENAMES))}
 FakeDistributionMetadata = collections.namedtuple(
         'FakeDistributionMetadata', DistributionMetadata_defaults.keys())
 
