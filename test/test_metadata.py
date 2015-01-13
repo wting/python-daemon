@@ -32,6 +32,7 @@ import pkg_resources
 import mock
 import testtools.helpers
 import testtools.matchers
+import testscenarios
 
 from . import scaffold
 from .scaffold import (basestring, unicode)
@@ -103,6 +104,40 @@ class metadata_value_TestCase(scaffold.TestCaseWithScenarios):
         instance = getattr(metadata, self.attribute_name)
         self.assertThat(
                 instance, HasAttribute(self.ducktype_attribute_name))
+
+
+class parse_person_field_TestCase(
+        testscenarios.WithScenarios, testtools.TestCase):
+    """ Test cases for ‘get_latest_version’ function. """
+
+    scenarios = [
+            ('simple', {
+                'test_person': "Foo Bar <foo.bar@example.com>",
+                'expected_result': ("Foo Bar", "foo.bar@example.com"),
+                }),
+            ('empty', {
+                'test_person': "",
+                'expected_result': (None, None),
+                }),
+            ('none', {
+                'test_person': None,
+                'expected_error': TypeError,
+                }),
+            ('no email', {
+                'test_person': "Foo Bar",
+                'expected_result': ("Foo Bar", None),
+                }),
+            ]
+
+    def test_returns_expected_result(self):
+        """ Should return expected result. """
+        if hasattr(self, 'expected_error'):
+            self.assertRaises(
+                    self.expected_error,
+                    metadata.parse_person_field, self.test_person)
+        else:
+            result = metadata.parse_person_field(self.test_person)
+            self.assertEqual(self.expected_result, result)
 
 
 class YearRange_TestCase(scaffold.TestCaseWithScenarios):

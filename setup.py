@@ -56,7 +56,7 @@ version_info = version.generate_version_info_from_changelog(changelog_filepath)
 version_string = version_info['version']
 
 
-(maintainer_name, maintainer_email) = version.parse_person_field(
+(maintainer_name, maintainer_email) = metadata.parse_person_field(
         version_info['maintainer'])
 
 
