@@ -1,8 +1,8 @@
-Version NEXT
-============
+Version 2.0.3
+=============
 
-:Released: FUTURE
-:Maintainer:
+:Released: 2015-01-14
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
 
 * Break circular import dependency for ‘setup.py’.
 * Refactor all initial metadata functionality to ‘daemon._metadata’.
