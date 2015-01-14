@@ -23,9 +23,19 @@ import pkg_resources
 
 
 distribution_name = "python-daemon"
+version_info_filename = "version_info.json"
 
-def get_distribution_version_info():
-    """ Get the version info from the installed distribution. """
+def get_distribution_version_info(filename=version_info_filename):
+    """ Get the version info from the installed distribution.
+
+        :param filename: Base filename of the version info resource.
+        :return: The version info as a mapping of fields. If the
+            distribution is not available, the mapping is empty.
+
+        The version info is stored as a metadata file in the
+        distribution.
+
+        """
     version_info = {}
 
     try:
@@ -33,7 +43,6 @@ def get_distribution_version_info():
     except pkg_resources.DistributionNotFound:
         distribution = None
 
-    version_info_filename = "version_info.json"
     if distribution is not None:
         if distribution.has_metadata(version_info_filename):
             content = distribution.get_metadata(version_info_filename)

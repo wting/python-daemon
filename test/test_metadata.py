@@ -265,18 +265,16 @@ version_info_filename = "version_info.json"
 
 def fake_func_has_metadata(testcase, resource_name):
     """ Fake the behaviour of ‘pkg_resources.Distribution.has_metadata’. """
-    if resource_name != version_info_filename:
+    if (
+            resource_name != testcase.expected_resource_name
+            or not hasattr(testcase, 'test_version_info')):
         return False
-    if hasattr(testcase, 'has_metadata_return_value'):
-        return testcase.has_metadata_return_value
     return True
 
 
 def fake_func_get_metadata(testcase, resource_name):
     """ Fake the behaviour of ‘pkg_resources.Distribution.get_metadata’. """
-    if (
-            resource_name != version_info_filename
-            or not hasattr(testcase, 'test_version_info')):
+    if not fake_func_has_metadata(testcase, resource_name):
         error = FileNotFoundError(resource_name)
         raise error
     content = testcase.test_version_info
@@ -289,7 +287,7 @@ def fake_func_get_distribution(testcase, distribution_name):
         raise pkg_resources.DistributionNotFound
     if hasattr(testcase, 'get_distribution_error'):
         raise testcase.get_distribution_error
-    mock_distribution = mock.MagicMock()
+    mock_distribution = testcase.mock_distribution
     mock_distribution.has_metadata.side_effect = functools.partial(
             fake_func_has_metadata, testcase)
     mock_distribution.get_metadata.side_effect = functools.partial(
@@ -297,7 +295,6 @@ def fake_func_get_distribution(testcase, distribution_name):
     return mock_distribution
 
 
-@mock.patch.object(pkg_resources, 'get_distribution')
 @mock.patch.object(metadata, 'distribution_name', new="mock-dist")
 class get_distribution_version_info_TestCase(scaffold.TestCaseWithScenarios):
     """ Test cases for ‘get_distribution_version_info’ function. """
@@ -315,33 +312,59 @@ class get_distribution_version_info_TestCase(scaffold.TestCaseWithScenarios):
                     }),
                 'expected_version_info': {'version': "1.0"},
                 }),
+            ('file lorem_ipsum.json', {
+                'version_info_filename': "lorem_ipsum.json",
+                'test_version_info': json.dumps({
+                    'version': "1.0",
+                    }),
+                'expected_version_info': {'version': "1.0"},
+                }),
             ('not installed', {
                 'get_distribution_error': pkg_resources.DistributionNotFound(),
                 'expected_version_info': {},
                 }),
             ('no version_info', {
-                'has_metadata_return_value': False,
                 'expected_version_info': {},
                 }),
             ]
 
-    def test_requests_installed_distribution(
-            self, mock_func_get_distribution):
-        """ The package distribution should be retrieved. """
-        mock_func_get_distribution.side_effect = functools.partial(
+    def setUp(self):
+        """ Set up test fixtures. """
+        super(get_distribution_version_info_TestCase, self).setUp()
+
+        if hasattr(self, 'expected_resource_name'):
+            self.test_args = {'filename': self.expected_resource_name}
+        else:
+            self.test_args = {}
+            self.expected_resource_name = version_info_filename
+
+        self.mock_distribution = mock.MagicMock()
+        func_patcher_get_distribution = mock.patch.object(
+                pkg_resources, 'get_distribution')
+        func_patcher_get_distribution.start()
+        self.addCleanup(func_patcher_get_distribution.stop)
+        pkg_resources.get_distribution.side_effect = functools.partial(
                 fake_func_get_distribution, self)
+
+    def test_requests_installed_distribution(self):
+        """ The package distribution should be retrieved. """
         expected_distribution_name = metadata.distribution_name
-        version_info = metadata.get_distribution_version_info()
-        mock_func_get_distribution.assert_called_with(
+        version_info = metadata.get_distribution_version_info(**self.test_args)
+        pkg_resources.get_distribution.assert_called_with(
                 expected_distribution_name)
 
-    def test_version_installed_matches_distribution(
-            self, mock_func_get_distribution):
+    def test_requests_specified_filename(self):
+        """ The specified metadata resource name should be requested. """
+        if hasattr(self, 'get_distribution_error'):
+            self.skipTest("No access to distribution")
+        version_info = metadata.get_distribution_version_info(**self.test_args)
+        self.mock_distribution.has_metadata.assert_called_with(
+                self.expected_resource_name)
+
+    def test_version_installed_matches_distribution(self):
         """ The ‘version_installed’ value should match the distribution. """
-        mock_func_get_distribution.side_effect = functools.partial(
-                fake_func_get_distribution, self)
-        version_info = metadata.get_distribution_version_info()
-        self.assertEqual(version_info, self.expected_version_info)
+        version_info = metadata.get_distribution_version_info(**self.test_args)
+        self.assertEqual(self.expected_version_info, version_info)
 
 
 # Local variables:
