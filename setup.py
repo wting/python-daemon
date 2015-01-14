@@ -11,8 +11,7 @@
 # Free Software Foundation; version 3 of that license or any later version.
 # No warranty expressed or implied. See the file ‘LICENSE.GPL-3’ for details.
 
-""" Distribution setup for ‘python-daemon’ library.
-    """
+""" Distribution setup for ‘python-daemon’ library. """
 
 from __future__ import (absolute_import, unicode_literals)
 
@@ -24,15 +23,12 @@ import distutils.util
 
 from setuptools import (setup, find_packages)
 
-import version
-
 
 fromlist_expects_type = str
 if sys.version_info < (3, 0):
     fromlist_expects_type = bytes
 
 
-distribution_name = "python-daemon"
 main_module_name = 'daemon'
 main_module_fromlist = list(map(fromlist_expects_type, [
         '_metadata']))
@@ -44,24 +40,15 @@ metadata = main_module._metadata
 synopsis, long_description = pydoc.splitdoc(
         pydoc.getdoc(main_module))
 
-
-version_info_filename = "version_info.json"
-changelog_filename = "ChangeLog"
-
-setup_dir = os.path.dirname(__file__)
-changelog_filepath = distutils.util.convert_path(
-        os.path.join(setup_dir, changelog_filename))
-
-version_info = version.generate_version_info_from_changelog(changelog_filepath)
+version_info = metadata.get_distribution_version_info()
 version_string = version_info['version']
 
-
 (maintainer_name, maintainer_email) = metadata.parse_person_field(
         version_info['maintainer'])
 
 
 setup(
-        name=distribution_name,
+        name=metadata.distribution_name,
         version=version_string,
         packages=find_packages(exclude=["test"]),
 
@@ -91,7 +78,7 @@ setup(
                 ],
             "egg_info.writers": [
                 "{filename} = version:generate_egg_info_metadata".format(
-                    filename=version_info_filename),
+                    filename=metadata.version_info_filename),
                 ],
             },
 
