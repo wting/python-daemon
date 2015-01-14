@@ -20,6 +20,8 @@ try:
 except ImportError:
     # Python 2 standard library.
     import __builtin__ as builtins
+import os
+import os.path
 import errno
 import functools
 import collections
@@ -907,7 +909,62 @@ class generate_version_info_from_distribution_TestCase(
         self.assertEqual(self.expected_result, result)
 
 
-@mock.patch.object(version, 'generate_version_info_from_distribution')
+class get_changelog_path_TestCase(
+        testscenarios.WithScenarios, testtools.TestCase):
+    """ Test cases for ‘get_changelog_path’ function. """
+
+    default_path = "."
+    default_script_filename = "setup.py"
+
+    scenarios = [
+            ('simple', {}),
+            ('unusual script name', {
+                'script_filename': "lorem_ipsum",
+                }),
+            ('relative script path', {
+                'script_directory': "dolor/sit/amet",
+                }),
+            ('absolute script path', {
+                'script_directory': "/dolor/sit/amet",
+                }),
+            ('specify filename', {
+                'changelog_filename': "adipiscing",
+                }),
+            ]
+
+    def setUp(self):
+        """ Set up test fixtures. """
+        super(get_changelog_path_TestCase, self).setUp()
+
+        self.test_distribution = mock.MagicMock(distutils.dist.Distribution)
+
+        if not hasattr(self, 'script_directory'):
+            self.script_directory = self.default_path
+        if not hasattr(self, 'script_filename'):
+            self.script_filename = self.default_script_filename
+        self.test_distribution.script_name = os.path.join(
+                self.script_directory, self.script_filename)
+
+        changelog_filename = version.changelog_filename
+        if hasattr(self, 'changelog_filename'):
+            changelog_filename = self.changelog_filename
+
+        self.expected_result = os.path.join(
+                self.script_directory, changelog_filename)
+
+    def test_returns_expected_result(self):
+        """ Should return expected result. """
+        args = {
+                'distribution': self.test_distribution,
+                }
+        if hasattr(self, 'changelog_filename'):
+            args.update({'filename': self.changelog_filename})
+        result = version.get_changelog_path(**args)
+        self.assertEqual(self.expected_result, result)
+
+
+@mock.patch.object(version, 'get_changelog_path')
+@mock.patch.object(version, 'generate_version_info_from_changelog')
 @mock.patch.object(version, 'serialise_version_info_from_mapping')
 class generate_egg_info_metadata_TestCase(testtools.TestCase):
     """ Test cases for ‘generate_egg_info_metadata’ function. """
@@ -925,19 +982,32 @@ class generate_egg_info_metadata_TestCase(testtools.TestCase):
                 'outfile_path': self.fake_outfile_path,
                 }
 
-    def test_generates_version_info_from_distribution(
+    def test_gets_changelog_path_from_distribution(
             self,
             mock_func_serialise_version_info,
-            mock_func_generate_version_info):
-        """ Should generate version info from specified distribution. """
+            mock_func_generate_version_info,
+            mock_func_get_changelog_path):
+        """ Should get changelog path from specified distribution. """
         version.generate_egg_info_metadata(**self.test_args)
-        mock_func_generate_version_info.assert_called_with(
+        mock_func_get_changelog_path.assert_called_with(
                 self.fake_command.distribution)
+
+    def test_generates_version_info_from_changelog(
+            self,
+            mock_func_serialise_version_info,
+            mock_func_generate_version_info,
+            mock_func_get_changelog_path):
+        """ Should generate version info from specified changelog. """
+        version.generate_egg_info_metadata(**self.test_args)
+        expected_changelog_path = mock_func_get_changelog_path.return_value
+        mock_func_generate_version_info.assert_called_with(
+                expected_changelog_path)
 
     def test_serialises_version_info_from_mapping(
             self,
             mock_func_serialise_version_info,
-            mock_func_generate_version_info):
+            mock_func_generate_version_info,
+            mock_func_get_changelog_path):
         """ Should serialise version info from specified mapping. """
         version.generate_egg_info_metadata(**self.test_args)
         expected_version_info = mock_func_generate_version_info.return_value
@@ -947,7 +1017,8 @@ class generate_egg_info_metadata_TestCase(testtools.TestCase):
     def test_writes_file_using_command_context(
             self,
             mock_func_serialise_version_info,
-            mock_func_generate_version_info):
+            mock_func_generate_version_info,
+            mock_func_get_changelog_path):
         """ Should write the metadata file using the command context. """
         version.generate_egg_info_metadata(**self.test_args)
         expected_content = mock_func_serialise_version_info.return_value

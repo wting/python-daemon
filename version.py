@@ -442,6 +442,22 @@ def generate_version_info_from_distribution(distribution):
     return result
 
 
+changelog_filename = "ChangeLog"
+
+def get_changelog_path(distribution, filename=changelog_filename):
+    """ Get the changelog file path for the distribution.
+
+        :param distribution: The distutils.dist.Distribution instance.
+        :return: Filesystem path of the changelog document, or ``None``
+            if not discoverable.
+
+        """
+    setup_dirname = os.path.dirname(distribution.script_name)
+    filepath = os.path.join(setup_dirname, filename)
+
+    return filepath
+
+
 def generate_egg_info_metadata(cmd, outfile_name, outfile_path):
     """ Setuptools entry point to generate version info metadata.
 
@@ -454,7 +470,8 @@ def generate_egg_info_metadata(cmd, outfile_name, outfile_path):
         metadata file during build.
 
         """
-    version_info = generate_version_info_from_distribution(cmd.distribution)
+    changelog_path = get_changelog_path(cmd.distribution)
+    version_info = generate_version_info_from_changelog(changelog_path)
     content = serialise_version_info_from_mapping(version_info)
     cmd.write_file("version info", outfile_path, content)
 
