@@ -54,7 +54,6 @@ version_info = get_distribution_version_info()
 
 version_installed = version_info.get('version', "UNKNOWN")
 
-
 
 rfc822_person_regex = re.compile(
         "^(?P<name>[^<]+) <(?P<email>[^>]+)>$")

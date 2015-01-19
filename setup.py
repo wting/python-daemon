@@ -37,8 +37,7 @@ main_module = __import__(
         level=0, fromlist=main_module_fromlist)
 metadata = main_module._metadata
 
-synopsis, long_description = pydoc.splitdoc(
-        pydoc.getdoc(main_module))
+(synopsis, long_description) = pydoc.splitdoc(pydoc.getdoc(main_module))
 
 version_info = metadata.get_distribution_version_info()
 version_string = version_info['version']
