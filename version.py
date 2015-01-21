@@ -29,6 +29,7 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
+import sys
 import os
 import errno
 import json
@@ -48,14 +49,53 @@ except NameError:
     basestring = str
     unicode = str
 
-import docutils.core
-import docutils.nodes
-import docutils.writers
+
+def ensure_class_bases_begin_with(namespace, class_name, base_class):
+    """ Ensure the named class's bases start with the base class.
+
+        :param namespace: The namespace containing the class name.
+        :param class_name: The name of the class to alter.
+        :param base_class: The type to be the first base class for the
+            newly created type.
+        :return: ``None``.
+
+        This function is a hack to circumvent a circular dependency:
+        using classes from a module which is not installed at the time
+        this module is imported.
+
+        Call this function after ensuring `base_class` is available,
+        before using the class named by `class_name`.
+
+        """
+    existing_class = namespace[class_name]
+    assert isinstance(existing_class, type)
+
+    bases = list(existing_class.__bases__)
+    if base_class is bases[0]:
+        # Already bound to a type with the right bases.
+        return
+    bases.insert(0, base_class)
+
+    new_class_namespace = existing_class.__dict__.copy()
+    # Type creation will assign the correct ‘__dict__’ attribute.
+    del new_class_namespace['__dict__']
+
+    metaclass = existing_class.__metaclass__
+    new_class = metaclass(class_name, tuple(bases), new_class_namespace)
+
+    namespace[class_name] = new_class
 
 
-class VersionInfoWriter(docutils.writers.Writer, object):
-    """ Docutils writer to produce a version info JSON data stream.
-        """
+class VersionInfoWriter(object):
+    """ Docutils writer to produce a version info JSON data stream. """
+
+    # This class needs its base class to be a class from `docutils`.
+    # But that would create a circular dependency: Setuptools cannot
+    # ensure `docutils` is available before importing this module.
+    #
+    # Use `ensure_class_bases_begin_with` after importing `docutils`, to
+    # re-bind the `VersionInfoWriter` name to a new type that inherits
+    # from `docutils.writers.Writer`.
 
     __metaclass__ = type
 
@@ -161,8 +201,16 @@ class InvalidFormatError(ValueError):
     """ Raised when the document is not a valid ‘ChangeLog’ document. """
 
 
-class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor, object):
+class VersionInfoTranslator(object):
     """ Translator from document nodes to a version info stream. """
+
+    # This class needs its base class to be a class from `docutils`.
+    # But that would create a circular dependency: Setuptools cannot
+    # ensure `docutils` is available before importing this module.
+    #
+    # Use `ensure_class_bases_begin_with` after importing `docutils`,
+    # to re-bind the `VersionInfoTranslator` name to a new type that
+    # inherits from `docutils.nodes.SparseNodeVisitor`.
 
     __metaclass__ = type
 
@@ -185,6 +233,10 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor, object):
         self.initial_indent = ""
         self.subsequent_indent = ""
         self.current_entry = None
+
+        # Docutils is not available when this class is defined.
+        # Get the `docutils` module dynamically.
+        self._docutils = sys.modules['docutils']
 
     def astext(self):
         """ Return the translated document as text. """
@@ -209,11 +261,11 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor, object):
         pass
 
     def visit_comment(self, node):
-        raise docutils.nodes.SkipNode
+        raise self._docutils.nodes.SkipNode
 
     def visit_field_body(self, node):
         field_list_node = node.parent.parent
-        if not isinstance(field_list_node, docutils.nodes.field_list):
+        if not isinstance(field_list_node, self._docutils.nodes.field_list):
             raise InvalidFormatError(
                     "Unexpected field within {node!r}".format(
                         node=field_list_node))
@@ -306,6 +358,19 @@ def changelog_to_version_info_collection(infile):
         :return: The serialised JSON data of the version info collection.
 
         """
+
+    # Docutils is not available when Setuptools needs this module, so
+    # delay the imports to this function instead.
+    import docutils.core
+    import docutils.nodes
+    import docutils.writers
+
+    ensure_class_bases_begin_with(
+            globals(), str('VersionInfoWriter'), docutils.writers.Writer)
+    ensure_class_bases_begin_with(
+            globals(), str('VersionInfoTranslator'),
+            docutils.nodes.SparseNodeVisitor)
+
     writer = VersionInfoWriter()
     settings_overrides = {
             'doctitle_xform': False,

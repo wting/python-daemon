@@ -45,6 +45,12 @@ import docutils
 
 import version
 
+version.ensure_class_bases_begin_with(
+        version.__dict__, str('VersionInfoWriter'), docutils.writers.Writer)
+version.ensure_class_bases_begin_with(
+        version.__dict__, str('VersionInfoTranslator'),
+        docutils.nodes.SparseNodeVisitor)
+
 
 class VersionInfoWriter_TestCase(testtools.TestCase):
     """ Test cases for ‘VersionInfoWriter’ class. """
