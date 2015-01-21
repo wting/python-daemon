@@ -553,16 +553,13 @@ class changelog_to_version_info_collection_TestCase(
 
     def test_returns_expected_version_info(self):
         """ Should return expected version info mapping. """
-        args = {
-                'infile': StringIO(self.test_input),
-                'writer': version.VersionInfoWriter(),
-                }
+        infile = StringIO(self.test_input)
         if hasattr(self, 'expected_error'):
             self.assertRaises(
                     self.expected_error,
-                    version.changelog_to_version_info_collection, **args)
+                    version.changelog_to_version_info_collection, infile)
         else:
-            result = version.changelog_to_version_info_collection(**args)
+            result = version.changelog_to_version_info_collection(infile)
             self.assertThat(result, JsonEqual(self.expected_version_info))
 
 

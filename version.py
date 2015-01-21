@@ -299,15 +299,14 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor, object):
         self.current_entry.version = version
 
 
-def changelog_to_version_info_collection(infile, writer):
+def changelog_to_version_info_collection(infile):
     """ Render the ‘ChangeLog’ document to a version info collection.
 
         :param infile: A file-like object containing the changelog.
-        :param writer: A Docutils writer to render to JSON version
-            info format.
         :return: The serialised JSON data of the version info collection.
 
         """
+    writer = VersionInfoWriter()
     settings_overrides = {
             'doctitle_xform': False,
             }
@@ -337,12 +336,10 @@ def generate_version_info_from_changelog(infile_path):
         """
     version_info = collections.OrderedDict()
 
-    writer = VersionInfoWriter()
     versions_all_json = None
     try:
         with open(infile_path, 'rt') as infile:
-            versions_all_json = changelog_to_version_info_collection(
-                    infile, writer=writer)
+            versions_all_json = changelog_to_version_info_collection(infile)
     except OSError:
         # If we can't read the input file, leave the collection empty.
         pass
