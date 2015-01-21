@@ -299,24 +299,6 @@ def make_mock_field_node(field_name, field_body):
 
     return mock_field_node
 
-
-class get_name_for_field_body_TestCase(
-        testscenarios.WithScenarios, testtools.TestCase):
-    """ Test cases for ‘get_name_for_field_body’ function. """
-
-    scenarios = [
-            ('simple', {
-                'test_field_node': make_mock_field_node("Foo", "spam"),
-                'expected_field_name': "Foo",
-                }),
-            ]
-
-    def test_returns_expected_field_name(self):
-        """ Should return expected field name. """
-        field_body_node = self.test_field_node.children[1]
-        result = version.get_name_for_field_body(field_body_node)
-        self.assertEqual(self.expected_field_name, result)
-
 
 class JsonEqual(testtools.matchers.Matcher):
     """ A matcher to compare the value of JSON streams. """

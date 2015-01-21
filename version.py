@@ -157,16 +157,6 @@ class ChangeLogEntry:
         return entry
 
 
-def get_name_for_field_body(node):
-    """ Return the text of the field name of a field body node. """
-    field_node = node.parent
-    field_name_node_index = field_node.first_child_matching_class(
-            docutils.nodes.field_name)
-    field_name_node = field_node.children[field_name_node_index]
-    field_name = unicode(field_name_node.children[0])
-    return field_name
-
-
 class InvalidFormatError(ValueError):
     """ Raised when the document is not a valid ‘ChangeLog’ document. """
 
