@@ -161,8 +161,10 @@ class InvalidFormatError(ValueError):
     """ Raised when the document is not a valid ‘ChangeLog’ document. """
 
 
-class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
+class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor, object):
     """ Translator from document nodes to a version info stream. """
+
+    __metaclass__ = type
 
     wrap_width = 78
     bullet_text = "* "
@@ -174,7 +176,7 @@ class VersionInfoTranslator(docutils.nodes.SparseNodeVisitor):
             }
 
     def __init__(self, document):
-        docutils.nodes.NodeVisitor.__init__(self, document)
+        super(VersionInfoTranslator, self).__init__(document)
         self.settings = document.settings
         self.current_section_level = 0
         self.current_field_name = None
