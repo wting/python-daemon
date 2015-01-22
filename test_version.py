@@ -1039,17 +1039,40 @@ class WriteVersionInfoCommand_finalize_options_TestCase(
         WriteVersionInfoCommand_BaseTestCase):
     """ Test cases for ‘WriteVersionInfoCommand.finalize_options’ method. """
 
+    def setUp(self):
+        """ Set up test fixtures. """
+        super(WriteVersionInfoCommand_finalize_options_TestCase, self).setUp()
+
+        patcher_func_get_changelog_path = mock.patch.object(
+                version, "get_changelog_path")
+        patcher_func_get_changelog_path.start()
+        self.addCleanup(patcher_func_get_changelog_path.stop)
+
+        self.fake_changelog_path = self.getUniqueString()
+        version.get_changelog_path.return_value = self.fake_changelog_path
+
     def test_sets_force_to_none(self):
         """ Should set ‘force’ attribute to ``None``. """
         instance = version.WriteVersionInfoCommand(self.test_distribution)
         instance.finalize_options()
         self.assertIs(instance.force, None)
 
-    def test_sets_changelog_path_to_none(self):
-        """ Should set ‘changelog_path’ attribute to ``None``. """
+    def test_sets_changelog_path_using_get_changelog_path(self):
+        """ Should set ‘changelog_path’ attribute if it was ``None``. """
         instance = version.WriteVersionInfoCommand(self.test_distribution)
+        instance.changelog_path = None
         instance.finalize_options()
-        self.assertIs(instance.changelog_path, None)
+        expected_changelog_path = self.fake_changelog_path
+        self.assertEqual(expected_changelog_path, instance.changelog_path)
+
+    def test_leaves_changelog_path_if_already_set(self):
+        """ Should leave ‘changelog_path’ attribute set. """
+        instance = version.WriteVersionInfoCommand(self.test_distribution)
+        prior_changelog_path = self.getUniqueString()
+        instance.changelog_path = prior_changelog_path
+        instance.finalize_options()
+        expected_changelog_path = prior_changelog_path
+        self.assertEqual(expected_changelog_path, instance.changelog_path)
 
     def test_sets_outfile_path_to_none(self):
         """ Should set ‘outfile_path’ attribute to ``None``. """

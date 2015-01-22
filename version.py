@@ -459,6 +459,7 @@ def get_changelog_path(distribution, filename=changelog_filename):
     """ Get the changelog file path for the distribution.
 
         :param distribution: The distutils.dist.Distribution instance.
+        :param filename: The base filename of the changelog document.
         :return: Filesystem path of the changelog document, or ``None``
             if not discoverable.
 
@@ -489,6 +490,9 @@ class WriteVersionInfoCommand(distutils.cmd.Command):
         self.set_undefined_options(
             'build',
             ('force', 'force'))
+
+        if self.changelog_path is None:
+            self.changelog_path = get_changelog_path(self.distribution)
 
     def has_changelog(self):
         """ Return ``True`` iff this distribution's changelog is readable. """
