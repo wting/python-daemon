@@ -299,6 +299,12 @@ def fake_func_get_distribution(testcase, distribution_name):
 class get_distribution_version_info_TestCase(scaffold.TestCaseWithScenarios):
     """ Test cases for ‘get_distribution_version_info’ function. """
 
+    default_version_info = {
+            'release_date': "UNKNOWN",
+            'version': "UNKNOWN",
+            'maintainer': "UNKNOWN",
+            }
+
     scenarios = [
             ('version 0.0', {
                 'test_version_info': json.dumps({
@@ -321,10 +327,10 @@ class get_distribution_version_info_TestCase(scaffold.TestCaseWithScenarios):
                 }),
             ('not installed', {
                 'get_distribution_error': pkg_resources.DistributionNotFound(),
-                'expected_version_info': {},
+                'expected_version_info': default_version_info,
                 }),
             ('no version_info', {
-                'expected_version_info': {},
+                'expected_version_info': default_version_info,
                 }),
             ]
 
@@ -361,8 +367,8 @@ class get_distribution_version_info_TestCase(scaffold.TestCaseWithScenarios):
         self.mock_distribution.has_metadata.assert_called_with(
                 self.expected_resource_name)
 
-    def test_version_installed_matches_distribution(self):
-        """ The ‘version_installed’ value should match the distribution. """
+    def test_result_matches_expected_items(self):
+        """ The result should match the expected items. """
         version_info = metadata.get_distribution_version_info(**self.test_args)
         self.assertEqual(self.expected_version_info, version_info)
 
