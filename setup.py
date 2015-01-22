@@ -23,6 +23,8 @@ import distutils.util
 
 from setuptools import (setup, find_packages)
 
+import version
+
 
 fromlist_expects_type = str
 if sys.version_info < (3, 0):
@@ -50,9 +52,12 @@ setup(
         name=metadata.distribution_name,
         version=version_string,
         packages=find_packages(exclude=["test"]),
+        cmdclass={
+            "write_version_info": version.WriteVersionInfoCommand,
+            "egg_info": version.EggInfoCommand,
+            },
 
         # Setuptools metadata.
-        release_date=version_info['release_date'],
         maintainer=maintainer_name,
         maintainer_email=maintainer_email,
         zip_safe=False,
@@ -71,15 +76,6 @@ setup(
             "docutils",
             "lockfile >=0.10",
             ],
-        entry_points={
-            "distutils.setup_keywords": [
-                "release_date = version:validate_distutils_release_date_value",
-                ],
-            "egg_info.writers": [
-                "{filename} = version:generate_egg_info_metadata".format(
-                    filename=metadata.version_info_filename),
-                ],
-            },
 
         # PyPI metadata.
         author=metadata.author_name,

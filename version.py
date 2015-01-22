@@ -40,6 +40,7 @@ import functools
 import collections
 import distutils
 import distutils.errors
+import distutils.cmd
 try:
     # Python 2 has both ‘str’ (bytes) and ‘unicode’ (text).
     basestring = basestring
@@ -48,6 +49,9 @@ except NameError:
     # Python 3 names the Unicode data type ‘str’.
     basestring = str
     unicode = str
+
+import setuptools
+import setuptools.command.egg_info
 
 
 def ensure_class_bases_begin_with(namespace, class_name, base_class):
@@ -528,6 +532,61 @@ def generate_egg_info_metadata(cmd, outfile_name, outfile_path):
     version_info = generate_version_info_from_changelog(changelog_path)
     content = serialise_version_info_from_mapping(version_info)
     cmd.write_file("version info", outfile_path, content)
+
+
+class WriteVersionInfoCommand(distutils.cmd.Command):
+    """ Distutils command to serialise version info metadata. """
+
+    user_options = [
+            ("changelog-path=", None,
+             "Filesystem path to the changelog document."),
+            ("outfile-path=", None,
+             "Filesystem path to the version info file."),
+            ]
+
+    def initialize_options(self):
+        """ Initialise command options to defaults. """
+        self.changelog_path = None
+        self.outfile_path = None
+
+    def finalize_options(self):
+        """ Finalise command options before execution. """
+        self.set_undefined_options(
+            'build',
+            ('force', 'force'))
+
+    def has_changelog(self):
+        """ Return ``True`` iff this distribution's changelog is readable. """
+        result = False
+        if self.changelog_path is not None:
+            changelog = None
+            try:
+                changelog = open(self.changelog_path, 'rt')
+            except OSError:
+                # Not able to open the file for reading.
+                pass
+
+            if changelog is not None:
+                result = True
+                changelog.close()
+
+        return result
+
+    def run(self):
+        """ Execute this command. """
+        version_info = generate_version_info_from_changelog(self.changelog_path)
+        content = serialise_version_info_from_mapping(version_info)
+        egg_info_command = setuptools.command.egg_info.egg_info(
+                self.distribution)
+        egg_info_command.write_file("version info", self.outfile_path, content)
+
+
+class EggInfoCommand(setuptools.command.egg_info.egg_info):
+    """ Custom ‘egg_info’ command for this distribution. """
+
+    sub_commands = [
+            ('write_version_info', WriteVersionInfoCommand.has_changelog)
+            ]
 
 
 # Local variables:

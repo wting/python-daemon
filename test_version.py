@@ -31,6 +31,7 @@ import tempfile
 import distutils.dist
 import distutils.cmd
 import distutils.errors
+import distutils.fancy_getopt
 try:
     # Standard library of Python 2.7 and later.
     from io import StringIO
@@ -44,6 +45,8 @@ import testscenarios
 import docutils
 import docutils.writers
 import docutils.nodes
+import setuptools
+import setuptools.command
 
 import version
 
@@ -1151,6 +1154,297 @@ class generate_egg_info_metadata_TestCase(testtools.TestCase):
         expected_content = mock_func_serialise_version_info.return_value
         self.fake_command.write_file.assert_called_with(
                 "version info", self.fake_outfile_path, expected_content)
+
+
+class WriteVersionInfoCommand_BaseTestCase(
+        testscenarios.WithScenarios, testtools.TestCase):
+    """ Base class for ‘WriteVersionInfoCommand’ test case classes. """
+
+    def setUp(self):
+        """ Set up test fixtures. """
+        super(WriteVersionInfoCommand_BaseTestCase, self).setUp()
+
+        self.test_distribution = distutils.dist.Distribution()
+
+
+class WriteVersionInfoCommand_TestCase(WriteVersionInfoCommand_BaseTestCase):
+    """ Test cases for ‘WriteVersionInfoCommand’ class. """
+
+    def test_subclass_of_distutils_command(self):
+        """ Should be a subclass of ‘distutils.cmd.Command’. """
+        instance = version.WriteVersionInfoCommand(self.test_distribution)
+        self.assertIsInstance(instance, distutils.cmd.Command)
+
+
+class WriteVersionInfoCommand_user_options_TestCase(
+        WriteVersionInfoCommand_BaseTestCase):
+    """ Test cases for ‘WriteVersionInfoCommand.user_options’ attribute. """
+
+    def setUp(self):
+        """ Set up test fixtures. """
+        super(WriteVersionInfoCommand_user_options_TestCase, self).setUp()
+
+        self.test_instance = version.WriteVersionInfoCommand(
+                self.test_distribution)
+        self.commandline_parser = distutils.fancy_getopt.FancyGetopt(
+                self.test_instance.user_options)
+
+    def test_parses_correctly_as_fancy_getopt(self):
+        """ Should parse correctly in ‘FancyGetopt’. """
+        self.assertIsInstance(
+                self.commandline_parser, distutils.fancy_getopt.FancyGetopt)
+
+    def test_has_option_changelog_path(self):
+        """ Should have a ‘changelog-path’ option. """
+        expected_option_name = "changelog-path="
+        result = self.commandline_parser.has_option(expected_option_name)
+        self.assertTrue(result)
+
+    def test_has_option_outfile_path(self):
+        """ Should have a ‘outfile-path’ option. """
+        expected_option_name = "outfile-path="
+        result = self.commandline_parser.has_option(expected_option_name)
+        self.assertTrue(result)
+
+
+class WriteVersionInfoCommand_initialize_options_TestCase(
+        WriteVersionInfoCommand_BaseTestCase):
+    """ Test cases for ‘WriteVersionInfoCommand.initialize_options’ method. """
+
+    def test_sets_changelog_path_to_none(self):
+        """ Should set ‘changelog_path’ attribute to ``None``. """
+        instance = version.WriteVersionInfoCommand(self.test_distribution)
+        self.assertIs(instance.changelog_path, None)
+
+    def test_sets_outfile_path_to_none(self):
+        """ Should set ‘outfile_path’ attribute to ``None``. """
+        instance = version.WriteVersionInfoCommand(self.test_distribution)
+        self.assertIs(instance.outfile_path, None)
+
+
+class WriteVersionInfoCommand_finalize_options_TestCase(
+        WriteVersionInfoCommand_BaseTestCase):
+    """ Test cases for ‘WriteVersionInfoCommand.finalize_options’ method. """
+
+    def test_sets_force_to_none(self):
+        """ Should set ‘force’ attribute to ``None``. """
+        instance = version.WriteVersionInfoCommand(self.test_distribution)
+        instance.finalize_options()
+        self.assertIs(instance.force, None)
+
+    def test_sets_changelog_path_to_none(self):
+        """ Should set ‘changelog_path’ attribute to ``None``. """
+        instance = version.WriteVersionInfoCommand(self.test_distribution)
+        instance.finalize_options()
+        self.assertIs(instance.changelog_path, None)
+
+    def test_sets_outfile_path_to_none(self):
+        """ Should set ‘outfile_path’ attribute to ``None``. """
+        instance = version.WriteVersionInfoCommand(self.test_distribution)
+        instance.finalize_options()
+        self.assertIs(instance.outfile_path, None)
+
+
+class WriteVersionInfoCommand_has_changelog_TestCase(
+        WriteVersionInfoCommand_BaseTestCase):
+    """ Test cases for ‘WriteVersionInfoCommand.has_changelog’ method. """
+
+    fake_open_side_effects = {
+            'success': (
+                lambda testcase, *args, **kwargs:
+                    testcase.fake_changelog_file),
+            'file not found': FileNotFoundError(),
+            'permission denied': PermissionError(),
+            }
+
+    fake_os_path_exists_side_effects = {
+            'true': (lambda path: True),
+            'false': (lambda path: False),
+            }
+
+    scenarios = [
+            ('changelog exists', {
+                'os_path_exists_scenario': 'true',
+                'open_scenario': 'success',
+                'expected_result': True,
+                }),
+            ('no changelog path', {
+                'changelog_path': None,
+                'expected_result': False,
+                }),
+            ('changelog not found', {
+                'os_path_exists_scenario': 'false',
+                'open_scenario': 'file not found',
+                'expected_result': False,
+                }),
+            ('changelog not readable', {
+                'os_path_exists_scenario': 'true',
+                'open_scenario': 'permission denied',
+                'expected_result': False,
+                }),
+            ]
+
+    def setUp(self):
+        """ Set up test fixtures. """
+        super(WriteVersionInfoCommand_has_changelog_TestCase, self).setUp()
+
+        self.test_instance = version.WriteVersionInfoCommand(
+                self.test_distribution)
+
+        if hasattr(self, 'changelog_path'):
+            self.test_instance.changelog_path = self.changelog_path
+        else:
+            self.test_instance.changelog_path = self.getUniqueString()
+        self.fake_changelog_file_path = self.test_instance.changelog_path
+        self.fake_changelog_file = StringIO()
+        self.test_instance.changelog_path = self.fake_changelog_file_path
+
+        def fake_open(filename, mode='rt', buffering=None):
+            if filename == self.fake_changelog_file_path:
+                side_effect = self.fake_open_side_effects[self.open_scenario]
+                if hasattr(side_effect, '__call__'):
+                    result = side_effect(self, filename, mode, buffering)
+                else:
+                    raise side_effect
+            else:
+                result = StringIO()
+            return result
+
+        mock_open = mock.mock_open()
+        mock_open.side_effect = fake_open
+
+        self.func_patcher_builtin_open = mock.patch.object(
+                builtins, "open",
+                new=mock_open)
+
+        def fake_os_path_exists(path):
+            if filename == self.fake_changelog_file_path:
+                side_effect = self.fake_os_path_exists_side_effects[
+                        self.os_path_exists_scenario]
+                if hasattr(side_effect, '__call__'):
+                    result = side_effect(path)
+                else:
+                    raise side_effect
+            else:
+                result = False
+            return result
+
+        func_patcher_os_path_exists = mock.patch.object(
+                os.path, "exists")
+        func_patcher_os_path_exists.start()
+        self.addCleanup(func_patcher_os_path_exists.stop)
+        func_patcher_os_path_exists.side_effect = fake_os_path_exists
+
+    def test_returns_expected_result(self):
+        """ Should be a subclass of ‘distutils.cmd.Command’. """
+        with self.func_patcher_builtin_open:
+            result = self.test_instance.has_changelog()
+        self.assertEqual(self.expected_result, result)
+
+    def test_closes_changelog(self):
+        """ Should close the changelog opened for interrogation. """
+        if getattr(self, 'open_scenario', None) != 'success':
+            self.skipTest("File is not opened, no need to close")
+        with self.func_patcher_builtin_open:
+            result = self.test_instance.has_changelog()
+        self.assertTrue(self.fake_changelog_file.closed)
+
+
+@mock.patch.object(version, 'generate_version_info_from_changelog')
+@mock.patch.object(version, 'serialise_version_info_from_mapping')
+@mock.patch.object(setuptools.command.egg_info, "egg_info")
+class WriteVersionInfoCommand_run_TestCase(
+        WriteVersionInfoCommand_BaseTestCase):
+    """ Test cases for ‘WriteVersionInfoCommand.run’ method. """
+
+    def setUp(self):
+        """ Set up test fixtures. """
+        super(WriteVersionInfoCommand_run_TestCase, self).setUp()
+
+        self.test_instance = version.WriteVersionInfoCommand(
+                self.test_distribution)
+
+        self.fake_changelog_path = self.getUniqueString()
+        self.test_instance.changelog_path = self.fake_changelog_path
+
+        self.fake_outfile_path = self.getUniqueString()
+        self.test_instance.outfile_path = self.fake_outfile_path
+
+    def test_returns_none(
+            self,
+            mock_command_class_egg_info,
+            mock_func_serialise_version_info,
+            mock_func_generate_version_info):
+        """ Should return ``None``. """
+        result = self.test_instance.run()
+        self.assertIs(result, None)
+
+    def test_generates_version_info_from_changelog(
+            self,
+            mock_command_class_egg_info,
+            mock_func_serialise_version_info,
+            mock_func_generate_version_info):
+        """ Should generate version info from specified changelog. """
+        self.test_instance.run()
+        expected_changelog_path = self.test_instance.changelog_path
+        mock_func_generate_version_info.assert_called_with(
+                expected_changelog_path)
+
+    def test_serialises_version_info_from_mapping(
+            self,
+            mock_command_class_egg_info,
+            mock_func_serialise_version_info,
+            mock_func_generate_version_info):
+        """ Should serialise version info from specified mapping. """
+        self.test_instance.run()
+        expected_version_info = mock_func_generate_version_info.return_value
+        mock_func_serialise_version_info.assert_called_with(
+                expected_version_info)
+
+    def test_writes_file_using_command_context(
+            self,
+            mock_command_class_egg_info,
+            mock_func_serialise_version_info,
+            mock_func_generate_version_info):
+        """ Should write the metadata file using the command context. """
+        self.test_instance.run()
+        egg_info_command = mock_command_class_egg_info.return_value
+        expected_content = mock_func_serialise_version_info.return_value
+        egg_info_command.write_file.assert_called_with(
+                "version info", self.fake_outfile_path, expected_content)
+
+
+IsSubset = testtools.matchers.MatchesPredicateWithParams(
+        set.issubset, "{0} should be a subset of {1}")
+
+class EggInfoCommand_TestCase(testtools.TestCase):
+    """ Test cases for ‘EggInfoCommand’ class. """
+
+    def setUp(self):
+        """ Set up test fixtures. """
+        super(EggInfoCommand_TestCase, self).setUp()
+
+        self.test_distribution = distutils.dist.Distribution()
+
+    def test_subclass_of_setuptools_egg_info(self):
+        """ Should be a subclass of Setuptools ‘egg_info’. """
+        instance = version.EggInfoCommand(self.test_distribution)
+        self.assertIsInstance(instance, setuptools.command.egg_info.egg_info)
+
+    def test_sub_commands_include_build_sub_commands(self):
+        """ Should include ‘build’ sub-commands in this sub_commands. """
+        instance = version.EggInfoCommand(self.test_distribution)
+        self.assertThat(
+                set(setuptools.command.egg_info.egg_info.sub_commands),
+                IsSubset(set(instance.sub_commands)))
+
+    def test_sub_commands_includes_write_version_info_command(self):
+        """ Should include sub-command named ‘write_version_info’. """
+        instance = version.EggInfoCommand(self.test_distribution)
+        commands_by_name = dict(instance.sub_commands)
+        expected_predicate = version.WriteVersionInfoCommand.has_changelog
+        expected_item = ('write_version_info', expected_predicate)
+        self.assertIn(expected_item, commands_by_name.items())
 
 
 # Local variables:
