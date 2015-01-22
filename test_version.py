@@ -42,6 +42,8 @@ import mock
 import testtools
 import testscenarios
 import docutils
+import docutils.writers
+import docutils.nodes
 
 import version
 
@@ -50,6 +52,146 @@ version.ensure_class_bases_begin_with(
 version.ensure_class_bases_begin_with(
         version.__dict__, str('VersionInfoTranslator'),
         docutils.nodes.SparseNodeVisitor)
+
+
+def make_test_classes_for_ensure_class_bases_begin_with():
+    """ Make test classes for use with ‘ensure_class_bases_begin_with’.
+
+        :return: Mapping {`name`: `type`} of the custom types created.
+
+        """
+
+    class quux_metaclass(type):
+        def __new__(metaclass, name, bases, namespace):
+            return super(quux_metaclass, metaclass).__new__(
+                    metaclass, name, bases, namespace)
+
+    class Foo(object):
+        __metaclass__ = type
+
+    class Bar(object):
+        pass
+
+    class FooInheritingBar(Bar):
+        __metaclass__ = type
+
+    class FooWithCustomMetaclass(object):
+        __metaclass__ = quux_metaclass
+
+    result = dict(
+            (name, value) for (name, value) in locals().items()
+            if isinstance(value, type))
+
+    return result
+
+class ensure_class_bases_begin_with_TestCase(
+        testscenarios.WithScenarios, testtools.TestCase):
+    """ Test cases for ‘ensure_class_bases_begin_with’ function. """
+
+    test_classes = make_test_classes_for_ensure_class_bases_begin_with()
+
+    scenarios = [
+            ('simple', {
+                'test_class': test_classes['Foo'],
+                'base_class': test_classes['Bar'],
+                }),
+            ('custom metaclass', {
+                'test_class': test_classes['FooWithCustomMetaclass'],
+                'base_class': test_classes['Bar'],
+                'expected_metaclass': test_classes['quux_metaclass'],
+                }),
+            ]
+
+    def setUp(self):
+        """ Set up test fixtures. """
+        super(ensure_class_bases_begin_with_TestCase, self).setUp()
+
+        self.class_name = self.test_class.__name__
+        self.test_module_namespace = {self.class_name: self.test_class}
+
+        if not hasattr(self, 'expected_metaclass'):
+            self.expected_metaclass = type
+
+        patcher_metaclass = mock.patch.object(
+            self.test_class, '__metaclass__')
+        patcher_metaclass.start()
+        self.addCleanup(patcher_metaclass.stop)
+
+        self.fake_new_class = type(object)
+        self.test_class.__metaclass__.return_value = (
+                self.fake_new_class)
+
+    def test_module_namespace_contains_new_class(self):
+        """ Specified module namespace should have new class. """
+        version.ensure_class_bases_begin_with(
+                self.test_module_namespace, self.class_name, self.base_class)
+        self.assertIn(self.fake_new_class, self.test_module_namespace.values())
+
+    def test_calls_metaclass_with_expected_class_name(self):
+        """ Should call the metaclass with the expected class name. """
+        version.ensure_class_bases_begin_with(
+                self.test_module_namespace, self.class_name, self.base_class)
+        expected_class_name = self.class_name
+        self.test_class.__metaclass__.assert_called_with(
+                expected_class_name, mock.ANY, mock.ANY)
+
+    def test_calls_metaclass_with_expected_bases(self):
+        """ Should call the metaclass with the expected bases. """
+        version.ensure_class_bases_begin_with(
+                self.test_module_namespace, self.class_name, self.base_class)
+        expected_bases = tuple(
+                [self.base_class]
+                + list(self.test_class.__bases__))
+        self.test_class.__metaclass__.assert_called_with(
+                mock.ANY, expected_bases, mock.ANY)
+
+    def test_calls_metaclass_with_expected_namespace(self):
+        """ Should call the metaclass with the expected class namespace. """
+        version.ensure_class_bases_begin_with(
+                self.test_module_namespace, self.class_name, self.base_class)
+        expected_namespace = self.test_class.__dict__.copy()
+        del expected_namespace['__dict__']
+        self.test_class.__metaclass__.assert_called_with(
+                mock.ANY, mock.ANY, expected_namespace)
+
+
+class ensure_class_bases_begin_with_AlreadyHasBase_TestCase(
+        testscenarios.WithScenarios, testtools.TestCase):
+    """ Test cases for ‘ensure_class_bases_begin_with’ function.
+
+        These test cases test the conditions where the class's base is
+        already the specified base class.
+
+        """
+
+    test_classes = make_test_classes_for_ensure_class_bases_begin_with()
+
+    scenarios = [
+            ('already Bar subclass', {
+                'test_class': test_classes['FooInheritingBar'],
+                'base_class': test_classes['Bar'],
+                }),
+            ]
+
+    def setUp(self):
+        """ Set up test fixtures. """
+        super(
+                ensure_class_bases_begin_with_AlreadyHasBase_TestCase,
+                self).setUp()
+
+        self.class_name = self.test_class.__name__
+        self.test_module_namespace = {self.class_name: self.test_class}
+
+        patcher_metaclass = mock.patch.object(
+            self.test_class, '__metaclass__')
+        patcher_metaclass.start()
+        self.addCleanup(patcher_metaclass.stop)
+
+    def test_metaclass_not_called(self):
+        """ Should not call metaclass to create a new type. """
+        version.ensure_class_bases_begin_with(
+                self.test_module_namespace, self.class_name, self.base_class)
+        self.assertFalse(self.test_class.__metaclass__.called)
 
 
 class VersionInfoWriter_TestCase(testtools.TestCase):
