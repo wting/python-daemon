@@ -4,6 +4,9 @@ Version NEXT
 :Released: FUTURE
 :Maintainer:
 
+* Record version info via Setuptools commands.
+* Remove the custom Setuptools entry points.
+
 
 Version 2.0.3
 =============

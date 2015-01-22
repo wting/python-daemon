@@ -453,53 +453,6 @@ def serialise_version_info_from_mapping(version_info):
     return content
 
 
-@lru_cache(maxsize=128)
-def validate_distutils_release_date_value(distribution, attrib, value):
-    """ Validate the ‘release_date’ parameter value.
-
-        :param distribution: The Distutils distribution context.
-        :param attrib: The attribute for the value.
-        :param value: The value to be validated.
-        :return: ``None`` if the value is valid for the atribute.
-        :raises distutils.DistutilsSetupError: If the value is invalid
-            for the attribute.
-
-        This function is designed to be called as a Distutils entry
-        point for ‘distutils.setup_keywords’. This allows the addition
-        of a ‘release_date’ parameter to ‘setup’.
-
-        """
-    try:
-        ChangeLogEntry.validate_release_date(value)
-    except ValueError as exc:
-        raise distutils.errors.DistutilsSetupError(
-                "{attrib!r} must be a valid release date"
-                " (got {value!r}".format(
-                    attrib=attrib, value=value))
-
-
-@lru_cache(maxsize=128)
-def generate_version_info_from_distribution(distribution):
-    """ Generate a version info mapping from a Setuptools distribution. """
-    if all(
-            getattr(distribution, attr_name)
-            for attr_name in ['maintainer', 'maintainer_email']):
-        maintainer_text = "{name} <{email}>".format(
-                name=distribution.maintainer,
-                email=distribution.maintainer_email)
-    else:
-        maintainer_text = ""
-
-    result = ChangeLogEntry.make_ordered_dict({
-            'version': distribution.metadata.version,
-            'release_date': distribution.release_date,
-            'maintainer': maintainer_text,
-            'body': "",
-            })
-
-    return result
-
-
 changelog_filename = "ChangeLog"
 
 def get_changelog_path(distribution, filename=changelog_filename):
@@ -514,24 +467,6 @@ def get_changelog_path(distribution, filename=changelog_filename):
     filepath = os.path.join(setup_dirname, filename)
 
     return filepath
-
-
-def generate_egg_info_metadata(cmd, outfile_name, outfile_path):
-    """ Setuptools entry point to generate version info metadata.
-
-        :param cmd: The Distutils command context.
-        :param outfile_name: Filename for the metadata file.
-        :param outfile_path: Filesystem path for the metadata file.
-
-        This function is designed to be called as a Setuptools entry
-        point for ‘egg_info.writers’. This allows the creation of the
-        metadata file during build.
-
-        """
-    changelog_path = get_changelog_path(cmd.distribution)
-    version_info = generate_version_info_from_changelog(changelog_path)
-    content = serialise_version_info_from_mapping(version_info)
-    cmd.write_file("version info", outfile_path, content)
 
 
 class WriteVersionInfoCommand(distutils.cmd.Command):

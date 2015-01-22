@@ -882,46 +882,6 @@ class serialise_version_info_from_mapping_TestCase(
         self.assertEqual(self.expected_value, value)
 
 
-@mock.patch.object(version.ChangeLogEntry, 'validate_release_date')
-class validate_distutils_release_date_value_TestCase(
-        testscenarios.WithScenarios, testtools.TestCase):
-    """ Test cases for ‘validate_distutils_release_date_value’ function. """
-
-    scenarios = [
-            ('success', {
-                'validation_effect': (lambda *args, **kwargs: None),
-                'expected_result': None,
-                }),
-            ('failure', {
-                'validation_effect': ValueError("Do not want"),
-                'expected_error': distutils.errors.DistutilsSetupError,
-                }),
-            ]
-
-    def setUp(self):
-        """ Set up test fixtures. """
-        super(validate_distutils_release_date_value_TestCase, self).setUp()
-
-        self.test_args = {
-                'distribution': object(),
-                'attrib': self.getUniqueString(),
-                'value': self.getUniqueString(),
-                }
-
-    def test_returns_expected_result(self, mock_func_validate_release_date):
-        """ Should return expected result. """
-        mock_func_validate_release_date.side_effect = self.validation_effect
-        if hasattr(self, 'expected_error'):
-            self.assertRaises(
-                    self.expected_error,
-                    version.validate_distutils_release_date_value,
-                    **self.test_args)
-        else:
-            result = version.validate_distutils_release_date_value(
-                    **self.test_args)
-            self.assertEqual(self.expected_result, result)
-
-
 DistributionMetadata_defaults = {
         name: None
         for name in list(collections.OrderedDict.fromkeys(
@@ -953,90 +913,6 @@ def make_fake_distribution(
     distribution = FakeDistribution(**fields)
 
     return distribution
-
-@mock.patch.object(
-        version.ChangeLogEntry, 'make_ordered_dict',
-        new=functools.partial((lambda cls, d: d), version.ChangeLogEntry))
-class generate_version_info_from_distribution_TestCase(
-        testscenarios.WithScenarios, testtools.TestCase):
-    """ Test cases for ‘generate_version_info_from_distribution’ function. """
-
-    scenarios = [
-            ('simple', {
-                'test_distribution': make_fake_distribution(
-                    fields_override={
-                        'release_date': "2001-01-01",
-                        'maintainer': "Foo Bar",
-                        'maintainer_email': "foo.bar@example.org",
-                        },
-                    metadata_fields_override={
-                        'version': "1.0",
-                        },
-                    ),
-                'expected_result': {
-                    'version': "1.0",
-                    'release_date': "2001-01-01",
-                    'maintainer': "Foo Bar <foo.bar@example.org>",
-                    'body': "",
-                    },
-                }),
-            ('no maintainer', {
-                'test_distribution': make_fake_distribution(
-                    fields_override={
-                        'release_date': "2001-01-01",
-                        },
-                    metadata_fields_override={
-                        'version': "1.0",
-                        },
-                    ),
-                'expected_result': {
-                    'version': "1.0",
-                    'release_date': "2001-01-01",
-                    'maintainer': "",
-                    'body': "",
-                    },
-                }),
-            ('no maintainer name', {
-                'test_distribution': make_fake_distribution(
-                    fields_override={
-                        'release_date': "2001-01-01",
-                        'maintainer_email': "foo.bar@example.org",
-                        },
-                    metadata_fields_override={
-                        'version': "1.0",
-                        },
-                    ),
-                'expected_result': {
-                    'version': "1.0",
-                    'release_date': "2001-01-01",
-                    'maintainer': "",
-                    'body': "",
-                    },
-                }),
-            ('no maintainer email', {
-                'test_distribution': make_fake_distribution(
-                    fields_override={
-                        'release_date': "2001-01-01",
-                        'maintainer': "Foo Bar",
-                        },
-                    metadata_fields_override={
-                        'version': "1.0",
-                        },
-                    ),
-                'expected_result': {
-                    'version': "1.0",
-                    'release_date': "2001-01-01",
-                    'maintainer': "",
-                    'body': "",
-                    },
-                }),
-            ]
-
-    def test_returns_expected_result(self):
-        """ Should return expected result. """
-        result = version.generate_version_info_from_distribution(
-                self.test_distribution)
-        self.assertEqual(self.expected_result, result)
 
 
 class get_changelog_path_TestCase(
@@ -1091,69 +967,6 @@ class get_changelog_path_TestCase(
             args.update({'filename': self.changelog_filename})
         result = version.get_changelog_path(**args)
         self.assertEqual(self.expected_result, result)
-
-
-@mock.patch.object(version, 'get_changelog_path')
-@mock.patch.object(version, 'generate_version_info_from_changelog')
-@mock.patch.object(version, 'serialise_version_info_from_mapping')
-class generate_egg_info_metadata_TestCase(testtools.TestCase):
-    """ Test cases for ‘generate_egg_info_metadata’ function. """
-
-    def setUp(self):
-        """ Set up test fixtures. """
-        super(generate_egg_info_metadata_TestCase, self).setUp()
-
-        self.fake_command = mock.MagicMock(name="Command")
-        self.fake_outfile_name = self.getUniqueString()
-        self.fake_outfile_path = self.getUniqueString()
-        self.test_args = {
-                'cmd': self.fake_command,
-                'outfile_name': self.fake_outfile_name,
-                'outfile_path': self.fake_outfile_path,
-                }
-
-    def test_gets_changelog_path_from_distribution(
-            self,
-            mock_func_serialise_version_info,
-            mock_func_generate_version_info,
-            mock_func_get_changelog_path):
-        """ Should get changelog path from specified distribution. """
-        version.generate_egg_info_metadata(**self.test_args)
-        mock_func_get_changelog_path.assert_called_with(
-                self.fake_command.distribution)
-
-    def test_generates_version_info_from_changelog(
-            self,
-            mock_func_serialise_version_info,
-            mock_func_generate_version_info,
-            mock_func_get_changelog_path):
-        """ Should generate version info from specified changelog. """
-        version.generate_egg_info_metadata(**self.test_args)
-        expected_changelog_path = mock_func_get_changelog_path.return_value
-        mock_func_generate_version_info.assert_called_with(
-                expected_changelog_path)
-
-    def test_serialises_version_info_from_mapping(
-            self,
-            mock_func_serialise_version_info,
-            mock_func_generate_version_info,
-            mock_func_get_changelog_path):
-        """ Should serialise version info from specified mapping. """
-        version.generate_egg_info_metadata(**self.test_args)
-        expected_version_info = mock_func_generate_version_info.return_value
-        mock_func_serialise_version_info.assert_called_with(
-                expected_version_info)
-
-    def test_writes_file_using_command_context(
-            self,
-            mock_func_serialise_version_info,
-            mock_func_generate_version_info,
-            mock_func_get_changelog_path):
-        """ Should write the metadata file using the command context. """
-        version.generate_egg_info_metadata(**self.test_args)
-        expected_content = mock_func_serialise_version_info.return_value
-        self.fake_command.write_file.assert_called_with(
-                "version info", self.fake_outfile_path, expected_content)
 
 
 class WriteVersionInfoCommand_BaseTestCase(
