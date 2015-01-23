@@ -498,10 +498,10 @@ class EggInfoCommand(setuptools.command.egg_info.egg_info, object):
 
     def run(self):
         """ Execute this command. """
+        super(EggInfoCommand, self).run()
+
         for command_name in self.get_sub_commands():
             self.run_command(command_name)
-
-        super(EggInfoCommand, self).run()
 
 
 version_info_filename = "version_info.json"
