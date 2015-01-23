@@ -1,8 +1,8 @@
-Version NEXT
-============
+Version 2.0.4
+=============
 
-:Released: FUTURE
-:Maintainer:
+:Released: 2015-01-23
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
 
 * Record version info via Setuptools commands.
 * Remove the custom Setuptools entry points.
