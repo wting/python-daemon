@@ -1329,28 +1329,71 @@ class EggInfoCommand_TestCase(testtools.TestCase):
         super(EggInfoCommand_TestCase, self).setUp()
 
         self.test_distribution = distutils.dist.Distribution()
+        self.test_instance = version.EggInfoCommand(self.test_distribution)
 
     def test_subclass_of_setuptools_egg_info(self):
         """ Should be a subclass of Setuptools ‘egg_info’. """
-        instance = version.EggInfoCommand(self.test_distribution)
-        self.assertIsInstance(instance, setuptools.command.egg_info.egg_info)
+        self.assertIsInstance(
+                self.test_instance, setuptools.command.egg_info.egg_info)
 
     def test_sub_commands_include_base_class_sub_commands(self):
         """ Should include base class's sub-commands in this sub_commands. """
         base_command = setuptools.command.egg_info.egg_info
         expected_sub_commands = base_command.sub_commands
-        instance = version.EggInfoCommand(self.test_distribution)
         self.assertThat(
                 set(expected_sub_commands),
-                IsSubset(set(instance.sub_commands)))
+                IsSubset(set(self.test_instance.sub_commands)))
 
     def test_sub_commands_includes_write_version_info_command(self):
         """ Should include sub-command named ‘write_version_info’. """
-        instance = version.EggInfoCommand(self.test_distribution)
-        commands_by_name = dict(instance.sub_commands)
+        commands_by_name = dict(self.test_instance.sub_commands)
         expected_predicate = version.has_changelog
         expected_item = ('write_version_info', expected_predicate)
         self.assertIn(expected_item, commands_by_name.items())
+
+
+@mock.patch.object(setuptools.command.egg_info.egg_info, "run")
+class EggInfoCommand_run_TestCase(testtools.TestCase):
+    """ Test cases for ‘EggInfoCommand.run’ method. """
+
+    def setUp(self):
+        """ Set up test fixtures. """
+        super(EggInfoCommand_run_TestCase, self).setUp()
+
+        self.test_distribution = distutils.dist.Distribution()
+        self.test_instance = version.EggInfoCommand(self.test_distribution)
+
+        base_command = setuptools.command.egg_info.egg_info
+        patcher_func_egg_info_get_sub_commands = mock.patch.object(
+                base_command, "get_sub_commands")
+        patcher_func_egg_info_get_sub_commands.start()
+        self.addCleanup(patcher_func_egg_info_get_sub_commands.stop)
+
+        patcher_func_egg_info_run_command = mock.patch.object(
+                base_command, "run_command")
+        patcher_func_egg_info_run_command.start()
+        self.addCleanup(patcher_func_egg_info_run_command.stop)
+
+        self.fake_sub_commands = ["spam", "eggs", "beans"]
+        base_command.get_sub_commands.return_value = self.fake_sub_commands
+
+    def test_returns_none(self, mock_func_egg_info_run):
+        """ Should return ``None``. """
+        result = self.test_instance.run()
+        self.assertIs(result, None)
+
+    def test_runs_each_command_in_sub_commands(
+            self, mock_func_egg_info_run):
+        """ Should run each command in ‘self.get_sub_commands()’. """
+        base_command = setuptools.command.egg_info.egg_info
+        self.test_instance.run()
+        expected_calls = [mock.call(name) for name in self.fake_sub_commands]
+        base_command.run_command.assert_has_calls(expected_calls)
+
+    def test_calls_base_class_run(self, mock_func_egg_info_run):
+        """ Should call base class's ‘run’ method. """
+        result = self.test_instance.run()
+        mock_func_egg_info_run.assert_called_with()
 
 
 # Local variables:
