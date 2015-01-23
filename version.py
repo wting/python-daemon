@@ -493,21 +493,21 @@ class EggInfoCommand(setuptools.command.egg_info.egg_info, object):
     """ Custom ‘egg_info’ command for this distribution. """
 
     sub_commands = ([
-            ('write_version_info', has_changelog)
+            ('write_version_info', has_changelog),
             ] + setuptools.command.egg_info.egg_info.sub_commands)
 
 
 version_info_filename = "version_info.json"
 
-class WriteVersionInfoCommand(setuptools.command.egg_info.egg_info, object):
-    """ Distutils command to serialise version info metadata. """
+class WriteVersionInfoCommand(EggInfoCommand, object):
+    """ Setuptools command to serialise version info metadata. """
 
     user_options = ([
             ("changelog-path=", None,
              "Filesystem path to the changelog document."),
             ("outfile-path=", None,
              "Filesystem path to the version info file."),
-            ] + setuptools.command.egg_info.egg_info.user_options)
+            ] + EggInfoCommand.user_options)
 
     def initialize_options(self):
         """ Initialise command options to defaults. """
@@ -534,9 +534,7 @@ class WriteVersionInfoCommand(setuptools.command.egg_info.egg_info, object):
         """ Execute this command. """
         version_info = generate_version_info_from_changelog(self.changelog_path)
         content = serialise_version_info_from_mapping(version_info)
-        egg_info_command = setuptools.command.egg_info.egg_info(
-                self.distribution)
-        egg_info_command.write_file("version info", self.outfile_path, content)
+        self.write_file("version info", self.outfile_path, content)
 
 
 # Local variables:

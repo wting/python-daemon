@@ -1257,7 +1257,7 @@ class has_changelog_TestCase(
 
 @mock.patch.object(version, 'generate_version_info_from_changelog')
 @mock.patch.object(version, 'serialise_version_info_from_mapping')
-@mock.patch.object(setuptools.command.egg_info, "egg_info")
+@mock.patch.object(version.EggInfoCommand, "write_file")
 class WriteVersionInfoCommand_run_TestCase(
         WriteVersionInfoCommand_BaseTestCase):
     """ Test cases for ‘WriteVersionInfoCommand.run’ method. """
@@ -1277,7 +1277,7 @@ class WriteVersionInfoCommand_run_TestCase(
 
     def test_returns_none(
             self,
-            mock_command_class_egg_info,
+            mock_func_egg_info_write_file,
             mock_func_serialise_version_info,
             mock_func_generate_version_info):
         """ Should return ``None``. """
@@ -1286,7 +1286,7 @@ class WriteVersionInfoCommand_run_TestCase(
 
     def test_generates_version_info_from_changelog(
             self,
-            mock_command_class_egg_info,
+            mock_func_egg_info_write_file,
             mock_func_serialise_version_info,
             mock_func_generate_version_info):
         """ Should generate version info from specified changelog. """
@@ -1297,7 +1297,7 @@ class WriteVersionInfoCommand_run_TestCase(
 
     def test_serialises_version_info_from_mapping(
             self,
-            mock_command_class_egg_info,
+            mock_func_egg_info_write_file,
             mock_func_serialise_version_info,
             mock_func_generate_version_info):
         """ Should serialise version info from specified mapping. """
@@ -1308,14 +1308,13 @@ class WriteVersionInfoCommand_run_TestCase(
 
     def test_writes_file_using_command_context(
             self,
-            mock_command_class_egg_info,
+            mock_func_egg_info_write_file,
             mock_func_serialise_version_info,
             mock_func_generate_version_info):
         """ Should write the metadata file using the command context. """
         self.test_instance.run()
-        egg_info_command = mock_command_class_egg_info.return_value
         expected_content = mock_func_serialise_version_info.return_value
-        egg_info_command.write_file.assert_called_with(
+        mock_func_egg_info_write_file.assert_called_with(
                 "version info", self.fake_outfile_path, expected_content)
 
 
