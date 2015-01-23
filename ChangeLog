@@ -6,6 +6,7 @@ Version NEXT
 
 * Record version info via Setuptools commands.
 * Remove the custom Setuptools entry points.
+  This closes Alioth bug#314948.
 
 
 Version 2.0.3
