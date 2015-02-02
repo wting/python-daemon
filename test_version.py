@@ -729,8 +729,6 @@ fake_version_info = {
 
 @mock.patch.object(
         version, "get_latest_version", return_value=fake_version_info)
-@mock.patch.object(
-        version, "changelog_to_version_info_collection")
 class generate_version_info_from_changelog_TestCase(
         testscenarios.WithScenarios, testtools.TestCase):
     """ Test cases for ‘generate_version_info_from_changelog’ function. """
@@ -784,12 +782,20 @@ class generate_version_info_from_changelog_TestCase(
         func_patcher_builtin_open.start()
         self.addCleanup(func_patcher_builtin_open.stop)
 
+        func_patcher_changelog_to_version_info_collection = mock.patch.object(
+                version, "changelog_to_version_info_collection")
+        func_patcher_changelog_to_version_info_collection.start()
+        self.addCleanup(func_patcher_changelog_to_version_info_collection.stop)
+        if hasattr(self, 'fake_versions_json'):
+            version.changelog_to_version_info_collection.return_value = (
+                    self.fake_versions_json.encode('utf-8'))
+
     def test_returns_empty_collection_on_read_error(
             self,
-            mock_func_changelog_to_version_info, mock_func_get_latest_version):
+            mock_func_get_latest_version):
         """ Should return empty collection on error reading changelog. """
         test_error = PermissionError("Not for you")
-        mock_func_changelog_to_version_info.side_effect = test_error
+        version.changelog_to_version_info_collection.side_effect = test_error
         result = version.generate_version_info_from_changelog(
                 self.fake_changelog_file_path)
         expected_result = {}
@@ -797,11 +803,8 @@ class generate_version_info_from_changelog_TestCase(
 
     def test_returns_expected_result(
             self,
-            mock_func_changelog_to_version_info, mock_func_get_latest_version):
+            mock_func_get_latest_version):
         """ Should return expected result. """
-        if hasattr(self, 'fake_versions_json'):
-            mock_func_changelog_to_version_info.return_value = (
-                    self.fake_versions_json.encode('utf-8'))
         result = version.generate_version_info_from_changelog(
                 self.fake_changelog_file_path)
         self.assertEqual(self.expected_result, result)
