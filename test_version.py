@@ -14,14 +14,9 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-try:
-    # Python 3 standard library.
-    import builtins
-except ImportError:
-    # Python 2 standard library.
-    import __builtin__ as builtins
 import os
 import os.path
+import io
 import errno
 import functools
 import collections
@@ -762,25 +757,22 @@ class generate_version_info_from_changelog_TestCase(
 
         self.fake_changelog_file_path = tempfile.mktemp()
 
-        def fake_open(filename, mode='rt', buffering=None):
-            if filename == self.fake_changelog_file_path:
+        def fake_open(filespec, *args, **kwargs):
+            if filespec == self.fake_changelog_file_path:
                 side_effect = self.fake_open_side_effects[self.open_scenario]
                 if callable(side_effect):
-                    result = side_effect(filename, mode, buffering)
+                    result = side_effect()
                 else:
                     raise side_effect
             else:
                 result = StringIO()
             return result
 
-        mock_open = mock.mock_open()
-        mock_open.side_effect = fake_open
-
-        func_patcher_builtin_open = mock.patch.object(
-                builtins, "open",
-                new=mock_open)
-        func_patcher_builtin_open.start()
-        self.addCleanup(func_patcher_builtin_open.stop)
+        func_patcher_io_open = mock.patch.object(
+                io, "open")
+        func_patcher_io_open.start()
+        self.addCleanup(func_patcher_io_open.stop)
+        io.open.side_effect = fake_open
 
         func_patcher_changelog_to_version_info_collection = mock.patch.object(
                 version, "changelog_to_version_info_collection")
@@ -800,6 +792,16 @@ class generate_version_info_from_changelog_TestCase(
                 self.fake_changelog_file_path)
         expected_result = {}
         self.assertDictEqual(expected_result, result)
+
+    def test_opens_file_with_expected_encoding(
+            self,
+            mock_func_get_latest_version):
+        result = version.generate_version_info_from_changelog(
+                self.fake_changelog_file_path)
+        expected_encoding = "utf-8"
+        (call_args_positional, call_args_kwargs) = io.open.call_args
+        self.assertEqual(self.fake_changelog_file_path, call_args_positional[0])
+        self.assertEqual(expected_encoding, call_args_kwargs['encoding'])
 
     def test_returns_expected_result(
             self,

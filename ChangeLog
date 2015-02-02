@@ -5,6 +5,7 @@ Version NEXT
 :Maintainer:
 
 * Refine compatibility of exceptions for file operations.
+* Specify the text encoding when opening the changelog file.
 
 
 Version 2.0.4

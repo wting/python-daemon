@@ -31,6 +31,7 @@ from __future__ import (absolute_import, unicode_literals)
 
 import sys
 import os
+import io
 import errno
 import json
 import datetime
@@ -402,12 +403,14 @@ def generate_version_info_from_changelog(infile_path):
         :return: The generated version info mapping; or ``None`` if the
             file cannot be read.
 
+        The document is explicitly opened as UTF-8 encoded text.
+
         """
     version_info = collections.OrderedDict()
 
     versions_all_json = None
     try:
-        with open(infile_path, 'rt') as infile:
+        with io.open(infile_path, 'rt', encoding="utf-8") as infile:
             versions_all_json = changelog_to_version_info_collection(infile)
     except EnvironmentError:
         # If we can't read the input file, leave the collection empty.
