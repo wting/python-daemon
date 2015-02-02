@@ -1,8 +1,8 @@
-Version NEXT
-============
+Version 2.0.5
+=============
 
-:Released: FUTURE
-:Maintainer:
+:Released: 2015-02-02
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
 
 * Refine compatibility of exceptions for file operations.
 * Specify the text encoding when opening the changelog file.
