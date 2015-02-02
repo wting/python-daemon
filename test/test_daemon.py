@@ -24,6 +24,7 @@ import signal
 import socket
 from types import ModuleType
 import collections
+import functools
 try:
     # Standard library of Python 2.7 and later.
     from io import StringIO
@@ -808,6 +809,13 @@ class DaemonContext_make_signal_handler_map_TestCase(
         self.assertEqual(expected_result, result)
 
 
+try:
+    FileNotFoundError
+except NameError:
+    # Python 2 uses IOError.
+    FileNotFoundError = functools.partial(IOError, errno.ENOENT)
+
+
 @mock.patch.object(os, "chdir")
 class change_working_directory_TestCase(scaffold.TestCase):
     """ Test cases for change_working_directory function. """
@@ -833,9 +841,9 @@ class change_working_directory_TestCase(scaffold.TestCase):
     def test_raises_daemon_error_on_os_error(
             self,
             mock_func_os_chdir):
-        """ Should raise a DaemonError on receiving and OSError. """
+        """ Should raise a DaemonError on receiving an IOError. """
         args = self.test_args
-        test_error = OSError(errno.ENOENT, "No such directory")
+        test_error = FileNotFoundError("No such directory")
         mock_func_os_chdir.side_effect = test_error
         expected_error = daemon.daemon.DaemonOSEnvironmentError
         exc = self.assertRaises(
@@ -848,7 +856,7 @@ class change_working_directory_TestCase(scaffold.TestCase):
             mock_func_os_chdir):
         """ Should raise a DaemonError with original message. """
         args = self.test_args
-        test_error = OSError(errno.ENOENT, "No such directory")
+        test_error = FileNotFoundError("No such directory")
         mock_func_os_chdir.side_effect = test_error
         expected_error = daemon.daemon.DaemonOSEnvironmentError
         exc = self.assertRaises(
@@ -892,9 +900,9 @@ class change_root_directory_TestCase(scaffold.TestCase):
     def test_raises_daemon_error_on_os_error_from_chdir(
             self,
             mock_func_os_chdir, mock_func_os_chroot):
-        """ Should raise a DaemonError on receiving an OSError from chdir. """
+        """ Should raise a DaemonError on receiving an IOError from chdir. """
         args = self.test_args
-        test_error = OSError(errno.ENOENT, "No such directory")
+        test_error = FileNotFoundError("No such directory")
         mock_func_os_chdir.side_effect = test_error
         expected_error = daemon.daemon.DaemonOSEnvironmentError
         exc = self.assertRaises(
@@ -920,7 +928,7 @@ class change_root_directory_TestCase(scaffold.TestCase):
             mock_func_os_chdir, mock_func_os_chroot):
         """ Should raise a DaemonError with original message. """
         args = self.test_args
-        test_error = OSError(errno.ENOENT, "No such directory")
+        test_error = FileNotFoundError("No such directory")
         mock_func_os_chdir.side_effect = test_error
         expected_error = daemon.daemon.DaemonOSEnvironmentError
         exc = self.assertRaises(
@@ -967,7 +975,7 @@ class change_file_creation_mask_TestCase(scaffold.TestCase):
             mock_func_os_umask):
         """ Should raise a DaemonError with original message. """
         args = self.test_args
-        test_error = OSError(errno.ENOENT, "No such directory")
+        test_error = FileNotFoundError("No such directory")
         mock_func_os_umask.side_effect = test_error
         expected_error = daemon.daemon.DaemonOSEnvironmentError
         exc = self.assertRaises(
@@ -1134,10 +1142,23 @@ class close_file_descriptor_if_open_TestCase(scaffold.TestCase):
         daemon.daemon.close_file_descriptor_if_open(fd)
         mock_func_os_close.assert_called_with(fd)
 
-    def test_raises_error_if_error_on_close(self, mock_func_os_close):
+    def test_raises_error_if_oserror_on_close(self, mock_func_os_close):
         """ Should raise DaemonError if an OSError occurs when closing. """
         fd = self.fake_fd
         test_error = OSError(object(), "Unexpected error")
+        def fake_os_close(fd):
+            raise test_error
+        mock_func_os_close.side_effect = fake_os_close
+        expected_error = daemon.daemon.DaemonOSEnvironmentError
+        exc = self.assertRaises(
+                expected_error,
+                daemon.daemon.close_file_descriptor_if_open, fd)
+        self.assertEqual(test_error, exc.__cause__)
+
+    def test_raises_error_if_ioerror_on_close(self, mock_func_os_close):
+        """ Should raise DaemonError if an IOError occurs when closing. """
+        fd = self.fake_fd
+        test_error = IOError(object(), "Unexpected error")
         def fake_os_close(fd):
             raise test_error
         mock_func_os_close.side_effect = fake_os_close
@@ -1586,7 +1607,7 @@ class redirect_stream_TestCase(scaffold.TestCase):
             if path == os.devnull:
                 result = self.test_null_file.fileno()
             else:
-                raise OSError(errno.NOENT, "No such file", path)
+                raise FileNotFoundError("No such file", path)
             return result
 
         func_patcher_os_open = mock.patch.object(

@@ -25,6 +25,7 @@ import os
 import itertools
 import tempfile
 import errno
+import functools
 try:
     # Standard library of Python 2.7 and later.
     from io import StringIO
@@ -59,6 +60,15 @@ class FakeFileDescriptorStringIO(StringIO, object):
         pass
 
 
+try:
+    FileNotFoundError
+    PermissionError
+except NameError:
+    # Python 2 uses IOError.
+    FileNotFoundError = functools.partial(IOError, errno.ENOENT)
+    PermissionError = functools.partial(IOError, errno.EPERM)
+
+
 def make_pidlockfile_scenarios():
     """ Make a collection of scenarios for testing `PIDLockFile` instances.
 
@@ -176,8 +186,8 @@ def setup_pidfile_fixtures(testcase):
 
         def fake_open_nonexist(filename, mode, buffering):
             if mode.startswith('r'):
-                error = IOError(
-                        errno.ENOENT, "No such file {filename!r}".format(
+                error = FileNotFoundError(
+                        "No such file {filename!r}".format(
                             filename=filename))
                 raise error
             else:
@@ -186,8 +196,8 @@ def setup_pidfile_fixtures(testcase):
 
         def fake_open_read_denied(filename, mode, buffering):
             if mode.startswith('r'):
-                error = IOError(
-                        errno.EPERM, "Read denied on {filename!r}".format(
+                error = PermissionError(
+                        "Read denied on {filename!r}".format(
                             filename=filename))
                 raise error
             else:
@@ -202,8 +212,8 @@ def setup_pidfile_fixtures(testcase):
             if (flags & os.O_CREAT):
                 result = testcase.scenario['pidfile'].fileno()
             else:
-                error = OSError(
-                        errno.ENOENT, "No such file {filename!r}".format(
+                error = FileNotFoundError(
+                        "No such file {filename!r}".format(
                             filename=filename))
                 raise error
             return result
@@ -212,8 +222,8 @@ def setup_pidfile_fixtures(testcase):
             if (flags & os.O_CREAT):
                 result = testcase.scenario['pidfile'].fileno()
             else:
-                error = OSError(
-                        errno.EPERM, "Read denied on {filename!r}".format(
+                error = PermissionError(
+                        "Read denied on {filename!r}".format(
                             filename=filename))
                 raise error
             return result

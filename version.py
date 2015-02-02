@@ -409,7 +409,7 @@ def generate_version_info_from_changelog(infile_path):
     try:
         with open(infile_path, 'rt') as infile:
             versions_all_json = changelog_to_version_info_collection(infile)
-    except OSError:
+    except EnvironmentError:
         # If we can't read the input file, leave the collection empty.
         pass
 

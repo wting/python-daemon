@@ -719,8 +719,8 @@ try:
     PermissionError
 except NameError:
     # Python 2 uses OSError.
-    FileNotFoundError = functools.partial(OSError, errno.ENOENT)
-    PermissionError = functools.partial(OSError, errno.EPERM)
+    FileNotFoundError = functools.partial(IOError, errno.ENOENT)
+    PermissionError = functools.partial(IOError, errno.EPERM)
 
 fake_version_info = {
         'release_date': "2001-01-01", 'version': "2.0",

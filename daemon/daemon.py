@@ -772,7 +772,7 @@ def close_file_descriptor_if_open(fd):
         """
     try:
         os.close(fd)
-    except OSError as exc:
+    except EnvironmentError as exc:
         if exc.errno == errno.EBADF:
             # File descriptor was not open.
             pass

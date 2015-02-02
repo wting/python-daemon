@@ -4,6 +4,8 @@ Version NEXT
 :Released: FUTURE
 :Maintainer:
 
+* Refine compatibility of exceptions for file operations.
+
 
 Version 2.0.4
 =============
