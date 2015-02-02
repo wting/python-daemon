@@ -471,20 +471,13 @@ def get_changelog_path(distribution, filename=changelog_filename):
 
 
 def has_changelog(command):
-    """ Return ``True`` iff the distribution's changelog is readable. """
+    """ Return ``True`` iff the distribution's changelog file exists. """
     result = False
+
     changelog_path = get_changelog_path(command.distribution)
     if changelog_path is not None:
-        changelog = None
-        try:
-            changelog = open(changelog_path, 'rt')
-        except OSError:
-            # Not able to open the file for reading.
-            pass
-
-        if changelog is not None:
+        if os.path.exists(changelog_path):
             result = True
-            changelog.close()
 
     return result
 

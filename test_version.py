@@ -1143,37 +1143,22 @@ class has_changelog_TestCase(
         testscenarios.WithScenarios, testtools.TestCase):
     """ Test cases for ‘has_changelog’ function. """
 
-    fake_open_side_effects = {
-            'success': (
-                lambda testcase, *args, **kwargs:
-                    testcase.fake_changelog_file),
-            'file not found': FileNotFoundError(),
-            'permission denied': PermissionError(),
-            }
-
     fake_os_path_exists_side_effects = {
             'true': (lambda path: True),
             'false': (lambda path: False),
             }
 
     scenarios = [
-            ('changelog exists', {
-                'os_path_exists_scenario': 'true',
-                'open_scenario': 'success',
-                'expected_result': True,
-                }),
             ('no changelog path', {
                 'changelog_path': None,
                 'expected_result': False,
                 }),
+            ('changelog exists', {
+                'os_path_exists_scenario': 'true',
+                'expected_result': True,
+                }),
             ('changelog not found', {
                 'os_path_exists_scenario': 'false',
-                'open_scenario': 'file not found',
-                'expected_result': False,
-                }),
-            ('changelog not readable', {
-                'os_path_exists_scenario': 'true',
-                'open_scenario': 'permission denied',
                 'expected_result': False,
                 }),
             ]
@@ -1197,26 +1182,8 @@ class has_changelog_TestCase(
         version.get_changelog_path.return_value = self.fake_changelog_file_path
         self.fake_changelog_file = StringIO()
 
-        def fake_open(filename, mode='rt', buffering=None):
-            if filename == self.fake_changelog_file_path:
-                side_effect = self.fake_open_side_effects[self.open_scenario]
-                if hasattr(side_effect, '__call__'):
-                    result = side_effect(self, filename, mode, buffering)
-                else:
-                    raise side_effect
-            else:
-                result = StringIO()
-            return result
-
-        mock_open = mock.mock_open()
-        mock_open.side_effect = fake_open
-
-        self.func_patcher_builtin_open = mock.patch.object(
-                builtins, "open",
-                new=mock_open)
-
         def fake_os_path_exists(path):
-            if filename == self.fake_changelog_file_path:
+            if path == self.fake_changelog_file_path:
                 side_effect = self.fake_os_path_exists_side_effects[
                         self.os_path_exists_scenario]
                 if hasattr(side_effect, '__call__'):
@@ -1231,28 +1198,18 @@ class has_changelog_TestCase(
                 os.path, "exists")
         func_patcher_os_path_exists.start()
         self.addCleanup(func_patcher_os_path_exists.stop)
-        func_patcher_os_path_exists.side_effect = fake_os_path_exists
+        os.path.exists.side_effect = fake_os_path_exists
 
     def test_gets_changelog_path_from_distribution(self):
         """ Should call ‘get_changelog_path’ with distribution. """
-        with self.func_patcher_builtin_open:
-            result = version.has_changelog(self.test_command)
+        result = version.has_changelog(self.test_command)
         version.get_changelog_path.assert_called_with(
                 self.test_distribution)
 
     def test_returns_expected_result(self):
         """ Should be a subclass of ‘distutils.cmd.Command’. """
-        with self.func_patcher_builtin_open:
-            result = version.has_changelog(self.test_command)
+        result = version.has_changelog(self.test_command)
         self.assertEqual(self.expected_result, result)
-
-    def test_closes_changelog(self):
-        """ Should close the changelog opened for interrogation. """
-        if getattr(self, 'open_scenario', None) != 'success':
-            self.skipTest("File is not opened, no need to close")
-        with self.func_patcher_builtin_open:
-            result = version.has_changelog(self.test_command)
-        self.assertTrue(self.fake_changelog_file.closed)
 
 
 @mock.patch.object(version, 'generate_version_info_from_changelog')
