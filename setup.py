@@ -70,6 +70,7 @@ setup(
             "testtools",
             "testscenarios >=0.4",
             "mock >=1.0",
+            "docutils",
             ],
         install_requires=[
             "setuptools",
