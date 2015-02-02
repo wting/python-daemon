@@ -774,13 +774,15 @@ class generate_version_info_from_changelog_TestCase(
         self.addCleanup(func_patcher_io_open.stop)
         io.open.side_effect = fake_open
 
+        self.file_encoding = "utf-8"
+
         func_patcher_changelog_to_version_info_collection = mock.patch.object(
                 version, "changelog_to_version_info_collection")
         func_patcher_changelog_to_version_info_collection.start()
         self.addCleanup(func_patcher_changelog_to_version_info_collection.stop)
         if hasattr(self, 'fake_versions_json'):
             version.changelog_to_version_info_collection.return_value = (
-                    self.fake_versions_json.encode('utf-8'))
+                    self.fake_versions_json.encode(self.file_encoding))
 
     def test_returns_empty_collection_on_read_error(
             self,
@@ -796,12 +798,18 @@ class generate_version_info_from_changelog_TestCase(
     def test_opens_file_with_expected_encoding(
             self,
             mock_func_get_latest_version):
+        """ Should open changelog file in text mode with expected encoding. """
         result = version.generate_version_info_from_changelog(
                 self.fake_changelog_file_path)
-        expected_encoding = "utf-8"
-        (call_args_positional, call_args_kwargs) = io.open.call_args
-        self.assertEqual(self.fake_changelog_file_path, call_args_positional[0])
-        self.assertEqual(expected_encoding, call_args_kwargs['encoding'])
+        expected_file_path = self.fake_changelog_file_path
+        expected_open_mode = 'rt'
+        expected_encoding = self.file_encoding
+        (open_args_positional, open_args_kwargs) = io.open.call_args
+        (open_args_filespec, open_args_mode) = open_args_positional[:2]
+        open_args_encoding = open_args_kwargs['encoding']
+        self.assertEqual(expected_file_path, open_args_filespec)
+        self.assertEqual(expected_open_mode, open_args_mode)
+        self.assertEqual(expected_encoding, open_args_encoding)
 
     def test_returns_expected_result(
             self,
