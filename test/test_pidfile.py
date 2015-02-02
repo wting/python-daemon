@@ -234,7 +234,7 @@ def setup_pidfile_fixtures(testcase):
 
         funcs = dict(
                 (name, obj) for (name, obj) in vars().items()
-                if hasattr(obj, '__call__'))
+                if callable(obj))
 
         return funcs
 

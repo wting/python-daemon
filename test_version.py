@@ -765,7 +765,7 @@ class generate_version_info_from_changelog_TestCase(
         def fake_open(filename, mode='rt', buffering=None):
             if filename == self.fake_changelog_file_path:
                 side_effect = self.fake_open_side_effects[self.open_scenario]
-                if hasattr(side_effect, '__call__'):
+                if callable(side_effect):
                     result = side_effect(filename, mode, buffering)
                 else:
                     raise side_effect
@@ -1189,7 +1189,7 @@ class has_changelog_TestCase(
             if path == self.fake_changelog_file_path:
                 side_effect = self.fake_os_path_exists_side_effects[
                         self.os_path_exists_scenario]
-                if hasattr(side_effect, '__call__'):
+                if callable(side_effect):
                     result = side_effect(path)
                 else:
                     raise side_effect
