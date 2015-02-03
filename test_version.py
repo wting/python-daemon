@@ -19,6 +19,7 @@ import os.path
 import io
 import errno
 import functools
+import contextlib
 import collections
 import textwrap
 import json
@@ -249,7 +250,25 @@ class VersionInfoWriter_translate_TestCase(testtools.TestCase):
         self.assertEqual(expected_output, instance.output)
 
 
-class ChangeLogEntry_TestCase(testtools.TestCase):
+class NoOpContextManager:
+    """ A context manager with no effect. """
+    def __enter__(self): pass
+    def __exit__(self, exc_type, exc_value, traceback): pass
+
+
+class ChangeLogEntry_BaseTestCase(
+        testscenarios.WithScenarios, testtools.TestCase):
+    """ Base class for ‘ChangeLogEntry’ test case classes. """
+
+    def expected_error_context(self):
+        """ Make a context manager to expect the nominated error. """
+        context = NoOpContextManager()
+        if hasattr(self, 'expected_error'):
+            context = testtools.ExpectedException(self.expected_error)
+        return context
+
+
+class ChangeLogEntry_TestCase(ChangeLogEntry_BaseTestCase):
     """ Test cases for ‘ChangeLogEntry’ class. """
 
     def setUp(self):
@@ -269,8 +288,7 @@ class ChangeLogEntry_TestCase(testtools.TestCase):
         self.assertIsNot(instance, None)
 
 
-class ChangeLogEntry_release_date_TestCase(
-        testscenarios.WithScenarios, testtools.TestCase):
+class ChangeLogEntry_release_date_TestCase(ChangeLogEntry_BaseTestCase):
     """ Test cases for ‘ChangeLogEntry.release_date’ attribute. """
 
     scenarios = [
@@ -299,17 +317,13 @@ class ChangeLogEntry_release_date_TestCase(
 
     def test_has_expected_release_date(self):
         """ Should have default `release_date` attribute. """
-        if hasattr(self, 'expected_error'):
-            self.assertRaises(
-                    self.expected_error,
-                    version.ChangeLogEntry, **self.test_args)
-        else:
+        with self.expected_error_context():
             instance = version.ChangeLogEntry(**self.test_args)
+        if hasattr(self, 'expected_release_date'):
             self.assertEqual(self.expected_release_date, instance.release_date)
 
 
-class ChangeLogEntry_version_TestCase(
-        testscenarios.WithScenarios, testtools.TestCase):
+class ChangeLogEntry_version_TestCase(ChangeLogEntry_BaseTestCase):
     """ Test cases for ‘ChangeLogEntry.version’ attribute. """
 
     scenarios = [
@@ -322,20 +336,57 @@ class ChangeLogEntry_version_TestCase(
                 'test_args': {'version': "UNKNOWN"},
                 'expected_version': "UNKNOWN",
                 }),
+            ('next token', {
+                'test_args': {'version': "NEXT"},
+                'expected_version': "NEXT",
+                }),
             ('0.0', {
                 'test_args': {'version': "0.0"},
                 'expected_version': "0.0",
+                }),
+            ('1.2.3', {
+                'test_args': {'version': "1.2.3"},
+                'expected_version': "1.2.3",
+                }),
+            ('1.23.456', {
+                'test_args': {'version': "1.23.456"},
+                'expected_version': "1.23.456",
+                }),
+            ('1.23.456a5', {
+                'test_args': {'version': "1.23.456a5"},
+                'expected_version': "1.23.456a5",
+                }),
+            ('123.456.789', {
+                'test_args': {'version': "123.456.789"},
+                'expected_version': "123.456.789",
+                }),
+            ('non-number', {
+                'test_args': {'version': "b0gUs"},
+                'expected_error': ValueError,
+                }),
+            ('negative', {
+                'test_args': {'version': "-1.0"},
+                'expected_error': ValueError,
+                }),
+            ('non-number parts', {
+                'test_args': {'version': "1.b0gUs.0"},
+                'expected_error': ValueError,
+                }),
+            ('too many parts', {
+                'test_args': {'version': "1.2.3.4.5"},
+                'expected_error': ValueError,
                 }),
             ]
 
     def test_has_expected_version(self):
         """ Should have default `version` attribute. """
-        instance = version.ChangeLogEntry(**self.test_args)
-        self.assertEqual(self.expected_version, instance.version)
+        with self.expected_error_context():
+            instance = version.ChangeLogEntry(**self.test_args)
+        if hasattr(self, 'expected_version'):
+            self.assertEqual(self.expected_version, instance.version)
 
 
-class ChangeLogEntry_maintainer_TestCase(
-        testscenarios.WithScenarios, testtools.TestCase):
+class ChangeLogEntry_maintainer_TestCase(ChangeLogEntry_BaseTestCase):
     """ Test cases for ‘ChangeLogEntry.maintainer’ attribute. """
 
     scenarios = [
@@ -355,17 +406,13 @@ class ChangeLogEntry_maintainer_TestCase(
 
     def test_has_expected_maintainer(self):
         """ Should have default `maintainer` attribute. """
-        if hasattr(self, 'expected_error'):
-            self.assertRaises(
-                    self.expected_error,
-                    version.ChangeLogEntry, **self.test_args)
-        else:
+        with self.expected_error_context():
             instance = version.ChangeLogEntry(**self.test_args)
+        if hasattr(self, 'expected_maintainer'):
             self.assertEqual(self.expected_maintainer, instance.maintainer)
 
 
-class ChangeLogEntry_body_TestCase(
-        testscenarios.WithScenarios, testtools.TestCase):
+class ChangeLogEntry_body_TestCase(ChangeLogEntry_BaseTestCase):
     """ Test cases for ‘ChangeLogEntry.body’ attribute. """
 
     scenarios = [
@@ -386,7 +433,7 @@ class ChangeLogEntry_body_TestCase(
 
 
 class ChangeLogEntry_as_version_info_entry_TestCase(
-        testscenarios.WithScenarios, testtools.TestCase):
+        ChangeLogEntry_BaseTestCase):
     """ Test cases for ‘ChangeLogEntry.as_version_info_entry’ attribute. """
 
     scenarios = [
@@ -697,15 +744,19 @@ class changelog_to_version_info_collection_TestCase(
                 }),
             ]
 
+    def expected_error_context(self):
+        """ Make a context manager to expect the nominated error. """
+        context = NoOpContextManager()
+        if hasattr(self, 'expected_error'):
+            context = testtools.ExpectedException(self.expected_error)
+        return context
+
     def test_returns_expected_version_info(self):
         """ Should return expected version info mapping. """
         infile = StringIO(self.test_input)
-        if hasattr(self, 'expected_error'):
-            self.assertRaises(
-                    self.expected_error,
-                    version.changelog_to_version_info_collection, infile)
-        else:
+        with self.expected_error_context():
             result = version.changelog_to_version_info_collection(infile)
+        if hasattr(self, 'expected_version_info'):
             self.assertThat(result, JsonEqual(self.expected_version_info))
 
 

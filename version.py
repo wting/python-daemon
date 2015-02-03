@@ -42,6 +42,7 @@ import collections
 import distutils
 import distutils.errors
 import distutils.cmd
+import distutils.version
 try:
     # Python 2 has both ‘str’ (bytes) and ‘unicode’ (text).
     basestring = basestring
@@ -143,6 +144,7 @@ class ChangeLogEntry:
         self.validate_release_date(release_date)
         self.release_date = release_date
 
+        self.validate_version(version)
         self.version = version
 
         self.validate_maintainer(maintainer)
@@ -166,6 +168,25 @@ class ChangeLogEntry:
         datetime.datetime.strptime(value, ChangeLogEntry.date_format)
 
     @classmethod
+    def validate_version(cls, value):
+        """ Validate the `version` value.
+
+            :param vaue: The prospective `version` value.
+            :return: ``None`` if the value is valid.
+            :raises ValueError: If the value is invalid.
+
+            """
+        if value in ["UNKNOWN", "NEXT"]:
+            # A valid non-version value.
+            return None
+
+        match = distutils.version.StrictVersion.version_re.match(value)
+        if match is None:
+            raise ValueError(
+                    "not a valid version string {value!r}".format(
+                        value=value))
+
+    @classmethod
     def validate_maintainer(cls, value):
         """ Validate the `maintainer` value.
 
@@ -182,7 +203,9 @@ class ChangeLogEntry:
             valid = True
 
         if not valid:
-            raise ValueError("Not a valid person specification {value!r}")
+            raise ValueError(
+                    "not a valid person specification {value!r}".format(
+                        value=value))
         else:
             return None
 
