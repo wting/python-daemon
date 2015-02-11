@@ -4,6 +4,8 @@ Version NEXT
 :Released: FUTURE
 :Maintainer:
 
+* Lower dependency for ‘unittest2’, we can work with an earlier version.
+
 
 Version 2.0.5
 =============

@@ -66,7 +66,7 @@ setup(
             ],
         test_suite="unittest2.collector",
         tests_require=[
-            "unittest2 >=0.6",
+            "unittest2 >=0.5.1",
             "testtools",
             "testscenarios >=0.4",
             "mock >=1.0",
