@@ -61,8 +61,8 @@ def get_function_signature(func):
         * 'arg_count': The number of arguments expected by the function.
         * 'arg_names': A sequence of the argument names, as strings.
         * 'arg_defaults': A sequence of the default values for the arguments.
-        * 'va_args': The name bound to remaining positional arguments.
-        * 'va_kw_args': The name bound to remaining keyword arguments.
+        * 'var_args': The name bound to remaining positional arguments.
+        * 'var_kw_args': The name bound to remaining keyword arguments.
 
         """
     try:
